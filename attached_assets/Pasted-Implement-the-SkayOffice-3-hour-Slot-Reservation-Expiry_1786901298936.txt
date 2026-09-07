@@ -1,0 +1,116 @@
+Implement the SkayOffice 3-hour Slot Reservation Expiry Sweeper.
+
+Do NOT build payment integration yet.
+Do NOT modify Market Decision Intelligence rules.
+Do NOT change pricing.
+Do NOT redesign the Admin UI yet.
+
+Goal:
+Automatically manage expired 3-hour slot reservations so no market slot remains blocked after a provider fails to activate/pay in time.
+
+Requirements:
+
+1. Reservation expiry
+- A reservation is valid for exactly 3 hours.
+- If `reservation_expires_at <= NOW()` and the reservation has not been converted to an allocated slot:
+  - mark it expired/released
+  - release the reserved capacity
+  - record the release reason as reservation_expired
+
+2. Automatic next-provider handoff
+After an expired reservation is released:
+- select the next eligible provider from the waitlist using the existing priority rules
+- create a new exclusive 3-hour reservation for that provider
+- never exceed Supply Cap
+- never reserve in a market whose approved acceptance_status is `closed`
+
+3. Capacity calculation
+Reserved slots must count against market capacity together with allocated slots.
+
+Example:
+Cap = 15
+Allocated = 14
+Reserved = 1
+Available = 0
+
+No second reservation may be created.
+
+4. Idempotency
+Running the sweeper multiple times must not:
+- expire the same reservation twice
+- create duplicate reservations
+- allocate the same available slot twice
+- generate duplicate notifications/audit events
+
+5. Concurrency safety
+Use transaction-safe locking so two sweeper runs or a sweeper + admin/payment action cannot reserve the final slot for two providers.
+
+6. Scheduler
+Run automatically in Production.
+
+Use an appropriate interval significantly shorter than 3 hours so expired reservations are released promptly.
+
+Keep a manual admin/internal trigger available for testing and operations.
+
+Do not run uncontrolled background scheduling in Development.
+
+7. Audit trail
+Record:
+- reservation_expired
+- reservation_released
+- next_provider_selected
+- reservation_created
+
+Include:
+- office
+- market
+- previous/new state
+- timestamps
+- system/admin actor
+- reason
+
+8. Provider notification foundation
+When the next waitlisted provider receives a 3-hour reservation:
+- trigger the existing notification mechanism/foundation if available
+- prevent duplicate notifications for the same reservation
+- clearly state that the slot is available for 3 hours
+
+Do NOT send payment links yet.
+
+9. Failure handling
+A failure processing one market must not stop reservations in all other markets.
+
+Log structured errors without exposing sensitive data.
+
+10. Tests
+Add tests covering at minimum:
+
+- reservation expires after 3 hours
+- reservation does not expire before 3 hours
+- expired reservation releases capacity
+- next waitlisted provider receives a new 3-hour reservation
+- reserved + allocated never exceeds cap
+- closed market does not issue a replacement reservation
+- duplicate sweeper run is idempotent
+- concurrent sweeper runs cannot reserve one slot twice
+- returning-provider priority remains intact
+- no eligible waitlist provider = slot stays available
+- failure in one market does not block another
+- audit events are written once
+- notification dedupe works
+- full existing test suite passes with zero regression
+
+Return only:
+
+1. sweeper architecture
+2. schedule
+3. expiry logic
+4. next-provider handoff
+5. concurrency/idempotency protection
+6. notification behavior
+7. audit behavior
+8. tests/results
+9. remaining limitations
+10. readiness score
+
+STOP after this task.

@@ -1,0 +1,177 @@
+Correct the SkayOffice Pilot public experience so it follows the actual core product model:
+
+Quick Office Card → Decision Card.
+
+The current implementation looks like a generic office directory and does not reflect the uploaded visual references closely enough.
+
+Implement only this public-experience correction.
+
+Do not change authentication, database ownership, roles, permissions, or backend architecture except where needed to support office images and the two-card experience.
+
+Core product rule:
+
+The Quick Office Card is the discovery layer.
+The Decision Card is the core of SkayOffice.
+
+1. Quick Office Cards
+
+Rebuild office cards as visual, image-led cards.
+
+Each card must show:
+
+- office cover image or office-front image
+- online/offline status
+- office name
+- office category
+- verification badge
+- 2–3 core service tags
+- completed transactions
+- clients recommend
+- favourite action
+- clear arrow or “View Digital Office” action
+
+Requirements:
+
+- office image must be prominent
+- cards must be consistently ordered and aligned
+- no text-heavy generic list rows
+- no missing-image blank areas
+- use seeded demo images through the real upload/storage pipeline
+- add safe fallback images only when an office has no uploaded image
+- cards must work correctly in Arabic RTL and English LTR
+- mobile cards must remain readable and visually balanced
+
+2. Decision Card
+
+Build a dedicated office Decision Card page closely following the uploaded design.
+
+This page must combine marketing tools and communication tools in one place.
+
+Top marketing area:
+
+- large hero image or video placeholder
+- office logo
+- office name
+- verification badge
+- category
+- online/offline status
+- short positioning statement
+
+Trust indicators:
+
+- completed transactions
+- clients recommend
+- key certifications or trust tags
+
+Services:
+
+- clear list of office services
+- concise, not overloaded
+
+Communication tools:
+
+- WhatsApp
+- schedule video call
+- email
+- website
+- location
+
+Marketing tools:
+
+- QR code
+- share
+- copy link
+- portfolio/gallery
+- hero image/video
+- branded office card
+
+Important:
+
+Do not split marketing tools and communication tools into separate unrelated pages.
+They must be integrated into the Decision Card because the Decision Card is the office’s digital office.
+
+3. Image requirements
+
+The current pilot lacks office imagery.
+
+Add demo office images for all seeded offices, clearly marked as demo data.
+
+Use images for:
+
+- office cover
+- office front or workspace
+- portfolio/gallery
+- hero marketing screen
+
+Do not leave major visual sections empty.
+Do not use the same repeated image for every office.
+Keep demo assets removable by admin later.
+
+4. Navigation flow
+
+Home/discovery:
+Search → categories → Quick Office Cards
+
+Card click:
+Open Decision Card
+
+Decision Card:
+Review office → contact through WhatsApp/video call/email/location/share/QR
+
+Do not add unnecessary intermediate pages.
+
+5. Visual hierarchy
+
+Use the uploaded screenshots as the main reference.
+
+Priorities:
+
+- image first
+- office identity second
+- trust metrics third
+- direct contact actions fourth
+
+The page must not look like:
+- a generic directory
+- a classifieds list
+- a bidding marketplace
+- a text-heavy SaaS dashboard
+
+6. Acceptance tests
+
+Verify:
+
+- every seeded office has a visible image
+- quick cards have consistent dimensions
+- cards are ordered correctly
+- clicking a card opens the correct Decision Card
+- Decision Card displays the correct office data
+- WhatsApp, email, website, location, share, copy link, and QR actions render correctly
+- video-call action appears as a prepared placeholder
+- Arabic RTL works
+- English LTR works
+- mobile widths 360px, 390px, and 430px work
+- no horizontal overflow
+- no blank image blocks
+- existing login and admin shells still work
+
+Before implementation:
+
+- create a checkpoint
+- audit the current quick-card and office-profile implementation
+- identify where the current result differs from the uploaded references
+- then implement the correction
+
+At completion provide:
+
+- screens changed
+- image assets added
+- card components changed
+- Decision Card components created
+- routes changed
+- tests passed
+- tests failed
+- before/after screenshots
+- final checkpoint
+
+Implement only this correction.

@@ -1,0 +1,341 @@
+Perform a comprehensive, read-only technical audit of the current SkayOffice production codebase only.
+
+Scope:
+- Production version only.
+- Do not inspect, modify, clean, refactor, delete, rename, format, optimize, migrate, or update anything.
+- Do not touch development, staging, test environments, production data, uploaded files, environment variables, database records, routes, APIs, dependencies, or configuration.
+- This task is inspection and reporting only.
+
+Before starting:
+1. Confirm the exact production codebase and production environment being inspected.
+2. Confirm that no changes will be made.
+3. Record the current production build/version/commit if available.
+4. Do not create automatic fixes or apply recommendations.
+
+Audit the following areas:
+
+A. Codebase structure and maintainability
+- Overall project organization.
+- Frontend/backend separation.
+- Component, service, route, utility, and module structure.
+- Naming consistency.
+- Large or overly complex files.
+- Tight coupling between modules.
+- Duplicate logic.
+- Repeated business rules.
+- Dead or unreachable code.
+- Unused imports, variables, functions, components, routes, files, and assets.
+- Temporary code, TODOs, obsolete comments, and stale feature flags.
+- Ease of onboarding a new professional development team.
+
+B. Production build and runtime health
+- Production build status.
+- TypeScript, lint, compile, and runtime errors.
+- Production startup process.
+- Health-check status.
+- Repeated warnings or errors in production logs.
+- Unhandled exceptions.
+- Memory leaks or resource-heavy processes if detectable.
+- Environment-specific failures.
+
+C. Architecture
+- Application architecture quality.
+- API design and consistency.
+- Separation of concerns.
+- Reusability of modules.
+- Business-logic placement.
+- State-management structure.
+- Scalability limitations.
+- Single points of failure.
+- Areas that may become difficult to maintain as usage grows.
+
+D. Authentication and authorization
+- Login, logout, session, and token handling.
+- Office, freelancer, admin, and guest access separation.
+- Backend authorization enforcement.
+- Role and permission clarity.
+- Direct URL access risks.
+- IDOR risks.
+- Session expiry and invalidation.
+- Unauthorized data access risks.
+- Privilege escalation risks.
+
+E. Office and freelancer account separation
+- Correct handling of office and freelancer account types.
+- Provider-type validation.
+- Account-specific dashboards.
+- Account-specific fields.
+- Account-specific permissions.
+- Risks of one account type accessing or purchasing features intended for another.
+- Readiness for separate office and freelancer subscription plans.
+
+F. Database and data integrity
+- Schema organization.
+- Relationships and foreign keys.
+- Duplicate records.
+- Orphaned records.
+- Orphaned media.
+- Invalid null values.
+- Inconsistent statuses.
+- Duplicate slugs.
+- Broken references.
+- Pending-change consistency.
+- Approval-state consistency.
+- Query efficiency.
+- N+1 queries.
+- Unsafe raw queries.
+- Transaction handling.
+- Migration quality.
+- Backup and recovery readiness.
+- Do not alter or delete any data.
+
+G. Registration and user workflows
+Review the full code paths for:
+- Office registration.
+- Freelancer registration.
+- Login and logout.
+- Profile completion.
+- Document upload.
+- Media upload.
+- Save and edit.
+- Admin review.
+- Approval and rejection.
+- Public activation.
+- Deactivation and reactivation.
+- Public profile display.
+- Account deletion behavior, if present.
+- Error and success handling in every stage.
+
+H. Admin panel
+- Admin authentication and permissions.
+- New-registration visibility.
+- Pending-change visibility.
+- Approval and rejection flows.
+- Activation and deactivation.
+- Media moderation.
+- Document review.
+- Statistics accuracy.
+- Search and filters.
+- Admin actions auditability.
+- Risks of accidental destructive actions.
+- Missing operational alerts.
+
+I. Media and file handling
+- Cover image uploads.
+- Gallery images.
+- Gallery videos.
+- Marketing videos.
+- Documents.
+- File size validation.
+- MIME-type validation.
+- Extension validation.
+- Filename safety.
+- Storage-path safety.
+- Broken-file references.
+- Orphaned files.
+- Unauthorized file access.
+- Duplicate uploads.
+- Upload replacement and deletion behavior.
+- Media ownership checks.
+
+J. Arabic and English localization
+- Arabic/English separation.
+- Missing translation keys.
+- Hardcoded interface text.
+- Mixed-language screens.
+- RTL and LTR logic.
+- Locale-aware routing.
+- Locale-aware validation messages.
+- Locale persistence.
+- Language-specific assistant behavior.
+- Risks of one language affecting the other.
+
+K. Public platform experience
+- Homepage.
+- Search.
+- Categories.
+- Quick office cards.
+- Office public pages.
+- Freelancer public pages.
+- Decision Card.
+- WhatsApp action.
+- Map action.
+- QR generation and QR destination.
+- Share action.
+- Copy-link action.
+- Favorites.
+- Galleries.
+- Public links after refresh.
+- Broken links and incorrect redirects.
+
+L. Interactive controls
+Inspect the implementation of:
+- Save.
+- Edit.
+- Delete.
+- Upload.
+- Replace.
+- Approve.
+- Reject.
+- Activate.
+- Deactivate.
+- Login.
+- Logout.
+- Language switch.
+- Search.
+- Filters.
+- Tabs.
+- Modals.
+- Close buttons.
+- Back navigation.
+- WhatsApp.
+- Maps.
+- QR.
+- Share.
+- Copy.
+- Confirmations.
+- Loading states.
+- Disabled states.
+- Double-click or duplicate-submission protection.
+
+M. Security
+- Hardcoded secrets.
+- Exposed API keys.
+- Sensitive environment values.
+- SQL injection.
+- XSS.
+- CSRF.
+- IDOR.
+- Broken access control.
+- CORS.
+- Security headers.
+- Rate limiting.
+- Brute-force protection.
+- Upload attacks.
+- Path traversal.
+- Open redirects.
+- Unsafe HTML rendering.
+- Logging of personal or sensitive information.
+- Dependency vulnerabilities.
+- Admin endpoint exposure.
+- Webhook readiness for future payment integration.
+
+N. Performance
+- Slow endpoints.
+- Large database queries.
+- N+1 query risks.
+- Large JavaScript bundles.
+- Unnecessary re-renders.
+- Inefficient state updates.
+- Image optimization.
+- Lazy loading.
+- Caching.
+- API response size.
+- Mobile loading performance.
+- Production asset delivery.
+- Areas likely to fail under increased traffic.
+
+O. Dependencies and technical debt
+- Unused dependencies.
+- Duplicate packages.
+- Outdated critical dependencies.
+- Known security risks.
+- Overly risky major-version upgrades.
+- Development-only dependencies used in production.
+- Stale libraries.
+- Dependency lockfile consistency.
+- Technical debt affecting future development speed.
+- Technical debt affecting production safety.
+- Technical debt that can safely be postponed.
+
+P. Tests and quality assurance
+- Existing automated tests.
+- Test quality.
+- Critical workflows without tests.
+- Authentication test coverage.
+- Permission test coverage.
+- Registration test coverage.
+- Admin test coverage.
+- Media test coverage.
+- Localization test coverage.
+- Mobile/responsive test coverage.
+- Database integrity test coverage.
+- Production smoke-test coverage.
+- Whether current tests are sufficient for launch confidence.
+
+Q. Payment and subscription readiness
+Do not implement payment features. Audit readiness only:
+- Ability to support separate office and freelancer plans.
+- Plan-to-account-type validation.
+- Subscription status model.
+- Payment-attempt records.
+- Unique transaction references.
+- Success/failure handling.
+- Backend activation rules.
+- Webhook verification readiness.
+- Prevention of frontend-only activation.
+- Currency and billing-period readiness.
+- Manual admin activation readiness.
+- Risks that should be resolved before integrating a payment gateway.
+
+For every finding, provide:
+- Unique issue ID.
+- Title.
+- Severity: Critical, High, Medium, or Low.
+- Category.
+- Exact file, function, route, table, component, or area affected.
+- Clear explanation.
+- Evidence.
+- Business impact.
+- Technical impact.
+- Security or data risk, if applicable.
+- Recommended action.
+- Whether it must be fixed before launch or can be postponed.
+- Estimated implementation effort: Small, Medium, or Large.
+- Risk of making the change.
+- Dependencies on other fixes.
+
+Required final report:
+
+1. Executive summary.
+2. Overall code-quality score out of 100.
+3. Maintainability score out of 100.
+4. Production-stability score out of 100.
+5. Security score out of 100.
+6. Scalability-readiness score out of 100.
+7. Test-coverage confidence score out of 100.
+8. Payment-integration readiness score out of 100.
+9. Technical-debt level: Low, Medium, High, or Critical.
+10. Total number of Critical, High, Medium, and Low findings.
+11. Top launch-blocking issues.
+12. Top security risks.
+13. Top data-integrity risks.
+14. Top maintainability risks.
+15. Top scalability risks.
+16. Areas that are already well designed.
+17. Items safe to clean later.
+18. Items that should not be changed immediately because they are risky.
+19. Recommended remediation plan in this order:
+   - Before launch
+   - Immediately after launch
+   - Within 30 days
+   - Within 90 days
+   - Long-term improvements
+20. Estimated effort for safe cleanup and remediation.
+21. Readiness conclusion:
+   - Ready for launch
+   - Ready with conditions
+   - Not ready for launch
+22. Clear explanation supporting the readiness conclusion.
+23. Confirmation that no code, files, dependencies, database records, production data, configuration, or environment settings were modified.
+
+Important constraints:
+- Do not perform fixes.
+- Do not apply formatting.
+- Do not remove unused code.
+- Do not update packages.
+- Do not alter the database.
+- Do not delete test or QA data.
+- Do not expose secret values in the report; only identify their locations and risk.
+- Do not declare the platform ready only because the build succeeds.
+- Base conclusions on evidence from the actual production codebase.

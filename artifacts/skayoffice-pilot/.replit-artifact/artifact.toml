@@ -1,0 +1,33 @@
+kind = "web"
+previewPath = "/"
+title = "SkayOffice Pilot"
+version = "1.0.0"
+id = "artifacts/skayoffice-pilot"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 25700
+
+[services.development]
+run = "pnpm --filter @workspace/skayoffice-pilot run dev"
+
+[services.production]
+
+[services.production.build]
+args = ["pnpm", "--filter", "@workspace/skayoffice-pilot", "run", "build"]
+
+[services.production.run]
+args = ["node", "artifacts/skayoffice-pilot/server.mjs"]
+
+[services.production.run.env]
+PORT = "25700"
+NODE_ENV = "production"
+
+[services.production.health.startup]
+path = "/healthz"
+
+[services.env]
+PORT = "25700"
+BASE_PATH = "/"

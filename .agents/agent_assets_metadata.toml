@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "XWFaloUO0d2wYXnD8Fv8d"
+uri = "file://AUDIT_REPORT.md"
+type = "text"
+title = "SkayOffice Technical Audit Report"

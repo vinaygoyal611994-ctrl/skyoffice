@@ -1,0 +1,36 @@
+modules = ["nodejs-24", "python-base-3.13", "postgresql-16"]
+
+[deployment]
+router = "application"
+deploymentTarget = "autoscale"
+
+[deployment.postBuild]
+args = ["pnpm", "store", "prune"]
+env = { "CI" = "true" }
+
+[workflows]
+runButton = "Project"
+
+[agent]
+stack = "PNPM_WORKSPACE"
+expertMode = true
+
+[postMerge]
+path = "scripts/post-merge.sh"
+timeoutMs = 20000
+
+[nix]
+channel = "stable-25_05"
+packages = ["ffmpeg"]
+
+[userenv]
+
+[userenv.shared]
+VITE_PUBLIC_APP_URL = "https://skayoffice.com"
+CLEANUP_TOKEN = ""
+CLEANUP_TOKEN_2 = ""
+SEED_OFFICE_USER17 = ""
+
+[userenv.production]
+CORS_ALLOWED_ORIGINS = "https://skayoffice.com"
+FRONTEND_URL = "https://skayoffice.com"

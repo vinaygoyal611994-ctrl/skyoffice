@@ -1,0 +1,215 @@
+Build the SkayOffice Active Supply Slot + Returning Provider Waitlist system.
+
+This must be completed BEFORE payment gateway integration.
+
+Do NOT change Market Decision Intelligence rules.
+Do NOT build payment integration yet.
+Do NOT delete or reset any office history.
+
+Core principle
+
+Separate:
+
+- Account
+- Subscription
+- Supply Slot
+- Public Visibility
+
+An office may have an active subscription but must NOT automatically become publicly visible if its Country + City + Category market has no available Supply Slot.
+
+Rule:
+
+Account is permanent.
+Reputation/history are permanent.
+Subscription can renew.
+Visibility requires an allocated market slot.
+
+1. Slot status
+
+Add a clear slot lifecycle, for example:
+
+- allocated
+- waiting
+- released
+- not_required
+
+Document the final states.
+
+"current_active_supply" must represent providers that actually occupy visible marketplace slots — not all historical accounts and not all subscriptions.
+
+2. Expired/non-paying office
+
+When an office becomes hidden due to non-payment:
+
+- preserve account
+- preserve subscription history
+- preserve reviews
+- preserve transactions
+- preserve reputation
+- preserve profile/media
+- release its active Supply Slot
+
+Do not delete anything.
+
+3. Returning office
+
+When a previously hidden office renews/reactivates:
+
+If capacity exists
+
+Allocate a slot and restore visibility.
+
+If market is full
+
+Do NOT make it provider #16 in a cap of 15.
+
+Instead:
+
+- subscription may become active
+- slot_status = waiting
+- office remains hidden from public discovery
+- office enters the market waitlist
+
+4. Waitlist priority
+
+Returning previously-active providers should have priority over brand-new providers, but they must NEVER bypass Supply Cap.
+
+Create a simple deterministic priority model.
+
+At minimum:
+
+1. eligible returning provider
+2. other existing eligible applications
+3. new provider
+
+Do not build a complex AI ranking system.
+
+5. Automatic slot release and allocation
+
+When capacity becomes available because:
+
+- a provider expires
+- a provider cancels
+- a provider leaves
+- Admin increases Supply Cap
+
+the system should identify available slots and allocate them safely according to waitlist priority.
+
+Do not exceed Supply Cap.
+
+Admin must be able to see what was allocated and why.
+
+6. Subscription interaction
+
+Important:
+
+"active_paid" does NOT necessarily mean "visible".
+
+Example:
+
+subscription_status = active_paid
+slot_status = waiting
+visibility = hidden_waiting_for_slot
+
+Only:
+
+subscription active + slot allocated
+
+may restore public visibility.
+
+Update existing reactivation logic so it cannot blindly clear "is_subscription_hidden" when the market is full.
+
+7. Supply Cap integration
+
+Use the existing:
+
+Country + Canonical City + Category + Supply Cap
+
+logic.
+
+Closed markets remain closed.
+
+Cap enforcement must remain transaction-safe.
+
+Concurrent reactivations must not allocate the same final slot twice.
+
+8. Admin UI
+
+Inside Supply Control / Subscription detail, show:
+
+- Current Supply Cap
+- Active Slots
+- Remaining Slots
+- Waiting Providers
+- Returning Providers Waiting
+- Slot status per office
+
+Allow Admin to inspect the waitlist and perform an audited exceptional override if required.
+
+Do not clutter the main dashboard.
+
+9. Office-facing status
+
+Prepare a simple office status message:
+
+If subscription is active but no slot is available:
+
+Your subscription/profile is preserved. Your market is currently at capacity and your office is waiting for the next available visibility slot.
+
+Provide Arabic + English.
+
+Do not charge or promise payment behavior yet — payment gateway is not integrated.
+
+10. Audit history
+
+Record:
+
+- slot allocated
+- slot released
+- waitlist entered
+- waitlist exited
+- return priority
+- admin override
+- reason
+- market
+- timestamps
+
+Never overwrite history.
+
+11. Tests
+
+Test at minimum:
+
+- cap 15 with 15 active slots → returning office cannot become #16
+- expired office releases slot
+- returning office gets free slot when available
+- returning office waits when full
+- returning provider priority beats new provider
+- priority never bypasses cap
+- cap increase allocates newly available slots correctly
+- cap reduction never removes existing providers
+- two concurrent returning providers cannot claim one slot
+- active subscription can exist while slot_status = waiting
+- waiting office remains publicly hidden
+- allocated office becomes visible
+- history/reviews/transactions remain intact
+- SA/AE and city/category isolation remain correct
+- full existing test suite passes
+
+Return:
+
+1. data model
+2. slot lifecycle
+3. exact slot-consumer definition
+4. release logic
+5. waitlist logic
+6. returning-provider priority
+7. subscription/visibility interaction
+8. concurrency protection
+9. admin/office UI
+10. audit history
+11. tests/results
+12. remaining limitations
+13. readiness score
+
+STOP.

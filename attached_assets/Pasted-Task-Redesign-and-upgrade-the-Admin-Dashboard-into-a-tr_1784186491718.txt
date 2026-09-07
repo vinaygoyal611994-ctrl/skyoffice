@@ -1,0 +1,162 @@
+Task: Redesign and upgrade the Admin Dashboard into a true operations center.
+The goal is not only UI improvement, but to optimize the workflow so the administrator can manage thousands of offices efficiently from one place.
+Requirements
+1. Dashboard Home (Operations Center)
+Replace the current statistics-only layout with a real operational dashboard.
+Top section should include KPI cards:
+Total Offices
+Active Offices
+Pending Approval
+Needs Changes
+Suspended Offices
+Rejected Offices
+Registered Customers
+Today's Contacts
+Video Call Requests Today
+Active Subscriptions
+Expiring Subscriptions (next 7 days)
+2. Action Center (Highest Priority)
+Create an "Items Requiring Action" section at the top.
+Examples:
+New Office Registrations
+Documents Waiting Review
+Offices Waiting Approval
+Offices Requiring Changes
+Subscription Expiring Soon
+Failed Uploads
+System Alerts
+Each item must display:
+Count
+Priority color
+One-click action
+3. Offices Table
+Redesign the office list.
+Each row should display:
+Logo
+Office Name
+Category
+Languages
+City
+Current Status
+Subscription Status
+Registration Date
+Last Login
+Last Activity
+Action menu:
+View
+Approve
+Request Changes
+Suspend
+Activate
+Delete
+Open Public Profile
+4. Registration Requests
+Improve review workflow.
+Inside every request show:
+Company information
+Uploaded documents
+Verification status
+Missing documents
+Admin notes
+Timeline
+Quick buttons:
+Approve
+Reject
+Request Changes
+Download Documents
+View Public Preview
+5. Customer Management
+Improve customer page.
+Show:
+Name
+Email
+Phone
+Number of contacted offices
+Last Activity
+Registration Date
+Actions:
+View
+Suspend
+Delete
+6. Contact Analytics
+Replace simple logs with analytics.
+Show:
+WhatsApp clicks
+Share clicks
+Location clicks
+Video Call requests
+QR scans
+Filter by:
+Office
+Date
+Country
+Category
+7. Activity Log
+Replace technical events like
+AUTH.LOGIN
+with readable events.
+Examples:
+Office registered
+Office approved
+Customer contacted office
+Subscription renewed
+Document uploaded
+Profile updated
+Include:
+Time
+User
+Office
+Action
+8. Search
+Global search should search:
+Office name
+Phone
+Email
+City
+Category
+Customer
+Office ID
+9. Filters
+Support filtering by:
+Status
+Category
+Country
+City
+Subscription
+Registration Date
+10. Mobile UX
+Optimize everything for mobile.
+No horizontal scrolling.
+Large touch targets.
+Proper spacing.
+Fast loading.
+11. Performance
+Support thousands of offices.
+Pagination.
+Lazy loading.
+Optimized queries.
+12. Do NOT change
+Do not modify database schema unless absolutely necessary.
+Do not affect production data.
+Keep all existing functionality working.
+Mandatory QA
+After implementation, perform a complete verification.
+Test:
+✅ Dashboard loads correctly
+✅ Statistics display correctly
+✅ Office list works
+✅ Filters work
+✅ Search works
+✅ Registration approval works
+✅ Request Changes works
+✅ Reject works
+✅ Customer management works
+✅ Contact analytics work
+✅ Activity log works
+✅ Mobile responsive layout works
+✅ No console errors
+✅ No API errors
+✅ No database errors
+✅ No broken UI
+Fix every issue found before considering the task complete.
+Finally, provide a QA summary listing every tested feature and whether it passed or was fixed before completion.

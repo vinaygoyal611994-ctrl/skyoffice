@@ -1,0 +1,136 @@
+Build the SkayOffice Plans and Commercial Activation Control.
+
+Do NOT integrate the payment gateway yet.
+Do NOT change Supply Control.
+Do NOT redesign unrelated Admin sections.
+
+Goal:
+Prepare the platform so subscriptions can remain inactive during the free market-building period, then be activated deliberately by Admin after all offices are notified in advance.
+
+1. Plans
+
+Create the minimum plan model needed for launch.
+
+Support:
+
+- plan name
+- monthly price
+- currency
+- billing interval
+- active/inactive
+- country applicability
+- provider type applicability if needed
+
+Keep the structure simple and editable by Admin.
+
+Do not create unnecessary pricing complexity.
+
+2. Commercial Activation State
+
+Add a global subscription commercial state:
+
+- disabled
+- scheduled
+- active
+
+When disabled:
+
+- offices continue operating normally
+- no office is hidden for non-payment
+- no billing countdown starts
+- subscription lifecycle remains technically available but commercial enforcement is off
+
+3. Scheduled Activation
+
+Admin can choose:
+
+- activation date/time
+- affected markets/providers
+- notification lead time
+
+Before activation, show:
+
+- number of eligible offices
+- number notified
+- delivery failures
+- offices excluded
+- planned activation date
+
+4. Pre-activation notifications
+
+Prepare/send bilingual notices before commercial activation.
+
+Track:
+
+- queued
+- sent
+- delivered if supported
+- failed
+- timestamp
+
+Prevent duplicate sends.
+
+Do not activate billing until Admin confirms.
+
+5. Final Admin Confirmation
+
+The actual commercial activation must require explicit Admin confirmation.
+
+No scheduler or recommendation may activate subscriptions automatically.
+
+After confirmation and activation time:
+
+- eligible offices enter the configured trial/free-to-paid lifecycle
+- existing office data remains untouched
+
+6. Safety
+
+If an office does not activate/pay later:
+
+- hide only through "is_subscription_hidden"
+- never delete the office
+- never reset reputation/history
+- reactivation restores visibility automatically
+
+7. Admin UI
+
+Create a compact subscription launch control showing:
+
+- Commercial Status
+- Planned Activation Date
+- Eligible Offices
+- Notified
+- Failed Notifications
+- Plan / Price
+- Final Activate button
+
+Use a confirmation dialog before activation.
+
+8. Tests
+
+Test:
+
+- commercial disabled = no enforcement
+- scheduled does not activate early
+- notifications dedupe
+- activation requires Admin confirmation
+- activation starts correct lifecycle
+- non-payment never deletes data
+- reactivation restores visibility
+- no Supply Control regression
+- full existing suite passes
+
+Return:
+
+1. plan model
+2. commercial activation states
+3. notification flow
+4. admin confirmation flow
+5. activation behaviour
+6. safety behaviour
+7. UI
+8. tests/results
+9. remaining limitations
+10. readiness score
+
+STOP.

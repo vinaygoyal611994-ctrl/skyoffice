@@ -1,0 +1,1 @@
+-- See lib/db/migrations/0008_remove_assistant_tables.sql for the correct migration.

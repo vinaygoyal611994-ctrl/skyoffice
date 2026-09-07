@@ -1,0 +1,173 @@
+أرسل له هذا الأمر:
+
+
+---
+
+Homepage Entry Simplification
+
+The current design is close to the desired result, but it still contains unnecessary elements that increase visual clutter.
+
+Do not change any functionality, routing, authentication, or business logic.
+
+This task is only to simplify and improve the homepage entry section.
+
+Office Section
+
+Keep only:
+
+Title
+
+أسّس مكتبك الرقمي
+
+
+Primary Button
+
+أسّس مكتبك الرقمي
+
+
+Below the button
+
+لديك حساب بالفعل؟
+
+
+Action
+
+دخول المكاتب
+
+
+Remove completely the descriptive sentence below the title.
+
+
+---
+
+Customer Section
+
+Keep only:
+
+Title
+
+بوابة العملاء
+
+
+Below the title
+
+لديك حساب بالفعل؟
+
+
+Action
+
+دخول العملاء
+
+
+Remove the اكتشف المكاتب button completely.
+
+Users can already discover offices using the search bar and categories immediately below, so this button is redundant.
+
+
+---
+
+Final Order
+
+The homepage should appear in this order:
+
+1. أسّس مكتبك الرقمي
+
+
+2. زر أسّس مكتبك الرقمي
+
+
+3. لديك حساب بالفعل؟
+
+
+4. دخول المكاتب
+
+
+5. Divider
+
+
+6. بوابة العملاء
+
+
+7. لديك حساب بالفعل؟
+
+
+8. دخول العملاء
+
+
+9. Search Bar
+
+
+10. Offices / Freelancers Tabs
+
+
+11. Sorting
+
+
+12. Categories
+
+
+13. Office Listings
+
+
+
+
+---
+
+UI Requirements
+
+Reduce the overall height of the card after removing unnecessary content.
+
+Keep spacing clean and balanced.
+
+Make دخول المكاتب and دخول العملاء look like clear clickable actions.
+
+Keep the primary CTA (أسّس مكتبك الرقمي) visually dominant.
+
+Keep the customer login secondary but clearly visible.
+
+Do not add any new descriptions or extra buttons.
+
+Do not redesign the rest of the homepage.
+
+
+
+---
+
+Preserve
+
+Do NOT modify:
+
+Authentication
+
+Routing
+
+Search
+
+Role separation
+
+Business logic
+
+Existing functionality
+
+
+Only simplify and polish the UI.
+
+
+---
+
+Validation
+
+After implementation, verify in both Arabic and English:
+
+Correct RTL/LTR layout.
+
+No broken spacing.
+
+No overflow.
+
+Responsive on mobile, tablet, and desktop.
+
+All existing routes continue to work exactly as before.
+
+
+Goal: Create a cleaner, shorter, and more professional homepage where the user immediately sees the primary action (أسّس مكتبك الرقمي) and, if already registered, can quickly access دخول المكاتب or دخول العملاء without unnecessary text or duplicated actions.

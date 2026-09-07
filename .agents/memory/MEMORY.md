@@ -1,0 +1,77 @@
+# Memory Index
+
+- [S3 storage migration](s3-storage-migration.md) — env-driven S3 layer replaced Replit GCS sidecar; ACL via metadata self-copy; bucket CORS required for browser PUT; legacy objects not migrated.
+
+- [Payment Foundation](payment-foundation.md) — triple-guard invariant, webhook-only activation, raw-body mount order, idempotency key format, price constants; adminId=null is correct system sentinel (SYSTEM_ADMIN_ID=1 removed).
+
+- [Trust metrics schema](trust-metrics-schema.md) — first_response_at/system-calc speed, completedCount LEFT JOIN, legacy columns removed, /service-metrics returns 4 keys.
+- [Zod intersection schemas lack .passthrough()](zod-intersection-passthrough.md) — generated response schemas use .and() → ZodIntersection; calling .passthrough() or .parse() on them crashes at runtime; just res.json(serializer()) directly.
+- [OpenAPI zod codegen version mismatch](openapi-zod-v3-v4.md) — `format: email`/`format: uri` in openapi.yaml makes orval emit zod v4-only methods that break this repo's zod v3 catalog.
+- [connect-pg-simple + esbuild bundling](connect-pg-simple-esbuild.md) — its runtime SQL file gets lost when esbuild bundles it; must externalize it in the api-server build.
+- [SkayOffice object-storage image latency](skayoffice-object-storage-latency.md) — object-storage image fetches take ~3.5-4s here; give image cards a loading/fade-in state, don't chase it as a bug.
+- [Schema-change conflicts with "don't touch DB" requests](schema-change-conflicts.md) — when a feature needs new stored data but schema is frozen, ask the user (additive column vs. skip) rather than guessing.
+- [drizzle-kit push non-interactive limits](drizzle-push-non-interactive.md) — it can't run non-interactively here and may propose dropping unrelated tables (e.g. session); use raw SQL for additive changes instead.
+- [api-client-react error shape](api-error-shape.md) — read `err.data.foo`, not `err.response.data.foo`, from a failed generated-hook mutation/query in this codebase.
+- [SkayOffice activation & upload reliability fixes](skayoffice-activation-upload-reliability.md) — structured blocker errors, storage-readability retry helper, and Uppy await/clear pattern to reuse for future upload work.
+- [SkayOffice admin login has no dedicated route](skayoffice-admin-login-route.md) — admins log in via /login/customer then navigate to /admin manually; this is by design, not a bug.
+- [SkayOffice availability label drift](skayoffice-availability-label-drift.md) — isOnline=false had two different labels in Card vs Decision Card; route shared-field labels through one i18n key.
+- [SkayOffice test data in public listing](skayoffice-test-data-in-public-listing.md) — e2e/QA offices without isDemo=true can go status=active and show up live on the public site.
+- [SkayOffice search/logout fixes](skayoffice-search-logout-fixes.md) — no `nameAr`/city-synonym search coverage, and `window.location.href` logout caused a blank-screen flash for all roles.
+- [Testing subagent credential leakage risk](testing-subagent-credential-leakage.md) — QA subagents will quote real secret values in reports if given any way to discover them; instruct them not to.
+- [Cross-artifact production module tests](cross-artifact-production-module-tests.md) — use runtime file-URL imports to test pilot browser code from API tests without breaking TypeScript rootDir boundaries.
+- [CORS allowlist needs explicit error handling](cors-allowlist-error-leak.md) — a rejected cors() origin callback leaks a stack trace unless you add dedicated error-handling middleware after cors().
+- [Autoscale strips app Set-Cookie headers](autoscale-cookie-stripping.md) — session cookies never reach the browser on this Autoscale deployment; bearer-token-via-signed-cookie-shim is the no-schema-change workaround.
+- [SkayOffice bearer-auth gap in raw fetch() calls](skayoffice-bearer-auth-raw-fetch-gap.md) — raw fetch() (e.g. media upload) skips the bearer token the generated hooks attach automatically; 401s only in prod, looks like a hang.
+- [Fixed-position modal over sticky header needs opaque bg](skayoffice-modal-header-bleedthrough.md) — a `fixed inset-0` overlay with a translucent bg (e.g. bg-muted/20) lets a sticky header behind it visually bleed through even though z-index stacking is correct.
+- [SkayOffice shared upload category enum lives in two places](skayoffice-upload-category-enum-split.md) — adding a new upload category needs the shared `UploadUrlRequest.category` enum updated too, not just the per-route `UPLOAD_LIMITS` map, or every upload 400s.
+- [Manual scrollLeft carousels silently fail in this app](skayoffice-carousel-scrollleft-bug.md) — use `embla-carousel-react` (`useEmblaCarousel`) for any swipeable slider; a hand-rolled scrollLeft/scrollTo scroller never actually scrolled, for unresolved reasons.
+- [gpt-5-mini empty/over-conservative completions](gpt5-mini-empty-completion-fallback.md) — low max_completion_tokens silently returns empty text; strict "only approved knowledge" prompts can make it discard a whole answer over one uncovered sub-question.
+- [orval Params type/const name collision](orval-params-name-collision.md) — an operation with both a path param and a query param can make orval's zod/react-query codegen emit duplicate `XxxParams` exports; api-zod's index.ts only needs the `generated/api` export.
+- [SkayOffice assistant language resolution](skayoffice-assistant-language-resolution.md) — conversation language must be read from a persisted per-conversation column, never a hardcoded default; the platform's true default is Arabic, not English.
+- [SkayOffice logo asset only has white text for dark backgrounds](skayoffice-logo-white-text-source.md) — no light-bg brand asset exists; recolor wordmark before chroma-keying, don't just make bg transparent.
+- [SkayOffice dashboard raw hardcoded Arabic strings](skayoffice-dashboard-raw-arabic-strings.md) — whole page had literal Arabic UI copy with no `t()` call at all; grep the Arabic Unicode range per-file, don't trust a prior partial i18n fix.
+- [SkayOffice public bilingual data fields](skayoffice-public-bilingual-fields.md) — field/fieldAr convention, no-schema-change city localization (case-insensitive map), fallback+audit-log-gap pattern, full-screen overlays can orphan the header's language toggle.
+- [SkayOffice canonical office public URL](skayoffice-canonical-office-url.md) — slug + VITE_-prefixed prod base URL for QR/share links; watch for /office/dashboard route collisions.
+- [orval zod codegen overwrites api-zod index.ts](api-zod-index-autogeneration.md) — re-running codegen re-adds a duplicate generated/types export; must be manually fixed back to a single-line barrel after every run.
+- [SkayOffice public share URL misconfiguration](skayoffice-public-url-misconfiguration.md) — a "prod URL" env var pointed at an unrelated Netlify site; verify against getDeploymentInfo(), don't trust a 200 response alone.
+- [TypeScript project references require explicit rebuild](ts-project-references-rebuild.md) — app tsconfigs resolve lib types via dist/.d.ts; must rebuild each lib after source edits or apps see stale types.
+- [Freelancer gallery image selection](freelancer-gallery-image-selection.md) — personal-photo removed; Quick Card = coverUrl via /quick-card-image endpoint; Decision Card hero = primaryMediaId; heroGalleryItemId dedups carousel.
+- [SkayOffice verifyObjectReadable placement](skayoffice-verifyobjectreadable-placement.md) — skip the GCS readability check for locked offices; it always fails for just-uploaded objects due to 3–4 s propagation lag.
+- [SkayOffice Vite dev proxy + CORS port](skayoffice-vite-dev-proxy.md) — Vite needs `server.proxy /api → localhost:8080 changeOrigin:true`; CORS allowlist needs port 25700, not stale 5173.
+- [Vitest 4 describe-timeout syntax change](vitest4-describe-timeout.md) — passing `{ timeout }` as a third arg to `describe()` was removed in Vitest 4; pass per-test timeout as the second arg to `it()` instead.
+- [Drizzle transaction type vs db type](drizzle-transaction-type.md) — `db.transaction(async (tx) => {...})` gives `tx` a different TS type than `db`; pass `tx as any` (or use a structural Pick type) when calling helpers that accept `typeof db`; runtime shape is identical.
+- [SkayOffice production hardening — July 2026](skayoffice-production-hardening-2026.md) — summary of all CRIT/HIGH/MED audit fixes applied in the July 2026 remediation pass.
+- [SkayOffice RTL dashboard layout bug](skayoffice-rtl-dashboard-layout.md) — `lg:me-60` on main content caused sidebar to overlap in RTL; fix is always `lg:ms-60` (CSS logical property flips automatically).
+- [SkayOffice admin API route paths](skayoffice-admin-api-routes.md) — admin routes: `/api/admin/applications/:id/approve|reject|request-changes`; pending-changes: `/api/admin/applications/:id/pending-changes/approve|reject`; public listing uses `items` key not `offices`.
+- [SkayOffice public offices API shape](skayoffice-public-offices-api-shape.md) — `GET /api/offices` returns `{ items, total, page, limit }` (not `offices`); requires `providerType=office|freelancer` query param or returns 400.
+- [SkayOffice correct API route paths](skayoffice-correct-api-routes.md) — verified route paths for submit, upload, AI, favourites, auth status codes (logout=204, register=201, AI conv=200); dir=rtl set dynamically by React.
+- [Chat modal mobile layout](chat-modal-mobile-layout.md) — h-fit + missing min-h-0 breaks flex-1 scroll; use h-[min(85dvh,680px)] + overflow-y-hidden + min-h-0 + shrink-0 pattern for chat dialogs.
+- [Audit Phase 1 migration](audit-phase1-migration.md) — indexes/columns/FK constraints added in 0009_audit_phase1; notes on ADD CONSTRAINT syntax, stamp-before-run order, and serializer nullable fix.
+- [Analytics Phase 1 patterns](analytics-phase1-patterns.md) — client function signatures, commonContext() spread order, lib/db rebuild requirement, Intelligence.tsx t() stub, event deduplication.
+- [SkayOffice Reports Phase 1](skayoffice-reports-phase1.md) — priority-test input constraints, phone_click gap, TranslationKey extension pattern, auth/ownership approach.
+- [Gallery sort_order migration and stamp flow](gallery-sort-order-migration.md) — sort_order for gallery ordering, stamp command syntax, safety-check false positive on commented DROP TABLE, reorder endpoint and limits.
+- [SkayOffice storage public-media fix](skayoffice-storage-public-media-fix.md) — approved-media allowlist bypasses auth for covers/gallery/video; ::text cast required in jsonb_build_object params or Postgres throws type error.
+- [Analytics Data Quality Phase 1](analytics-dq-phase1.md) — is_internal/is_self_view/is_internal_actor columns, aggregation filter rules, contact_events audit-vs-reality note, visitor-cookie fix, FK RESTRICT changes.
+- [Market Supply Control](market-supply-control.md) — rules-based classifier, city normalization (LOWER join), 4 API routes, acceptance status mapping, safeguard: never touches offices/subs.
+- [Hybrid Supply Cap](hybrid-supply-cap.md) — admin cap per country+city+category; slot consumers=approved/active/is_demo=false; approval uses FOR UPDATE; recompute never touches supply_cap.
+- [vitest resetAllMocks vs clearAllMocks](vitest-reset-vs-clear.md) — clearAllMocks() does NOT drain mockResolvedValueOnce queues; use resetAllMocks() globally or unconsumed mocks bleed between tests.
+- [SkayOffice subscription lifecycle](skayoffice-subscription-lifecycle.md) — 7-state machine in office_subscriptions; is_subscription_hidden overlay on offices; vi.hoisted() required for Drizzle mock setup in Vitest.
+- [SkayOffice commercial activation](skayoffice-commercial-activation.md) — plans + campaign lifecycle + commercial_state guard in sweeper; activation requires explicit Admin confirmation; price in halalas (÷100 for SAR).
+- [Supply Slot Manager](supply-slot-manager.md) — slot lifecycle independent of subscription; allocateSlot/releaseSlot/processWaitlist; FOR UPDATE lock pattern; slot consumer count via market_slot_allocations not offices.
+- [Slot Reservation Hardening](slot-reservation-hardening.md) — processWaitlist returns {reserved,allocated}; forceAllocateSlot hardcodes 'admin_override' in SQL; CustomerRegisterInput was missing termsAccepted.
+- [Slot Reservation Sweeper](slot-reservation-sweeper.md) — runReservationSweep() every 15min; sweeper no longer sends email (delegated to outbox); result no longer has notificationsSent.
+- [Slot Notification Outbox](slot-notification-outbox.md) — atomic outbox row in createReservationRow tx; worker uses FOR UPDATE SKIP LOCKED; createReservationRow now 4 client queries (was 2); test stubs need 2 extra rows per reservation.
+- [Supply Slot Admin UI](supply-slot-admin-ui.md) — SlotReservationPanel in DrillDown (outside ctrl block); 4 parallel fetches; live countdown from expiresAt; outbox matched by max(id) per officeId.
+- [Migration integrity fix](migration-integrity-fix.md) — root causes + fixes for the broken journal; PG16 NOT-NULL pseudo-constraint bug in 0003; production stamp SQL already applied; new migrations → drizzle-kit generate only.
+- [pg Pool.connect() overload type](pg-pool-connect-type.md) — ReturnType<typeof pool.connect> resolves to void (last overload); use a local DBLockClient interface.
+- [lib/db rebuild after schema additions](libdb-rebuild.md) — new schema files need `npx tsc --build` in lib/db/; the api-server tsconfig uses project references pointing to lib/db/dist/.
+- [Analytics dimension functions use db.execute](analytics-dimension-queries.md) — dimension aggregators call db.execute(sql`...`), not db.select; mock db.execute to trigger dimension failures in tests.
+- [Slot-sync recovery pattern](slot-sync-recovery.md) — slot_sync_needed_at flag + 15-min sweeper for post-commit convertReservationToAllocation failures; null sentinel, never auto-allocate after expiry.
+- [Real provider verification boundary](real-provider-verification-boundary.md) — production readiness must verify non-demo provider rows through owner FK, active user state, and audit evidence; seeded accounts are not ownership evidence.
+- [Activation override consistency](activation-override-consistency.md) — bind admin confirmation to exact blockers and evaluate/update/audit in one serializable transaction.
+- [Provider OTP issuance](provider-otp-issuance.md) — serialize per user/channel and count retained successful token rows for durable, channel-isolated resend limits.
+- [Sequential provider uploads](sequential-provider-uploads.md) — Uppy batches must use concurrency 1 because the relay intentionally permits one in-flight upload per provider account.
+- [SkayOffice media placement isolation](skayoffice-media-placement-isolation.md) — Works and Decision Card media are separate roles; lock Works mutations per office to preserve caps and ordering.
+- [Moderated public profile freshness](moderated-public-profile-freshness.md) — cross-session approval/visibility changes require no-store at API and client boundaries, not query invalidation alone.
+- [Deployment startup health-probe race](deployment-startup-health-race.md) — distinguish transient probes from control-plane failures before changing app configuration.
+- [Marketing-video server verification](marketing-video-server-verification.md) — actual private MP4 bytes are probed with the existing ffprobe runtime; client duration is advisory only.

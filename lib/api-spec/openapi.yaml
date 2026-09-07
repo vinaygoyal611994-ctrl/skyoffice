@@ -1,0 +1,3199 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: SkayOffice Pilot API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: Auth
+    description: Registration, login, session
+  - name: Categories
+    description: Service categories
+  - name: Offices
+    description: Office discovery and profile management
+  - name: Favourites
+    description: Customer saved offices
+  - name: Platform
+    description: Platform-wide stats
+  - name: Admin
+    description: Admin dashboard operations
+  - name: Contact
+    description: Login-gated, verified contact events and video-call requests
+  - name: Storage
+    description: Object storage upload and serving endpoints.
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  # ------------------------------------------------------------------
+  # Auth
+  # ------------------------------------------------------------------
+  /auth/register/customer:
+    post:
+      operationId: registerCustomer
+      tags: [Auth]
+      summary: Register a new customer account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CustomerRegisterInput"
+      responses:
+        "201":
+          description: Customer registered and session started
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthUser"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "409":
+          description: Email already registered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /auth/register/office:
+    post:
+      operationId: registerOffice
+      tags: [Auth]
+      summary: Register a new office account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OfficeRegisterInput"
+      responses:
+        "201":
+          description: Office registered and session started
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthUser"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "409":
+          description: Email already registered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /auth/login:
+    post:
+      operationId: login
+      tags: [Auth]
+      summary: Log in with email and password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginInput"
+      responses:
+        "200":
+          description: Session started
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthUser"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [Auth]
+      summary: End the current session
+      responses:
+        "204":
+          description: Logged out
+  /auth/me:
+    get:
+      operationId: getCurrentUser
+      tags: [Auth]
+      summary: Get the current authenticated user
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthUser"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+  # ------------------------------------------------------------------
+  # Categories
+  # ------------------------------------------------------------------
+  /categories:
+    get:
+      operationId: listCategories
+      tags: [Categories]
+      summary: List service categories with office counts
+      responses:
+        "200":
+          description: Categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CategorySummary"
+
+  # ------------------------------------------------------------------
+  # Offices (public discovery)
+  # ------------------------------------------------------------------
+  /offices:
+    get:
+      operationId: listOffices
+      tags: [Offices]
+      summary: Discover offices
+      parameters:
+        - name: category
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/OfficeCategory"
+        - name: search
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: verifiedOnly
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: providerType
+          in: query
+          required: true
+          schema:
+            $ref: "#/components/schemas/ProviderType"
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [nearest, available, newest]
+            default: newest
+        - name: latitude
+          in: query
+          schema:
+            type: number
+        - name: longitude
+          in: query
+          schema:
+            type: number
+        - name: city
+          in: query
+          schema:
+            type: string
+        - name: country
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: List of offices matching the filters
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items, total, page, limit]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/OfficeSummary"
+                  total:
+                    type: integer
+                  page:
+                    type: integer
+                  limit:
+                    type: integer
+  /offices/{officeId}:
+    get:
+      operationId: getOffice
+      tags: [Offices]
+      summary: Get an office's full digital profile
+      parameters:
+        - name: officeId
+          in: path
+          required: true
+          description: Either the numeric office id or its public slug.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Office profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PublicOfficeProfile"
+        "404":
+          description: Office not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+  # ------------------------------------------------------------------
+  # Offices (self-management, office role)
+  # ------------------------------------------------------------------
+  /offices/me:
+    get:
+      operationId: getMyOffice
+      tags: [Offices]
+      summary: Get the logged-in office's own profile
+      responses:
+        "200":
+          description: Office profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OfficeProfile"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+    patch:
+      operationId: updateMyOffice
+      tags: [Offices]
+      summary: Update the logged-in office's own profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OfficeUpdate"
+      responses:
+        "200":
+          description: Updated office profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OfficeProfile"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /offices/me/works-visibility:
+    patch:
+      operationId: updateMyOfficeWorksVisibility
+      tags: [Offices]
+      summary: Enable or disable the logged-in office's public Works tab
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorksVisibilityUpdate"
+      responses:
+        "200":
+          description: Updated office profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OfficeProfile"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /offices/me/services:
+    post:
+      operationId: addMyOfficeService
+      tags: [Offices]
+      summary: Add a service offered by the logged-in office
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OfficeServiceInput"
+      responses:
+        "201":
+          description: Service added
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OfficeService"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /offices/me/services/{serviceId}:
+    delete:
+      operationId: removeMyOfficeService
+      tags: [Offices]
+      summary: Remove a service from the logged-in office
+      parameters:
+        - name: serviceId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Service removed
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "404":
+          description: Service not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /offices/me/media:
+    post:
+      operationId: addMyOfficeMedia
+      tags: [Offices]
+      summary: Add a Decision Card gallery or Works media item to the logged-in office
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OfficeMediaInput"
+      responses:
+        "201":
+          description: Media added
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OfficeMedia"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /offices/me/media/{mediaId}:
+    delete:
+      operationId: removeMyOfficeMedia
+      tags: [Offices]
+      summary: Remove a gallery media item from the logged-in office
+      parameters:
+        - name: mediaId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Media removed
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "404":
+          description: Media not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /offices/me/documents:
+    get:
+      operationId: listMyOfficeDocuments
+      tags: [Offices]
+      summary: List the logged-in office's verification documents
+      responses:
+        "200":
+          description: Verification documents
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/VerificationDocument"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+    post:
+      operationId: addMyOfficeDocument
+      tags: [Offices]
+      summary: Upload a verification document for the logged-in office
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VerificationDocumentInput"
+      responses:
+        "201":
+          description: Document added
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VerificationDocument"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /offices/me/documents/{documentId}:
+    delete:
+      operationId: removeMyOfficeDocument
+      tags: [Offices]
+      summary: Remove a verification document from the logged-in office
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Document removed
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "404":
+          description: Document not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /offices/me/submit:
+    post:
+      operationId: submitMyOfficeApplication
+      tags: [Offices]
+      summary: Submit the logged-in office's application for admin review
+      description: |
+        Transitions the office from draft/changes_requested into the review
+        queue. Fails with 400 if required fields or documents are missing.
+      responses:
+        "200":
+          description: Application submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OfficeProfile"
+        "400":
+          description: Application incomplete
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubmissionValidationError"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /offices/me/marketing-video:
+    put:
+      operationId: setMyOfficeMarketingVideo
+      tags: [Offices]
+      summary: Register/replace the logged-in office's single marketing video
+      description: |
+        Registers a previously-uploaded MP4 (category `marketing_video`) as
+        the office's one optional marketing video, shown on its Digital
+        Office / Decision Card with the cover image as poster. Replacing an
+        existing video overwrites it; the previous file is cleaned up
+        best-effort. Not subject to the approved/active/suspended edit
+        lock — it takes effect immediately, same as gallery media. The server
+        independently validates the actual MP4 file and its duration; client
+        metadata is advisory only.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MarketingVideoInput"
+      responses:
+        "200":
+          description: Updated office profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OfficeProfile"
+        "400":
+          description: Invalid file (wrong type, too large, too long) or not yet readable in storage
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+    delete:
+      operationId: removeMyOfficeMarketingVideo
+      tags: [Offices]
+      summary: Remove the logged-in office's marketing video
+      responses:
+        "200":
+          description: Updated office profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OfficeProfile"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "404":
+          description: No marketing video to remove
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /offices/me/media/{mediaId}/primary:
+    patch:
+      operationId: setMyOfficePrimaryMedia
+      tags: [Offices]
+      summary: Mark a gallery item as the office's primary media
+      parameters:
+        - name: mediaId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Updated office profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OfficeProfile"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "404":
+          description: Media not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+  # ------------------------------------------------------------------
+  # Favourites (customer role)
+  # ------------------------------------------------------------------
+  /favourites:
+    get:
+      operationId: listFavourites
+      tags: [Favourites]
+      summary: List the logged-in customer's saved offices
+      responses:
+        "200":
+          description: Saved offices
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/OfficeSummary"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+    post:
+      operationId: addFavourite
+      tags: [Favourites]
+      summary: Save an office to favourites
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FavouriteInput"
+      responses:
+        "201":
+          description: Favourite added
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Favourite"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /favourites/{officeId}:
+    delete:
+      operationId: removeFavourite
+      tags: [Favourites]
+      summary: Remove an office from favourites
+      parameters:
+        - name: officeId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Favourite removed
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+  # ------------------------------------------------------------------
+  # Contact (customer role) — verified contact events & video-call requests
+  # ------------------------------------------------------------------
+  /contact-events:
+    post:
+      operationId: createContactEvent
+      tags: [Contact]
+      summary: Record a verified contact event (WhatsApp click, location click, share click)
+      description: |
+        Requires an authenticated, active (non-suspended) customer session.
+        Rapid repeat taps of the same action on the same office are
+        deduplicated server-side and return the existing recent event
+        instead of creating a duplicate.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContactEventInput"
+      responses:
+        "201":
+          description: Contact event created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContactEvent"
+        "200":
+          description: Deduplicated — an identical event was just created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContactEvent"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "403":
+          description: Not an active customer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "404":
+          description: Office not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "429":
+          description: Too many requests
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+  /video-call-requests:
+    post:
+      operationId: createVideoCallRequest
+      tags: [Contact]
+      summary: Submit a real video-call request to an office
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VideoCallRequestInput"
+      responses:
+        "201":
+          description: Video-call request created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VideoCallRequest"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "403":
+          description: Not an active customer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "404":
+          description: Office not found or video calls not enabled
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "429":
+          description: Too many requests
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+  /video-call-requests/me:
+    get:
+      operationId: listMyVideoCallRequests
+      tags: [Contact]
+      summary: List the logged-in customer's own video-call requests
+      responses:
+        "200":
+          description: Video-call requests
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/VideoCallRequest"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+  /contact-events/me:
+    get:
+      operationId: listMyContactEvents
+      tags: [Contact]
+      summary: List the logged-in customer's own recent verified contact events
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Contact events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MyContactEventSummary"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+  /offices/me/contact-events:
+    get:
+      operationId: listMyOfficeContactEvents
+      tags: [Contact]
+      summary: List recent verified contact events for the logged-in office's own office
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Contact events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/OfficeContactEventSummary"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "403":
+          description: Not an office
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+  /offices/me/video-call-requests:
+    get:
+      operationId: listMyOfficeVideoCallRequests
+      tags: [Contact]
+      summary: List video-call requests for the logged-in office's own office
+      responses:
+        "200":
+          description: Video-call requests
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/OfficeVideoCallRequestSummary"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "403":
+          description: Not an office
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+  /offices/me/video-call-requests/{requestId}/status:
+    patch:
+      operationId: updateMyOfficeVideoCallRequestStatus
+      tags: [Contact]
+      summary: Update the status of one of the office's own video-call requests
+      parameters:
+        - name: requestId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateVideoCallRequestStatusBody"
+      responses:
+        "200":
+          description: Updated video-call request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OfficeVideoCallRequestSummary"
+        "400":
+          description: Invalid status transition
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "403":
+          description: Not the owning office
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "404":
+          description: Request not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+  # ------------------------------------------------------------------
+  # Platform-wide stats
+  # ------------------------------------------------------------------
+  /platform/summary:
+    get:
+      operationId: getPlatformSummary
+      tags: [Platform]
+      summary: Platform-wide trust stats for the homepage
+      responses:
+        "200":
+          description: Platform summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlatformSummary"
+
+  # ------------------------------------------------------------------
+  # Admin
+  # ------------------------------------------------------------------
+  /admin/offices:
+    get:
+      operationId: listAdminOffices
+      tags: [Admin]
+      summary: List all offices, including unverified and demo offices
+      parameters:
+        - name: category
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/OfficeCategory"
+        - name: isVerified
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: isDemo
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: providerType
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/ProviderType"
+      responses:
+        "200":
+          description: Offices
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AdminOfficeSummary"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "403":
+          description: Not an admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /admin/offices/{officeId}/verification:
+    patch:
+      operationId: setOfficeVerification
+      tags: [Admin]
+      summary: Verify or unverify an office
+      parameters:
+        - name: officeId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminVerificationInput"
+      responses:
+        "200":
+          description: Updated office
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminOfficeSummary"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "403":
+          description: Not an admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /admin/offices/{officeId}:
+    delete:
+      operationId: deleteAdminOffice
+      tags: [Admin]
+      summary: Delete an office (used for removing demo data)
+      parameters:
+        - name: officeId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Office deleted
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "403":
+          description: Not an admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /admin/offices/{officeId}/marketing-video:
+    delete:
+      operationId: removeAdminOfficeMarketingVideo
+      tags: [Admin]
+      summary: Remove an office's marketing video (moderation — no approval workflow)
+      parameters:
+        - name: officeId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Updated office
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminOfficeSummary"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "403":
+          description: Not an admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "404":
+          description: Office has no marketing video, or not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /admin/applications:
+    get:
+      operationId: listAdminApplications
+      tags: [Admin]
+      summary: List office applications, optionally filtered by status
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/OfficeStatus"
+      responses:
+        "200":
+          description: Applications
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AdminApplicationSummary"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "403":
+          description: Not an admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /admin/applications/{officeId}:
+    get:
+      operationId: getAdminApplication
+      tags: [Admin]
+      summary: Get full application detail, including verification documents
+      parameters:
+        - name: officeId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Application detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminApplicationDetail"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "403":
+          description: Not an admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "404":
+          description: Application not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /admin/applications/{officeId}/approve:
+    post:
+      operationId: approveAdminApplication
+      tags: [Admin]
+      summary: Approve an office's application
+      parameters:
+        - name: officeId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Updated application
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminApplicationDetail"
+        "400":
+          description: Invalid state transition
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "403":
+          description: Not an admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "404":
+          description: Application not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /admin/applications/{officeId}/reject:
+    post:
+      operationId: rejectAdminApplication
+      tags: [Admin]
+      summary: Reject an office's application, with a reason
+      parameters:
+        - name: officeId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApplicationReasonInput"
+      responses:
+        "200":
+          description: Updated application
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminApplicationDetail"
+        "400":
+          description: Invalid state transition
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "403":
+          description: Not an admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "404":
+          description: Application not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /admin/applications/{officeId}/request-changes:
+    post:
+      operationId: requestChangesAdminApplication
+      tags: [Admin]
+      summary: Send an office's application back with requested changes
+      parameters:
+        - name: officeId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApplicationReasonInput"
+      responses:
+        "200":
+          description: Updated application
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminApplicationDetail"
+        "400":
+          description: Invalid state transition
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "403":
+          description: Not an admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "404":
+          description: Application not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /admin/applications/{officeId}/documents/{documentId}:
+    post:
+      operationId: reviewAdminApplicationDocument
+      tags: [Admin]
+      summary: Approve or reject a specific verification document
+      parameters:
+        - name: officeId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReviewDocumentInput"
+      responses:
+        "200":
+          description: Updated document
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VerificationDocument"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "403":
+          description: Not an admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "404":
+          description: Document not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /admin/applications/{officeId}/activate:
+    post:
+      operationId: activateAdminApplication
+      tags: [Admin]
+      summary: Activate an approved office so it becomes publicly visible
+      parameters:
+        - name: officeId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Updated application
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminApplicationDetail"
+        "400":
+          description: Activation rules not met
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ActivationBlockedError"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "403":
+          description: Not an admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "404":
+          description: Application not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /admin/applications/{officeId}/activate-override:
+    post:
+      operationId: activateAdminApplicationOverride
+      tags: [Admin]
+      summary: Activate an approved office despite unresolved activation blockers
+      description: |
+        Admin-only exception path. The server recomputes and records every
+        unresolved activation blocker, then changes only the office activation
+        state. It never verifies contacts or approves documents.
+      parameters:
+        - name: officeId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminActivationOverrideInput"
+      responses:
+        "200":
+          description: Updated application
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminApplicationDetail"
+        "400":
+          description: Invalid confirmation or application status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "403":
+          description: Not an admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "404":
+          description: Application not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "409":
+          description: Application state changed during override confirmation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /admin/applications/{officeId}/reactivate:
+    post:
+      operationId: reactivateAdminApplication
+      tags: [Admin]
+      summary: Reactivate a suspended office, restoring public visibility
+      parameters:
+        - name: officeId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Updated application
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminApplicationDetail"
+        "400":
+          description: Reactivation rules not met
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ActivationBlockedError"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "403":
+          description: Not an admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "404":
+          description: Application not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /admin/applications/{officeId}/pending-changes/approve:
+    post:
+      operationId: approveAdminApplicationPendingChanges
+      tags: [Admin]
+      summary: Approve a live office's staged profile revision and merge it in
+      parameters:
+        - name: officeId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Updated application
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminApplicationDetail"
+        "400":
+          description: No pending revision to approve
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "403":
+          description: Not an admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "404":
+          description: Application not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /admin/applications/{officeId}/pending-changes/reject:
+    post:
+      operationId: rejectAdminApplicationPendingChanges
+      tags: [Admin]
+      summary: Reject a live office's staged profile revision, with a reason
+      parameters:
+        - name: officeId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApplicationReasonInput"
+      responses:
+        "200":
+          description: Updated application
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminApplicationDetail"
+        "400":
+          description: No pending revision to reject
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "403":
+          description: Not an admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "404":
+          description: Application not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /admin/applications/{officeId}/notes:
+    get:
+      operationId: listAdminApplicationNotes
+      tags: [Admin]
+      summary: List internal admin-only notes for an office
+      parameters:
+        - name: officeId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Notes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AdminNote"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "403":
+          description: Not an admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+    post:
+      operationId: addAdminApplicationNote
+      tags: [Admin]
+      summary: Add an internal admin-only note to an office
+      parameters:
+        - name: officeId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminNoteInput"
+      responses:
+        "201":
+          description: Note added
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminNote"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "403":
+          description: Not an admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /admin/applications/{officeId}/suspend:
+    post:
+      operationId: suspendAdminApplication
+      tags: [Admin]
+      summary: Suspend an active office, removing it from public visibility
+      parameters:
+        - name: officeId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Updated application
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminApplicationDetail"
+        "400":
+          description: Invalid state transition
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "403":
+          description: Not an admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "404":
+          description: Application not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /admin/customers:
+    get:
+      operationId: listAdminCustomers
+      tags: [Admin]
+      summary: List all customers
+      responses:
+        "200":
+          description: Customers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AdminCustomerSummary"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "403":
+          description: Not an admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /admin/customers/{userId}/status:
+    patch:
+      operationId: setAdminCustomerStatus
+      tags: [Admin]
+      summary: Suspend, reactivate, or deactivate a customer account (audit-logged)
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SetCustomerStatusBody"
+      responses:
+        "200":
+          description: Updated customer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminCustomerSummary"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "403":
+          description: Not an admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "404":
+          description: Customer not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+  /admin/contact-events:
+    get:
+      operationId: listAdminContactEvents
+      tags: [Admin]
+      summary: List recent contact-event metadata across all offices (no message content)
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Contact events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AdminContactEventSummary"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "403":
+          description: Not an admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+  /admin/video-call-requests:
+    get:
+      operationId: listAdminVideoCallRequests
+      tags: [Admin]
+      summary: List all video-call requests across all offices
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Video-call requests
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AdminVideoCallRequestSummary"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "403":
+          description: Not an admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+  /admin/audit-log:
+    get:
+      operationId: listAuditLog
+      tags: [Admin]
+      summary: List recent admin/system audit log entries
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Audit log entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AuditLogEntry"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "403":
+          description: Not an admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+  # ------------------------------------------------------------------
+  # Storage
+  # ------------------------------------------------------------------
+  /storage/uploads/request-url:
+    post:
+      tags: [Storage]
+      operationId: requestUploadUrl
+      summary: Request a presigned URL for file upload
+      description: |
+        Returns a presigned GCS URL for direct upload. The client sends JSON
+        metadata here, then uploads the file directly to the returned URL.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UploadUrlRequest"
+      responses:
+        "200":
+          description: Presigned upload URL generated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UploadUrlResponse"
+        "400":
+          description: Missing or invalid required fields.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "500":
+          description: Failed to generate upload URL.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /storage/public-objects/{filePath}:
+    get:
+      tags: [Storage]
+      operationId: getPublicObject
+      summary: Serve a public asset from PUBLIC_OBJECT_SEARCH_PATHS
+      description: |
+        Unconditionally public — no authentication or ACL checks.
+        Searches PUBLIC_OBJECT_SEARCH_PATHS for the given file path.
+      parameters:
+        - name: filePath
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Relative file path within the public search paths.
+      responses:
+        "200":
+          description: Object content streamed with correct Content-Type.
+          content:
+            "*/*":
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: File not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "500":
+          description: Failed to serve public object.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /storage/objects/{objectPath}:
+    get:
+      tags: [Storage]
+      operationId: getStorageObject
+      summary: Serve an object entity from PRIVATE_OBJECT_DIR
+      description: |
+        Serves object entities uploaded via presigned URLs. These can optionally
+        be protected with authentication or ACL checks based on the use case.
+      parameters:
+        - name: objectPath
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Object path within the private object dir (e.g. `uploads/some-uuid`).
+      responses:
+        "200":
+          description: Object content streamed with correct Content-Type.
+          content:
+            "*/*":
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Object not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "500":
+          description: Failed to serve object.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    ErrorEnvelope:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+        code:
+          type: string
+          description: |
+            Optional machine-readable error code for clients that want to
+            branch on the failure reason instead of parsing the message
+            (e.g. "file_not_readable" when an uploaded object could not be
+            confirmed as readable in storage).
+
+    UserRole:
+      type: string
+      enum: [office, customer, admin]
+
+    OfficeCategory:
+      type: string
+      enum:
+        - translation
+        - legal
+        - marketing
+        - development
+        - design
+        - real_estate
+        - company_formation
+        - business_consulting
+        - accounting
+        - social_media_management
+        - other
+
+    SelectableOfficeCategory:
+      description: Current category choices accepted for new registrations and profile edits. Legacy `other` records remain readable through OfficeCategory.
+      type: string
+      enum:
+        - translation
+        - legal
+        - marketing
+        - development
+        - design
+        - real_estate
+        - company_formation
+        - business_consulting
+        - accounting
+        - social_media_management
+
+    ProviderType:
+      type: string
+      enum:
+        - office
+        - freelancer
+
+    OfficeStatus:
+      type: string
+      enum:
+        - draft
+        - under_review
+        - changes_requested
+        - approved
+        - active
+        - rejected
+        - suspended
+
+    VerificationDocumentType:
+      type: string
+      enum:
+        - identity
+        - trade_license
+        - professional_license
+        - certificate
+
+    VerificationDocumentStatus:
+      type: string
+      enum:
+        - pending
+        - approved
+        - rejected
+
+    VerificationDocument:
+      type: object
+      required: [id, documentType, objectPath, status, createdAt]
+      properties:
+        id:
+          type: integer
+        documentType:
+          $ref: "#/components/schemas/VerificationDocumentType"
+        objectPath:
+          type: string
+        status:
+          $ref: "#/components/schemas/VerificationDocumentStatus"
+        reviewNote:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+
+    VerificationDocumentInput:
+      type: object
+      required: [documentType, objectPath]
+      properties:
+        documentType:
+          $ref: "#/components/schemas/VerificationDocumentType"
+        objectPath:
+          type: string
+          minLength: 1
+
+    ApplicationReasonInput:
+      type: object
+      required: [reason]
+      properties:
+        reason:
+          type: string
+          minLength: 1
+
+    ReviewDocumentInput:
+      type: object
+      required: [status]
+      properties:
+        status:
+          $ref: "#/components/schemas/VerificationDocumentStatus"
+        reviewNote:
+          type: string
+
+    UserAccountStatus:
+      type: string
+      enum: [active, suspended, deactivated]
+
+    AuthUser:
+      type: object
+      required: [id, role, name, email, status, createdAt]
+      properties:
+        id:
+          type: integer
+        role:
+          $ref: "#/components/schemas/UserRole"
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: ["string", "null"]
+        officeId:
+          type: ["integer", "null"]
+          description: Present when role is office — the office profile id.
+        status:
+          $ref: "#/components/schemas/UserAccountStatus"
+        statusReason:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+
+    CustomerRegisterInput:
+      type: object
+      required: [name, email, password, termsAccepted]
+      properties:
+        name:
+          type: string
+          minLength: 1
+        email:
+          type: string
+        phone:
+          type: string
+        password:
+          type: string
+          minLength: 6
+        termsAccepted:
+          type: boolean
+          description: Must be true — the customer ticked "I agree to the Terms & Privacy Policy".
+
+    OfficeRegisterInput:
+      type: object
+      required:
+        [officeName, category, email, whatsapp, password, city, termsAccepted, providerType]
+      properties:
+        officeName:
+          type: string
+          minLength: 1
+        category:
+          $ref: "#/components/schemas/SelectableOfficeCategory"
+        email:
+          type: string
+        whatsapp:
+          type: string
+          minLength: 1
+        password:
+          type: string
+          minLength: 6
+        city:
+          type: string
+          minLength: 1
+        termsAccepted:
+          type: boolean
+          description: Must be true — the office ticked "I agree to the Terms & Privacy Policy".
+        providerType:
+          $ref: "#/components/schemas/ProviderType"
+
+    LoginInput:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+          minLength: 1
+
+    CategorySummary:
+      type: object
+      required: [key, labelAr, labelEn, officeCount]
+      properties:
+        key:
+          $ref: "#/components/schemas/OfficeCategory"
+        labelAr:
+          type: string
+        labelEn:
+          type: string
+        officeCount:
+          type: integer
+
+    OfficeService:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        nameAr:
+          type: ["string", "null"]
+
+    OfficeServiceInput:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          minLength: 1
+        nameAr:
+          type: string
+
+    MediaType:
+      type: string
+      enum: [image, video]
+
+    OfficeSortType:
+      type: string
+      enum: [nearest, available, newest]
+
+    OfficeMedia:
+      type: object
+      required: [id, url, type, placement]
+      properties:
+        id:
+          type: integer
+        url:
+          type: string
+        type:
+          $ref: "#/components/schemas/MediaType"
+        placement:
+          type: string
+          enum: [decision_gallery, decision_card_cover, works]
+        variants:
+          type: ["object", "null"]
+          properties:
+            thumbnail:
+              type: string
+            medium:
+              type: string
+            display:
+              type: string
+        sortOrder:
+          type: ["integer", "null"]
+
+    OfficeMediaInput:
+      type: object
+      required: [objectPath, type]
+      properties:
+        objectPath:
+          type: string
+          minLength: 1
+        type:
+          $ref: "#/components/schemas/MediaType"
+        placement:
+          type: string
+          enum: [decision_gallery, decision_card_cover, works]
+          description: Media surface. Omitted legacy requests default to decision_gallery.
+
+    MarketingVideoInput:
+      type: object
+      required: [objectPath, mimeType, size]
+      properties:
+        objectPath:
+          type: string
+          minLength: 1
+        mimeType:
+          type: string
+          minLength: 1
+        size:
+          type: integer
+          minimum: 1
+        duration:
+          type: integer
+          minimum: 1
+          maximum: 75
+          description: Advisory duration in whole seconds, measured client-side before upload. The server independently verifies the uploaded MP4.
+
+    OfficeSummary:
+      type: object
+      required:
+        - id
+        - slug
+        - name
+        - category
+        - city
+        - isOnline
+        - isVerified
+        - completedTransactions
+        - clientsRecommendPercent
+        - isDemo
+        - providerType
+        - status
+      properties:
+        id:
+          type: integer
+        slug:
+          type: string
+          description: Stable, human-readable public identifier used in shareable URLs and QR codes.
+        name:
+          type: string
+        nameAr:
+          type: ["string", "null"]
+        category:
+          $ref: "#/components/schemas/OfficeCategory"
+        status:
+          $ref: "#/components/schemas/OfficeStatus"
+        city:
+          type: string
+        shortDescription:
+          type: ["string", "null"]
+        shortDescriptionAr:
+          type: ["string", "null"]
+        logoUrl:
+          type: ["string", "null"]
+        coverUrl:
+          type: ["string", "null"]
+        isOnline:
+          type: boolean
+        isVerified:
+          type: boolean
+        completedTransactions:
+          type: integer
+        clientsRecommendPercent:
+          type: integer
+        isDemo:
+          type: boolean
+        providerType:
+          $ref: "#/components/schemas/ProviderType"
+        serviceTags:
+          type: array
+          items:
+            $ref: "#/components/schemas/OfficeServiceTag"
+
+    OfficeServiceTag:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        nameAr:
+          type: ["string", "null"]
+
+    PublicOfficeProfile:
+      description: >
+        Public-facing office profile returned by GET /api/offices/:slug.
+        Omits precise provider coordinates (latitude, longitude) and
+        internal admin review fields (rejectionReason, changeRequestReason)
+        that must never be exposed publicly, as well as staged pending edits.
+        Use OfficeProfile for authenticated provider/admin views.
+      allOf:
+        - $ref: "#/components/schemas/OfficeSummary"
+        - type: object
+          required:
+            [
+              description,
+              phone,
+              whatsapp,
+              acceptsPhoneCalls,
+              spokenLanguages,
+              customLanguages,
+              email,
+              services,
+              gallery,
+              works,
+              videoCallEnabled,
+              worksEnabled,
+            ]
+          properties:
+            description:
+              type: ["string", "null"]
+            descriptionAr:
+              type: ["string", "null"]
+            phone:
+              type: ["string", "null"]
+            whatsapp:
+              type: ["string", "null"]
+            acceptsPhoneCalls:
+              type: boolean
+              description: Whether the WhatsApp number above also accepts regular phone calls.
+            spokenLanguages:
+              type: array
+              items:
+                type: string
+              description: Stable language codes from the default 6-language list.
+            customLanguages:
+              type: array
+              items:
+                type: string
+              description: Free-text "Other" language entries the office typed in themselves.
+            email:
+              type: string
+            website:
+              type: ["string", "null"]
+            address:
+              type: ["string", "null"]
+            country:
+              type: ["string", "null"]
+            specialization:
+              type: ["string", "null"]
+            googleMapsUrl:
+              type: ["string", "null"]
+            submittedAt:
+              type: ["string", "null"]
+              format: date-time
+            reviewedAt:
+              type: ["string", "null"]
+              format: date-time
+            activatedAt:
+              type: ["string", "null"]
+              format: date-time
+            heroMediaUrl:
+              type: ["string", "null"]
+            heroMediaType:
+              $ref: "#/components/schemas/MediaType"
+              nullable: true
+            marketingVideoUrl:
+              type: ["string", "null"]
+            marketingVideoMimeType:
+              type: ["string", "null"]
+            marketingVideoSize:
+              type: ["number", "null"]
+            marketingVideoDuration:
+              type: ["number", "null"]
+              description: Server-verified duration in whole seconds.
+            marketingVideoUpdatedAt:
+              type: ["string", "null"]
+              format: date-time
+            videoCallEnabled:
+              type: boolean
+            worksEnabled:
+              type: boolean
+              description: Whether the office chose to show its public Works tab.
+            certifications:
+              type: array
+              items:
+                type: string
+            certificationsAr:
+              type: array
+              items:
+                type: string
+            services:
+              type: array
+              items:
+                $ref: "#/components/schemas/OfficeService"
+            gallery:
+              type: array
+              items:
+                $ref: "#/components/schemas/OfficeMedia"
+            works:
+              description: Approved Works portfolio images only.
+              type: array
+              items:
+                $ref: "#/components/schemas/OfficeMedia"
+            primaryMediaId:
+              type: ["number", "null"]
+              description: id of the gallery item to display first, if any.
+
+    OfficeProfile:
+      allOf:
+        - $ref: "#/components/schemas/OfficeSummary"
+        - type: object
+          required:
+            [
+              description,
+              phone,
+              whatsapp,
+              acceptsPhoneCalls,
+              spokenLanguages,
+              customLanguages,
+              email,
+              services,
+              gallery,
+              works,
+              videoCallEnabled,
+              worksEnabled,
+            ]
+          properties:
+            description:
+              type: ["string", "null"]
+            descriptionAr:
+              type: ["string", "null"]
+            phone:
+              type: ["string", "null"]
+            whatsapp:
+              type: ["string", "null"]
+            acceptsPhoneCalls:
+              type: boolean
+              description: Whether the WhatsApp number above also accepts regular phone calls.
+            spokenLanguages:
+              type: array
+              items:
+                type: string
+              description: Stable language codes from the default 6-language list.
+            customLanguages:
+              type: array
+              items:
+                type: string
+              description: Free-text "Other" language entries the office typed in themselves.
+            email:
+              type: string
+            website:
+              type: ["string", "null"]
+            address:
+              type: ["string", "null"]
+            country:
+              type: ["string", "null"]
+            specialization:
+              type: ["string", "null"]
+            googleMapsUrl:
+              type: ["string", "null"]
+            rejectionReason:
+              type: ["string", "null"]
+            changeRequestReason:
+              type: ["string", "null"]
+            submittedAt:
+              type: ["string", "null"]
+              format: date-time
+            reviewedAt:
+              type: ["string", "null"]
+              format: date-time
+            activatedAt:
+              type: ["string", "null"]
+              format: date-time
+            heroMediaUrl:
+              type: ["string", "null"]
+            heroMediaType:
+              anyOf:
+                - $ref: "#/components/schemas/MediaType"
+                - type: "null"
+            marketingVideoUrl:
+              type: ["string", "null"]
+            marketingVideoMimeType:
+              type: ["string", "null"]
+            marketingVideoSize:
+              type: ["integer", "null"]
+            marketingVideoDuration:
+              type: ["integer", "null"]
+              description: Server-verified duration in whole seconds.
+            marketingVideoUpdatedAt:
+              type: ["string", "null"]
+              format: date-time
+            videoCallEnabled:
+              type: boolean
+            worksEnabled:
+              type: boolean
+              description: Whether the office chose to show its public Works tab.
+            certifications:
+              type: array
+              items:
+                type: string
+            certificationsAr:
+              type: array
+              items:
+                type: string
+            services:
+              type: array
+              items:
+                $ref: "#/components/schemas/OfficeService"
+            gallery:
+              type: array
+              items:
+                $ref: "#/components/schemas/OfficeMedia"
+            works:
+              description: Approved Works portfolio images only.
+              type: array
+              items:
+                $ref: "#/components/schemas/OfficeMedia"
+            pendingWorksItems:
+              description: Works images awaiting review; authenticated owner/admin views only.
+              type: array
+              items:
+                $ref: "#/components/schemas/OfficeMedia"
+            primaryMediaId:
+              type: ["integer", "null"]
+              description: id of the gallery item to display first, if any.
+            pendingChanges:
+              type: ["object", "null"]
+              additionalProperties: true
+              description: |
+                Staged edits awaiting admin approval, only present while the
+                office is approved/active/suspended (edit-lock revision
+                flow). Never merged into the fields above until approved.
+            pendingChangesSubmittedAt:
+              type: ["string", "null"]
+              format: date-time
+            isSubscriptionHidden:
+              type: boolean
+              description: |
+                True when the office is hidden due to non-payment or because the
+                market is at capacity and the office is on the waitlist.
+                Only present in authenticated provider/admin views.
+            slotStatus:
+              type: ["string", "null"]
+              description: |
+                Current market slot status from market_slot_allocations.
+                Values: allocated | reserved | waiting | released | not_required.
+                Null if no slot record exists yet.
+            reservationExpiresAt:
+              type: ["string", "null"]
+              format: date-time
+              description: |
+                ISO-8601 timestamp when the 3-hour exclusive slot reservation expires.
+                Present only when slotStatus = 'reserved'. Null otherwise.
+            latitude:
+              type: ["number", "null"]
+              description: Precise latitude for the authenticated provider/admin view.
+            longitude:
+              type: ["number", "null"]
+              description: Precise longitude for the authenticated provider/admin view.
+
+    OfficeUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+        nameAr:
+          type: ["string", "null"]
+          description: Optional Arabic office name. Blank values clear the Arabic override.
+        category:
+          $ref: "#/components/schemas/SelectableOfficeCategory"
+        city:
+          type: string
+          minLength: 1
+        shortDescription:
+          type: string
+        description:
+          type: string
+        whatsapp:
+          type: string
+          minLength: 1
+        acceptsPhoneCalls:
+          type: boolean
+        spokenLanguages:
+          type: array
+          items:
+            type: string
+        customLanguages:
+          type: array
+          items:
+            type: string
+        email:
+          type: string
+        website:
+          type: string
+        address:
+          type: string
+        country:
+          type: string
+        specialization:
+          type: string
+        googleMapsUrl:
+          type: string
+        logoUrl:
+          type: string
+        coverUrl:
+          type: string
+        heroMediaUrl:
+          type: string
+        heroMediaType:
+          $ref: "#/components/schemas/MediaType"
+        certifications:
+          type: array
+          items:
+            type: string
+        isOnline:
+          type: boolean
+        latitude:
+          type: ["number", "null"]
+        longitude:
+          type: ["number", "null"]
+        freelancerImageStyle:
+          type: ["string", "null"]
+          enum: [personal_photo, brand_image, null]
+
+    WorksVisibilityUpdate:
+      type: object
+      required: [enabled]
+      properties:
+        enabled:
+          type: boolean
+
+    Favourite:
+      type: object
+      required: [id, officeId, createdAt]
+      properties:
+        id:
+          type: integer
+        officeId:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+
+    FavouriteInput:
+      type: object
+      required: [officeId]
+      properties:
+        officeId:
+          type: integer
+
+    PlatformSummary:
+      type: object
+      required:
+        - totalOffices
+        - verifiedOffices
+        - totalCompletedTransactions
+        - totalCategories
+      properties:
+        totalOffices:
+          type: integer
+        verifiedOffices:
+          type: integer
+        totalCompletedTransactions:
+          type: integer
+        totalCategories:
+          type: integer
+
+    AdminOfficeSummary:
+      allOf:
+        - $ref: "#/components/schemas/OfficeSummary"
+        - type: object
+          required: [email, createdAt]
+          properties:
+            email:
+              type: string
+            phone:
+              type: ["string", "null"]
+            whatsapp:
+              type: ["string", "null"]
+            createdAt:
+              type: string
+              format: date-time
+            marketingVideoUrl:
+              type: ["string", "null"]
+
+    AdminVerificationInput:
+      type: object
+      required: [isVerified]
+      properties:
+        isVerified:
+          type: boolean
+
+    AdminApplicationSummary:
+      allOf:
+        - $ref: "#/components/schemas/OfficeSummary"
+        - type: object
+          required: [email, phone, createdAt]
+          properties:
+            email:
+              type: string
+            phone:
+              type: ["string", "null"]
+            createdAt:
+              type: string
+              format: date-time
+            submittedAt:
+              type: ["string", "null"]
+              format: date-time
+            reviewedAt:
+              type: ["string", "null"]
+              format: date-time
+            pendingWorksCount:
+              type: integer
+              minimum: 0
+              description: Number of Works images awaiting admin review.
+
+    AdminApplicationDetail:
+      allOf:
+        - $ref: "#/components/schemas/OfficeProfile"
+        - type: object
+          required: [createdAt, documents, adminNotes]
+          properties:
+            createdAt:
+              type: string
+              format: date-time
+            documents:
+              type: array
+              items:
+                $ref: "#/components/schemas/VerificationDocument"
+            adminNotes:
+              type: array
+              items:
+                $ref: "#/components/schemas/AdminNote"
+            activationBlockers:
+              type: array
+              items:
+                type: string
+              description: |
+                Machine-readable reasons this office cannot currently be
+                activated (or reactivated). Empty when there are none. Lets
+                the admin UI disable the activate/reactivate action and
+                explain why before the admin even attempts it.
+            nameChangeHistory:
+              type: array
+              items:
+                $ref: "#/components/schemas/OfficeNameChangeHistory"
+
+    OfficeNameChangeHistory:
+      type: object
+      required: [previousName, newName, requestedAt, requesterId, approvingAdminId, approvedAt]
+      properties:
+        previousName:
+          type: string
+        newName:
+          type: string
+        previousNameAr:
+          type: ["string", "null"]
+        newNameAr:
+          type: ["string", "null"]
+        requestedAt:
+          type: string
+          format: date-time
+        requesterId:
+          type: ["integer", "null"]
+        approvingAdminId:
+          type: ["integer", "null"]
+        approvedAt:
+          type: string
+          format: date-time
+
+    AdminNote:
+      type: object
+      required: [id, note, createdBy, createdByName, createdAt]
+      properties:
+        id:
+          type: integer
+        note:
+          type: string
+        createdBy:
+          type: integer
+        createdByName:
+          type: string
+          nullable: true
+          description: >-
+            Display name of the admin who wrote this note. Null when the
+            authoring account no longer exists.
+        createdAt:
+          type: string
+          format: date-time
+
+    AdminNoteInput:
+      type: object
+      required: [note]
+      properties:
+        note:
+          type: string
+          minLength: 1
+
+    SubmissionValidationError:
+      type: object
+      required: [error, missingFields]
+      properties:
+        error:
+          type: string
+        missingFields:
+          type: array
+          items:
+            type: string
+          description: |
+            Machine-readable field/document keys still missing, so the
+            client can highlight each one individually.
+
+    ActivationBlockedError:
+      type: object
+      required: [error, blockers]
+      properties:
+        error:
+          type: string
+        blockers:
+          type: array
+          items:
+            type: string
+          description: |
+            Machine-readable reasons activation (or reactivation) was
+            rejected, so the client can render each one individually
+            instead of a single generic message.
+
+    AdminActivationOverrideInput:
+      type: object
+      required: [confirm, expectedBlockers]
+      properties:
+        confirm:
+          type: boolean
+          enum: [true]
+          description: Explicit confirmation that the admin reviewed the current blocker list.
+        expectedBlockers:
+          type: array
+          minItems: 1
+          items:
+            type: string
+          description: Exact blocker codes shown to the admin in the confirmation dialog.
+
+    AdminCustomerSummary:
+      type: object
+      required: [id, name, email, status, createdAt, favouritesCount]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: ["string", "null"]
+        status:
+          $ref: "#/components/schemas/UserAccountStatus"
+        statusReason:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+        favouritesCount:
+          type: integer
+
+    SetCustomerStatusBody:
+      type: object
+      required: [status]
+      properties:
+        status:
+          $ref: "#/components/schemas/UserAccountStatus"
+        reason:
+          type: string
+
+    ContactEventActionType:
+      type: string
+      enum: [whatsapp_click, video_call_request, location_click, share_click]
+
+    ContactEvent:
+      type: object
+      required: [id, officeId, actionType, createdAt]
+      properties:
+        id:
+          type: integer
+        officeId:
+          type: integer
+        actionType:
+          $ref: "#/components/schemas/ContactEventActionType"
+        sourcePage:
+          type: ["string", "null"]
+        language:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+
+    ContactEventInput:
+      type: object
+      required: [officeId, actionType]
+      properties:
+        officeId:
+          type: integer
+        actionType:
+          $ref: "#/components/schemas/ContactEventActionType"
+        sourcePage:
+          type: string
+        language:
+          type: string
+        searchSessionId:
+          type: string
+
+    OfficeContactEventSummary:
+      allOf:
+        - $ref: "#/components/schemas/ContactEvent"
+        - type: object
+          required: [customerName]
+          properties:
+            customerName:
+              type: string
+
+    MyContactEventSummary:
+      allOf:
+        - $ref: "#/components/schemas/ContactEvent"
+        - type: object
+          required: [officeName]
+          properties:
+            officeName:
+              type: string
+
+    AdminContactEventSummary:
+      allOf:
+        - $ref: "#/components/schemas/ContactEvent"
+        - type: object
+          required: [customerName, officeName]
+          properties:
+            customerName:
+              type: string
+            officeName:
+              type: string
+
+    VideoCallRequestStatus:
+      type: string
+      enum: [new, viewed, accepted, declined, completed]
+
+    VideoCallRequest:
+      type: object
+      required:
+        - id
+        - officeId
+        - preferredDate
+        - preferredTime
+        - timezone
+        - contactNumber
+        - status
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: integer
+        officeId:
+          type: integer
+        preferredDate:
+          type: string
+        preferredTime:
+          type: string
+        timezone:
+          type: string
+        contactNumber:
+          type: string
+        note:
+          type: ["string", "null"]
+        status:
+          $ref: "#/components/schemas/VideoCallRequestStatus"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    VideoCallRequestInput:
+      type: object
+      required: [officeId, preferredDate, preferredTime, timezone, contactNumber]
+      properties:
+        officeId:
+          type: integer
+        preferredDate:
+          type: string
+          minLength: 1
+        preferredTime:
+          type: string
+          minLength: 1
+        timezone:
+          type: string
+          minLength: 1
+        contactNumber:
+          type: string
+          minLength: 5
+        note:
+          type: string
+
+    OfficeVideoCallRequestSummary:
+      allOf:
+        - $ref: "#/components/schemas/VideoCallRequest"
+        - type: object
+          required: [customerName]
+          properties:
+            customerName:
+              type: string
+
+    AdminVideoCallRequestSummary:
+      allOf:
+        - $ref: "#/components/schemas/VideoCallRequest"
+        - type: object
+          required: [customerName, officeName]
+          properties:
+            customerName:
+              type: string
+            officeName:
+              type: string
+
+    UpdateVideoCallRequestStatusBody:
+      type: object
+      required: [status]
+      properties:
+        status:
+          $ref: "#/components/schemas/VideoCallRequestStatus"
+
+    AuditLogEntry:
+      type: object
+      required: [id, action, createdAt]
+      properties:
+        id:
+          type: integer
+        actorId:
+          type: ["integer", "null"]
+        actorRole:
+          anyOf:
+            - $ref: "#/components/schemas/UserRole"
+            - type: "null"
+        action:
+          type: string
+        targetType:
+          type: ["string", "null"]
+        targetId:
+          type: ["integer", "null"]
+        metadata:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+
+    UploadUrlRequest:
+      type: object
+      required: [name, size, contentType]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          description: Original file name.
+        size:
+          type: integer
+          minimum: 1
+          description: File size in bytes.
+        contentType:
+          type: string
+          minLength: 1
+          description: MIME type of the file (e.g. `image/jpeg`).
+        category:
+          type: string
+          enum: [logo, cover, gallery_image, gallery_video, works_image, marketing_video, document, quick_card_cover, decision_card_cover]
+          description: |
+            Which asset class this upload is for. Used server-side to apply
+            the matching type/size allow-list; omitted requests fall back to
+            the most permissive image rules for backward compatibility.
+    UploadUrlResponse:
+      type: object
+      required: [uploadURL, objectPath]
+      properties:
+        uploadURL:
+          type: string
+          description: Presigned GCS URL for PUT upload.
+        objectPath:
+          type: string
+          description: Normalized object path (e.g. `/objects/uploads/uuid`). Store this in your database.
+        metadata:
+          $ref: "#/components/schemas/UploadUrlRequest"
+

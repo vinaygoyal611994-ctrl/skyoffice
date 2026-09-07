@@ -1,0 +1,88 @@
+Implement a professional branding and footer update across the SkayOffice website.
+
+Use the uploaded image as the official SkayOffice logo. Do not redesign, recreate, modify, recolor, or replace the logo. Use the exact uploaded asset and integrate it cleanly with the current visual design.
+
+Requirements:
+
+1. Official logo
+- Add the official SkayOffice logo to the main website header.
+- Replace the current temporary logo/icon only where appropriate.
+- Keep the logo sharp, correctly proportioned, and never stretched or cropped.
+- Create a responsive version for mobile and desktop.
+- On smaller screens, use the logo symbol or a compact version only if necessary, while preserving the original identity.
+- Ensure the logo works correctly in both Arabic RTL and English LTR interfaces.
+- Add appropriate accessible alt text: “SkayOffice”.
+
+2. Professional footer
+Add a clean, professional footer at the bottom of the website containing:
+
+SkayOffice is a project of Future Road Labs.
+
+© 2026 SkayOffice. All rights reserved.
+
+Email:
+info@skayoffice.com
+
+Phone / WhatsApp:
++966 55 722 7818
+
+3. Arabic and English localization
+
+Arabic version:
+
+SkayOffice أحد مشاريع شركة Future Road Labs
+
+© 2026 SkayOffice. جميع الحقوق محفوظة.
+
+البريد الإلكتروني:
+info@skayoffice.com
+
+الهاتف / واتساب:
++966 55 722 7818
+
+English version:
+
+SkayOffice is a project of Future Road Labs.
+
+© 2026 SkayOffice. All rights reserved.
+
+Email:
+info@skayoffice.com
+
+Phone / WhatsApp:
++966 55 722 7818
+
+4. Contact behavior
+- Make the email clickable using a mailto link.
+- Make the phone number clickable using a tel link.
+- The WhatsApp contact should open the correct WhatsApp conversation using the international number.
+- Display the number professionally as:
+  +966 55 722 7818
+- Use the technical phone value:
+  +966557227818
+
+5. Footer design
+- Match the existing SkayOffice colors, typography, spacing, rounded elements, and overall premium visual style.
+- Keep the footer elegant and uncluttered.
+- Include the logo in the footer in a smaller professional size.
+- Organize company attribution, copyright, email, and phone clearly.
+- Ensure proper RTL layout in Arabic and LTR layout in English.
+- Ensure excellent mobile responsiveness.
+- Do not allow the footer to overlap page content, fixed navigation, modals, or the AI assistant.
+
+6. Website coverage
+- Apply the branding consistently across the homepage and office pages.
+- Verify the logo and footer on both Arabic and English versions.
+- Preserve all current functionality, office cards, AI assistant, language switching, and existing design.
+- Do not modify unrelated sections.
+
+7. Quality checks
+After implementation:
+- Test mobile and desktop layouts.
+- Test Arabic RTL and English LTR.
+- Verify the logo remains clear at all screen sizes.
+- Verify email, phone, and WhatsApp links.
+- Check that no text is cut off or misaligned.
+- Run the application and confirm there are no layout or console errors.
+
+Do not stop at planning. Implement the changes, test them, and report exactly what was changed.

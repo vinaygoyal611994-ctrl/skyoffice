@@ -1,0 +1,232 @@
+Implement the final SkayOffice media model and verify it end-to-end.
+
+Scope:
+- Quick Display Card media
+- Decision Card media
+- Optional marketing video
+- Media approval workflow
+- Media replacement, deletion, ordering, and audit logs
+- Production verification on Office 54 only
+
+Production office:
+- Office ID: 54
+- Owner user ID: 17
+- Email: sdsh2017@gmail.com
+- This is a real office, not demo or QA data.
+
+Final product requirements
+
+1. Quick Display Card
+- Exactly ONE independent image.
+- This image belongs only to the Quick Display Card.
+- It must not be reused as the Decision Card image fallback.
+- The office owner can upload, replace, or delete it.
+- Replacing or deleting it must not affect any Decision Card media.
+
+2. Decision Card images
+- Exactly FOUR image slots total.
+- Do not expose separate “Decision Card Cover” and “Decision Gallery” concepts to the user.
+- The four images form one unified ordered carousel.
+- Position 1 is the first image displayed when the Decision Card opens.
+- The office owner must be able to:
+  - upload into an empty slot,
+  - replace one specific image,
+  - delete one specific image,
+  - reorder all four images.
+- Replacing, deleting, approving, or rejecting one image must never alter the other three images.
+- Maximum: 4 images.
+- Minimum: 1 approved image for public display.
+- If all four slots are full, show a bilingual message explaining that the maximum has been reached and that an existing image must be replaced or deleted.
+
+3. Approval behavior for active offices
+- Each new or replacement image must go through admin approval independently.
+- The currently approved image must remain publicly visible until its replacement is approved.
+- Approval of one slot must affect only that slot.
+- Rejection must preserve the currently approved version.
+- No sibling image may be silently rejected, hidden, or deleted.
+- Pending, approved, rejected, and replacement states must be clear in the office dashboard and admin dashboard.
+
+4. Decision Card carousel
+- Auto-rotate approved images every exactly 8 seconds.
+- Activate only when there are at least 2 approved images.
+- Support:
+  - mobile swipe,
+  - dot indicators,
+  - RTL and LTR,
+  - infinite loop,
+  - pause on touch,
+  - pause on hover,
+  - pause while video is playing,
+  - safe resume after user interaction,
+  - reduced-motion preference.
+- Manual navigation must not break the timer.
+- No stretched or distorted images.
+
+5. Decision Card image size
+- Change the carousel and loading skeleton ratio from:
+  - aspect-[8/3]
+  to:
+  - aspect-[7/3]
+- Confirm the change on:
+  - 320px mobile
+  - 390px mobile
+  - desktop/max-width card
+- Ensure the WhatsApp and Request Service buttons are not pushed too far down.
+
+6. Optional marketing video
+- Exactly ONE optional video for the Decision Card.
+- Maximum duration: 60 seconds.
+- It must never autoplay.
+- Display a clear play button.
+- The visitor chooses whether to play it.
+- Support fullscreen.
+- Pause image auto-rotation while the video is playing.
+- Resume safely after the video is paused or closed.
+- The office owner can upload, replace, or delete the video.
+- Video changes for active offices must go through approval without removing the currently approved video before the replacement is approved.
+- Validate duration client-side and server-side.
+- Reject files longer than 60 seconds with clear Arabic and English messages.
+
+7. Request Service button
+- Preserve the current verified production behavior:
+  - Anonymous: visible, click redirects to /login/customer
+  - Customer: visible, opens form and submits successfully
+  - Office owner: visible, shows bilingual explanatory toast
+  - Admin: hidden
+- Do not regress this flow while changing the Decision Card.
+
+8. Audit logging
+Add complete audit logs for:
+- media upload,
+- media replacement,
+- media deletion,
+- media approval,
+- media rejection,
+- media reordering,
+- video upload,
+- video replacement,
+- video deletion,
+- video approval,
+- video rejection.
+
+Each audit entry should include, where applicable:
+- actor user ID,
+- actor role,
+- office ID,
+- media ID,
+- media type,
+- slot number/order,
+- old status/value,
+- new status/value,
+- timestamp.
+
+9. Data migration and compatibility
+- Inspect the current production media records for Office 54.
+- Safely map the existing Decision Card media into the new four-slot model.
+- Preserve all existing approved and pending media where possible.
+- Do not delete production media during migration.
+- Keep Quick Display Card media fully independent.
+- Avoid duplicate rows and orphaned storage objects.
+
+10. Dashboard UX
+Office dashboard:
+- Show four clear Decision Card image slots.
+- Show one separate Quick Display Card image section.
+- Show one separate optional video section.
+- Each slot must clearly show:
+  - empty,
+  - approved,
+  - pending review,
+  - rejected,
+  - replacement pending.
+- Include bilingual helper text explaining:
+  - Quick Card image = one independent image
+  - Decision Card = four rotating images
+  - Video = optional, max 60 seconds
+
+Admin dashboard:
+- Review each image/video independently.
+- Show slot/order and current approved version.
+- Approve or reject without affecting other media.
+
+11. Production verification on Office 54
+After implementation and publish, verify directly in production:
+
+Quick Display Card:
+- upload one image,
+- replace it,
+- confirm Decision Card media is unchanged.
+
+Decision Card:
+- upload four images,
+- approve all four,
+- confirm all remain,
+- replace one image,
+- reject one replacement,
+- approve another replacement,
+- delete one image,
+- upload a new image into that slot,
+- reorder all four images.
+
+Carousel:
+- confirm 8-second transition,
+- confirm swipe,
+- confirm indicators,
+- confirm looping,
+- confirm RTL Arabic and LTR English,
+- confirm mobile and desktop behavior.
+
+Video:
+- upload one video under 60 seconds,
+- verify manual play only,
+- verify fullscreen,
+- verify no autoplay,
+- verify carousel pauses during playback,
+- verify replacement and deletion,
+- verify over-60-second rejection.
+
+Request Service:
+- re-run all four role checks and confirm no regression.
+
+Data integrity:
+- no duplicate media,
+- no orphan rows,
+- no orphan storage files,
+- no unrelated users or offices modified,
+- no HTTP 500,
+- no console errors.
+
+12. Tests
+Add or update tests for:
+- exactly one Quick Display Card image,
+- exactly four Decision Card image slots,
+- independent slot replacement,
+- independent deletion,
+- image ordering,
+- approval without sibling loss,
+- rejection preserving approved media,
+- 8-second carousel behavior,
+- video duration limit,
+- video manual playback,
+- audit logging,
+- Request Service role behavior,
+- Arabic and English UI states.
+
+13. Delivery requirements
+Before implementation:
+- report the current architecture and migration plan.
+
+After implementation:
+- list every changed file,
+- list every schema or migration change,
+- report test results,
+- report TypeScript and production build results,
+- report production verification evidence,
+- state whether a Publish is required,
+- give a final verdict:
+  - READY
+  - READY WITH LIMITATIONS
+  - NOT READY
+
+Do not modify unrelated offices, users, or production data.
+Do not claim success without direct production verification.

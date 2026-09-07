@@ -1,0 +1,113 @@
+Before making any changes, create a checkpoint.
+
+I need you to prepare SkayOffice production for a controlled real-office pilot. Follow the steps below in order. Do not delete, restore, overwrite, seed, migrate, or modify any production office data unless a step explicitly requires it and you first explain the exact risk.
+
+1. DEV / PRODUCTION PARITY
+- Compare the latest development code with the currently deployed production build.
+- Confirm whether production is missing any fixes.
+- Ensure the latest verified development fixes are included, especially:
+  a) the admin applications-list phone serialization / nullable phone fix;
+  b) customer session persistence after page refresh;
+  c) the latest homepage, share-link, empty-state, registration, and admin-flow fixes.
+- Republish the latest safe build to production.
+- After publishing, verify the deployed production version directly. Do not assume the publish succeeded.
+
+2. PRODUCTION DATA SAFETY
+- Investigate why the production office-domain tables were previously emptied.
+- Do not restore historical data during this task.
+- Identify the exact deployment, schema-push, migration, or database operation capable of dropping and recreating office-related tables.
+- Prevent future deployments from dropping, recreating, truncating, or wiping production tables.
+- Replace unsafe schema-push behavior with safe, explicit, non-destructive migrations.
+- Add safeguards that fail the deployment if a migration attempts destructive production changes without explicit approval.
+- Confirm that development and production use separate databases and that no development seed process can run against production.
+
+3. BACKUPS AND RECOVERY
+- Review the current production database backup and recovery setup.
+- Confirm whether automatic backups or restore points exist, their frequency, retention period, and last successful backup.
+- If the project configuration allows it safely, configure automatic production backups.
+- Do not perform a live restore.
+- Produce a clear recovery procedure explaining how production data would be restored if office data were deleted again.
+- Confirm that office media and uploaded documents are also protected or explain any remaining gap.
+
+4. SESSION PERSISTENCE
+- Test customer login on the production URL.
+- Refresh the page and confirm the customer remains authenticated.
+- Test in a fresh incognito session and, where possible, on a mobile-sized browser.
+- Review cookie/session settings, including Secure, HttpOnly, SameSite, domain, path, proxy, and Replit Autoscale behavior.
+- Fix any session persistence issue.
+- Also verify office-owner and admin sessions after refresh.
+
+5. PHONE SERIALIZATION REGRESSION
+- Create or use a safe disposable test application in development with phone = null or an omitted optional phone value.
+- Confirm the admin applications list and application detail do not return 500.
+- Confirm the same fixed code is deployed to production.
+- Do not create unnecessary production data solely for this check.
+
+6. LOGOUT UX
+- Verify logout for customer, office owner, and admin.
+- The server session must be invalidated.
+- The interface must visibly confirm logout and redirect the user to the correct public or login page.
+- Fix the current behavior if the session clears but the UI remains on the same screen.
+
+7. OFFICE ACCOUNT WITHOUT PROFILE
+- Handle orphaned office accounts safely.
+- If an office-role user logs in but no office profile exists, do not show a blank panel or raw 401/403 errors.
+- Show a clear message and a safe next action, such as contacting support or completing registration.
+- Do not expose technical error details.
+
+8. SMALL UX FIXES
+- After an active office saves profile edits, clearly state that the changes were saved and are pending admin approval, not immediately live.
+- Fix the Arabic favourites label typo.
+- In the QR modal, display the canonical public office URL as readable and copyable text in addition to the QR graphic.
+- Show which admin added each admin note, if the identity is already safely available.
+- Do not redesign unrelated areas.
+
+9. COMPLETE PRODUCTION FLOW TEST
+After publishing all safe fixes, test this full lifecycle on production using one disposable test office only:
+
+Register office
+→ office account/dashboard opens
+→ application appears in admin
+→ admin reviews it
+→ verify warning behavior for unreviewed documents using a safe test document
+→ admin approves and activates
+→ office appears publicly
+→ Decision Card opens
+→ multiple images load and switch correctly
+→ one video of up to 1 minute plays correctly
+→ WhatsApp uses the correct office-specific number
+→ phone call works
+→ video-call request submits and appears correctly
+→ QR code opens the correct canonical office page
+→ office sharing copies the clean production URL
+→ Arabic/English and RTL/LTR work
+→ office edits its active profile
+→ changes remain pending until admin approval
+→ admin approves the changes
+→ updated data becomes public
+→ logout works for all roles
+→ login sessions persist correctly after refresh
+
+10. SECURITY AND ISOLATION CHECK
+- Confirm customers cannot access /admin or /office/dashboard.
+- Confirm an office owner cannot read or modify another office’s private profile, media, services, documents, contact events, video-call requests, assistant conversations, or knowledge data.
+- Confirm public office endpoints expose only intentionally public data.
+- Test AI assistant isolation using two different offices with clearly different test information.
+- Confirm an assistant for office A never answers using office B’s private or public profile context.
+- Test an Arabic assistant response.
+
+11. FINAL REPORT
+Do not mark the project ready merely because development tests pass.
+
+Provide a final report with:
+- exact files changed;
+- exact production deployment verified;
+- production and development parity status;
+- backup status and recovery procedure;
+- every test marked PASS, FAIL, BLOCKED, or NOT TESTED;
+- severity for every remaining issue;
+- confirmation that no production data was deleted, restored, seeded, or overwritten;
+- confirmation that production is safe for a controlled pilot of 3–5 real offices, or a clear statement that it is not ready;
+- a short list of any remaining blockers before real offices are onboarded.
+
+Stop and ask me before any destructive database operation, historical-data restoration, schema reset, or action that could modify existing production office records.

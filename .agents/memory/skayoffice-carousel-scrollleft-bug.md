@@ -1,0 +1,12 @@
+---
+name: Manual scrollLeft-based carousels can silently fail in this app
+description: A hand-rolled horizontal scroller (flex + overflow-x-auto + scrollLeft/scrollTo) in office-profile.tsx never actually scrolled — not via scrollTo(), not via direct scrollLeft assignment, not via real mouse drag or wheel — despite correct CSS (overflow-x:auto, scrollWidth > clientWidth, no blocking !important rules, no scroll-lock). Root cause was never conclusively isolated after extensive diagnostics (dev tools style checks, MutationObserver, disabling scroll-snap, forcing overflow, removing aspect-ratio all failed to fix it).
+---
+
+**Rule:** Do not hand-roll a native `scrollLeft`/`scrollTo`-based horizontal carousel/scroller in this codebase. Use `embla-carousel-react` (already a dependency, wraps `src/components/ui/carousel.tsx`) directly via `useEmblaCarousel` for any swipeable/draggable slide UI, even outside the shadcn `<Carousel>` wrapper if custom markup/controls are needed.
+
+**Why:** In `office-profile.tsx`'s `MarketingScreen`, a custom scroller (`ref.scrollTo(...)`, `el.scrollLeft = x`) silently no-op'd — confirmed via a testing subagent across multiple isolated diagnostics (programmatic assignment, real Playwright mouse-drag, real wheel event all failed to move `scrollLeft`, with zero DOM mutations observed). Switching the same markup/behavior to `useEmblaCarousel` (viewport ref + flex track + `basis-full` slides, `scrollPrev/scrollNext/scrollTo(idx, jump)` API, `direction: 'rtl'|'ltr'` for locale, `on('select'|'pointerDown'|'settle', ...)` for state sync) fixed it immediately with no other changes, and also gained real drag/swipe support that the manual version lacked.
+
+**How to apply:** Any future carousel/gallery/slider work in this app (or likely sibling artifacts using the same stack) should start from `useEmblaCarousel` rather than a native overflow-scroll container. If a native scrollLeft approach seems to silently do nothing (dots/state update but visible content doesn't move, and `scrollWidth > clientWidth` yet no method moves `scrollLeft`), don't keep debugging CSS — swap to Embla directly.
+
+**Also learned:** when layering custom autoplay on top of Embla, reset the autoplay pause/resume timer (`pauseAutoplay()`/`scheduleResume()`) inside manual `goPrev`/`goNext`/`goTo` handlers too, not just on hover/touch — otherwise a manual click can race with an autoplay tick moments later and the slide appears to "jump twice."
