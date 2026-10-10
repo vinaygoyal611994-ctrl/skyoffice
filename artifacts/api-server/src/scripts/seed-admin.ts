@@ -23,14 +23,14 @@ async function seedAdmin() {
 
   if (existing) {
     logger.info("Admin user already exists — updating password");
-    const passwordHash = await hashPassword(ADMIN_PASSWORD);
+    const passwordHash = await hashPassword(ADMIN_PASSWORD!);
     await db
       .update(usersTable)
       .set({ passwordHash })
       .where(eq(usersTable.email, ADMIN_EMAIL));
     logger.info("Admin password updated");
   } else {
-    const passwordHash = await hashPassword(ADMIN_PASSWORD);
+    const passwordHash = await hashPassword(ADMIN_PASSWORD!);
     await db.insert(usersTable).values({
       role: "admin",
       name: "Platform Admin",
