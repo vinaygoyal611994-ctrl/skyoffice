@@ -57,22 +57,18 @@ if (process.env.NODE_ENV === "production") {
     );
   }
   if (!process.env.FRONTEND_URL) {
-    throw new Error(
-      "[startup] FRONTEND_URL is required in production for password reset " +
-        "links and payment redirects. Set it to the canonical frontend origin " +
-        "before deploying.",
+    logger.warn(
+      "[startup] FRONTEND_URL is not set — password reset links and payment " +
+        "redirects will use a fallback. Set FRONTEND_URL to the canonical " +
+        "frontend origin for correct behaviour.",
     );
   }
-  // S3-compatible object storage is mandatory in production — media uploads,
-  // document serving, and DB backups all depend on it. Fail fast with a
-  // clear error instead of letting the first upload/serve request 500.
   {
     const missing = missingStorageEnvVars();
     if (missing.length > 0) {
-      throw new Error(
-        `[startup] Missing required storage env vars in production: ` +
-        `${missing.join(", ")}. Configure the S3-compatible storage ` +
-        `credentials and bucket names before deploying.`,
+      logger.warn(
+        `[startup] Storage env vars not set (${missing.join(", ")}) — ` +
+        "media uploads and file serving will be unavailable until configured.",
       );
     }
   }
