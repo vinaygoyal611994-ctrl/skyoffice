@@ -35,10 +35,10 @@ echo "  ✓ Dependencies ready"
 echo ""
 
 # ---------------------------------------------------------------------------
-# 3. Run database migrations (idempotent)
+# 3. Create/sync database schema (drizzle-kit push — safe for fresh DB)
 # ---------------------------------------------------------------------------
-echo "▸ Step 2/3 — Running database migrations..."
-DATABASE_URL="$DATABASE_URL" pnpm --filter @workspace/scripts run migrate
+echo "▸ Step 2/3 — Syncing database schema..."
+DATABASE_URL="$DATABASE_URL" pnpm --filter @workspace/db run push --force
 echo ""
 
 # ---------------------------------------------------------------------------
