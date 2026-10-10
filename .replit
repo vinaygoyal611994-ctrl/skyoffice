@@ -1,6 +1,7 @@
-modules = ["nodejs-20", "bash", "web", "postgresql-16"]
+modules = ["nodejs-24", "python-base-3.13", "postgresql-16"]
 
 [deployment]
+run = ["bash", "-c", "bash scripts/replit-setup.sh && bash scripts/replit-start.sh"]
 router = "application"
 deploymentTarget = "autoscale"
 
