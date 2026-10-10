@@ -79,7 +79,7 @@ export function SharePlatformSection() {
       data-testid="section-share-platform"
     >
       <div className="mx-auto flex max-w-md flex-col items-center gap-3">
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary cursor-pointer" onClick={handleShareAndCopy}>
           <Share2 className="h-6 w-6" />
         </div>
         <h2 className="text-xl font-bold text-foreground sm:text-2xl">
@@ -89,7 +89,7 @@ export function SharePlatformSection() {
         <Button
           type="button"
           onClick={handleShareAndCopy}
-          className="mt-2 h-11 w-full gap-2 rounded-xl font-semibold sm:w-auto"
+          className="mt-2 h-11 w-full gap-2 rounded-xl font-semibold sm:w-auto cursor-pointer"
           data-testid="button-share-copy-platform"
         >
           {messageState === 'success' ? (

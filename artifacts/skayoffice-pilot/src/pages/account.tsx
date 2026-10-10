@@ -217,7 +217,7 @@ export function Account() {
           ) : (
             <div className="space-y-3">
               {videoRequests.map((req) => (
-                <div key={req.id} className="flex items-center justify-between border rounded-lg p-3 flex-wrap gap-2" data-testid={`row-my-video-request-${req.id}`}>
+                <div key={req.id} className="flex flex-col sm:flex-row sm:items-center justify-between border rounded-lg p-3 gap-2" data-testid={`row-my-video-request-${req.id}`}>
                   <div className="text-sm">
                     <div className="font-medium" dir="ltr">{req.preferredDate} — {req.preferredTime} ({req.timezone})</div>
                     <div className="text-xs text-muted-foreground">{format(new Date(req.createdAt), 'yyyy-MM-dd HH:mm')}</div>

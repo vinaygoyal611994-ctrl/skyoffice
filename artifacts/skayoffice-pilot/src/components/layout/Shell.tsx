@@ -154,7 +154,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
             <button
               type="button"
               onClick={toggleLang}
-              className="min-h-11 min-w-11 px-2.5 py-1.5 inline-flex items-center justify-center text-xs font-semibold rounded-md border border-border/60 hover:bg-secondary hover:border-border transition-colors uppercase tracking-wider text-muted-foreground hover:text-foreground xl:min-h-0 xl:min-w-0"
+              className="min-h-11 min-w-11 px-2.5 py-1.5 inline-flex items-center justify-center text-xs font-semibold rounded-md border border-border/60 hover:bg-secondary hover:border-border transition-colors uppercase tracking-wider text-muted-foreground hover:text-foreground cursor-pointer"
               dir="ltr"
               aria-label={language === 'ar' ? t('nav.switch_to_english') : t('nav.switch_to_arabic')}
             >
@@ -166,7 +166,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
                 <>
                   {user.role === 'customer' && (
                     <>
-                      <Link href="/favourites" className="text-muted-foreground hover:text-foreground p-2 rounded-md hover:bg-secondary transition-colors">
+                      <Link href="/favourites" className="text-muted-foreground hover:text-foreground p-2 rounded-md hover:bg-secondary transition-colors" aria-label={t('nav.favourites')}>
                         <Heart size={18} />
                       </Link>
                       <Link href="/account" className="text-muted-foreground hover:text-foreground p-2 rounded-md hover:bg-secondary transition-colors flex items-center gap-2" data-testid="link-account">
@@ -440,11 +440,11 @@ export function Shell({ children }: { children: React.ReactNode }) {
           <div className="flex gap-4">
             <button
               onClick={toggleLang}
-              className="min-h-11 min-w-11 px-3 inline-flex items-center justify-center hover:text-primary uppercase xl:min-h-0 xl:min-w-0"
+              className="min-h-11 min-w-11 px-2.5 py-1.5 inline-flex items-center justify-center text-xs font-semibold rounded-md border border-border/60 hover:bg-secondary hover:border-border transition-colors uppercase tracking-wider text-muted-foreground hover:text-foreground cursor-pointer"
               dir="ltr"
               aria-label={language === 'ar' ? t('nav.switch_to_english') : t('nav.switch_to_arabic')}
             >
-              {language === 'ar' ? 'English' : 'عربي'}
+              {language === 'ar' ? 'EN' : 'عربي'}
             </button>
           </div>
         </div>

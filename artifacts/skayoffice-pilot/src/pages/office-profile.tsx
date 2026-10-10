@@ -291,9 +291,11 @@ function MarketingScreen({
                 aria-label={`${officeName} ${idx + 1}/${items.length}`}
                 aria-current={idx === active}
                 onClick={() => goTo(idx)}
-                className={`h-1.5 rounded-full transition-all ${idx === active ? 'w-5 bg-white' : 'w-1.5 bg-white/50'}`}
+                className="h-6 w-6 flex items-center justify-center"
                 data-testid={`button-carousel-dot-${idx}`}
-              />
+              >
+                <span className={`rounded-full transition-all ${idx === active ? 'h-1.5 w-5 bg-white' : 'h-1.5 w-1.5 bg-white/50'}`} />
+              </button>
             ))}
           </div>
         </>
@@ -982,14 +984,14 @@ export function OfficeProfile({
                               <span>{t('account.status_suspended_notice')}</span>
                             </div>
                           )}
-                          <div className="grid grid-cols-2 gap-3">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div className="space-y-1.5">
                               <Label className="text-xs">{t('videocall.preferred_date')}</Label>
-                              <Input type="date" name="preferredDate" value={videoForm.preferredDate} onChange={handleVideoFieldChange} data-testid="input-video-date" />
+                              <Input type="date" name="preferredDate" value={videoForm.preferredDate} onChange={handleVideoFieldChange} className="min-h-[44px]" data-testid="input-video-date" />
                             </div>
                             <div className="space-y-1.5">
                               <Label className="text-xs">{t('videocall.preferred_time')}</Label>
-                              <Input type="time" name="preferredTime" value={videoForm.preferredTime} onChange={handleVideoFieldChange} data-testid="input-video-time" />
+                              <Input type="time" name="preferredTime" value={videoForm.preferredTime} onChange={handleVideoFieldChange} className="min-h-[44px]" data-testid="input-video-time" />
                             </div>
                           </div>
                           <div className="space-y-1.5">
@@ -1114,7 +1116,7 @@ export function OfficeProfile({
                     <div data-testid="office-summary">
                       <p
                         dir="auto"
-                        className={`text-sm leading-relaxed text-foreground/80 break-words${showFullDesc ? '' : ' line-clamp-3'}`}
+                        className={`text-sm leading-relaxed text-foreground/80 break-words ${showFullDesc ? '' : 'line-clamp-3'}`}
                       >
                         {shortDescriptionLocalized}
                       </p>

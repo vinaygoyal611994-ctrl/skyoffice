@@ -85,7 +85,7 @@ export function LoginCustomer() {
                   <FormItem>
                     <FormLabel>{t('auth.email')}</FormLabel>
                     <FormControl>
-                      <Input type="email" placeholder="name@example.com" dir="ltr" className="text-left" autoComplete="email" {...field} />
+                      <Input type="email" placeholder="name@example.com" dir="ltr" className="text-left" autoComplete="email" autoFocus {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -108,7 +108,7 @@ export function LoginCustomer() {
                     </div>
                     <FormControl>
                       <div className="relative">
-                        <Input type={showPassword ? 'text' : 'password'} dir="ltr" className="text-left pe-10" autoComplete="current-password" {...field} />
+                        <Input type={showPassword ? 'text' : 'password'} dir="ltr" className="text-left pe-12" autoComplete="current-password" {...field} />
                         <button
                           type="button"
                           tabIndex={-1}
@@ -233,7 +233,7 @@ export function LoginOffice() {
                     </div>
                     <FormControl>
                       <div className="relative">
-                        <Input type={showPassword ? 'text' : 'password'} dir="ltr" className="text-left pe-10" autoComplete="current-password" {...field} />
+                        <Input type={showPassword ? 'text' : 'password'} dir="ltr" className="text-left pe-12" autoComplete="current-password" {...field} />
                         <button
                           type="button"
                           tabIndex={-1}

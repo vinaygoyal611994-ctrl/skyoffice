@@ -209,7 +209,7 @@ export function Home() {
     }
   };
 
-  const handleVoiceSearch = () => {
+  const handleVoiceSearch = async () => {
     const SpeechRecognition =
       (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
 
@@ -230,7 +230,16 @@ export function Home() {
 
     recognition.onstart = () => setListening(true);
     recognition.onend = () => setListening(false);
-    recognition.onerror = () => setListening(false);
+    recognition.onerror = (event: any) => {
+      setListening(false);
+      if (event.error === 'not-allowed' || event.error === 'permission-denied') {
+        toast({ title: t('discover.voice_permission_denied') || 'Microphone permission denied. Please allow mic access in browser settings.', variant: 'destructive' });
+      } else if (event.error === 'no-speech') {
+        toast({ title: t('discover.voice_no_speech') || 'No speech detected. Please try again.', variant: 'default' });
+      } else if (event.error !== 'aborted') {
+        toast({ title: t('discover.voice_error') || 'Voice search failed. Please try again.', variant: 'destructive' });
+      }
+    };
     recognition.onresult = (event: any) => {
       const transcript = event.results?.[0]?.[0]?.transcript;
       if (transcript) {
@@ -240,7 +249,26 @@ export function Home() {
     };
 
     recognitionRef.current = recognition;
-    recognition.start();
+    try {
+      const permStatus = await navigator.permissions.query({ name: 'microphone' as PermissionName });
+      if (permStatus.state === 'denied') {
+        toast({
+          title: 'Microphone blocked',
+          description: 'Click the 🔒 lock icon in the address bar → Site settings → Microphone → Allow, then reload the page.',
+          variant: 'destructive',
+        });
+        return;
+      }
+      await navigator.mediaDevices.getUserMedia({ audio: true });
+      recognition.start();
+    } catch {
+      setListening(false);
+      toast({
+        title: 'Microphone blocked',
+        description: 'Click the 🔒 lock icon in the address bar → Site settings → Microphone → Allow, then reload.',
+        variant: 'destructive',
+      });
+    }
   };
 
   const handleProviderTypeChange = (type: 'office' | 'freelancer') => {
@@ -255,7 +283,7 @@ export function Home() {
 
       {/* ── 1. Hero ─────────────────────────────────────────────────────────── */}
       <div className="flex flex-col items-center gap-1 pb-0.5 text-center">
-        <h1 className="max-w-2xl text-2xl font-serif font-bold tracking-tight text-foreground sm:text-3xl whitespace-pre-line">
+        <h1 className="max-w-2xl text-2xl font-serif font-bold tracking-tight text-foreground sm:text-3xl whitespace-pre-line break-words">
           {t('home.hero_title')}
         </h1>
         <p className="max-w-xl text-xs text-blue-700/80 sm:text-sm font-medium">
@@ -264,19 +292,19 @@ export function Home() {
       </div>
 
       {/* ── 2. Search bar ───────────────────────────────────────────────────── */}
-      <div className="relative">
-        <Search className="absolute ltr:left-4 rtl:right-4 top-1/2 -translate-y-1/2 h-[18px] w-[18px] text-muted-foreground/60 pointer-events-none" />
+      <div className="flex items-center h-14 rounded-2xl border border-border/70 shadow-sm hover:border-border/90 focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/15 transition-colors bg-background px-2">
+        <Search className="ltr:ml-2 rtl:mr-2 shrink-0 h-[18px] w-[18px] text-muted-foreground/60 pointer-events-none" />
         <Input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder={t('discover.search_placeholder')}
-          className="h-14 ltr:pl-12 rtl:pr-12 ltr:pr-14 rtl:pl-14 rounded-2xl text-base shadow-sm border-border/70 hover:border-border/90 focus-visible:border-primary/50 focus-visible:ring-2 focus-visible:ring-primary/15 transition-colors"
+          className="flex-1 h-full border-none shadow-none focus-visible:ring-0 bg-transparent text-base px-3"
         />
         <button
           type="button"
           onClick={handleVoiceSearch}
           aria-label={t('discover.voice_search')}
-          className={`absolute ltr:right-2 rtl:left-2 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full flex items-center justify-center transition-colors ${
+          className={`shrink-0 h-10 w-10 rounded-full flex items-center justify-center transition-colors cursor-pointer ${
             listening
               ? 'bg-rose-500 text-white animate-pulse'
               : 'bg-primary text-primary-foreground hover:bg-primary/90'
@@ -296,7 +324,7 @@ export function Home() {
           type="button"
           onClick={() => handleProviderTypeChange('office')}
           aria-pressed={providerType === 'office'}
-          className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium transition-colors min-h-[44px] ${
+          className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium transition-colors min-h-[44px] cursor-pointer ${
             providerType === 'office'
               ? 'bg-primary text-primary-foreground'
               : 'bg-card text-foreground hover:bg-muted/50'
@@ -311,7 +339,7 @@ export function Home() {
           type="button"
           onClick={() => handleProviderTypeChange('freelancer')}
           aria-pressed={providerType === 'freelancer'}
-          className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium transition-colors min-h-[44px] ${
+          className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium transition-colors min-h-[44px] cursor-pointer ${
             providerType === 'freelancer'
               ? 'bg-primary text-primary-foreground'
               : 'bg-card text-foreground hover:bg-muted/50'

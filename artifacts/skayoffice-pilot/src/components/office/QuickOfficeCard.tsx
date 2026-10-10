@@ -129,7 +129,7 @@ export function QuickOfficeCard({
 
   // Fetch verified service metrics for this office (when slug available).
   // Cache for 5 minutes; only fires when slug is known.
-  const { data: metrics } = useGetOfficeServiceMetrics(office.slug ?? '', {
+  const { data: metrics, isLoading: metricsLoading } = useGetOfficeServiceMetrics(office.slug ?? '', {
     query: {
       enabled: !!office.slug,
       staleTime: 5 * 60 * 1000,
@@ -303,7 +303,9 @@ export function QuickOfficeCard({
           className="mt-auto rounded-lg border border-border/40 bg-muted/20 p-2.5"
           data-testid="card-service-metrics"
         >
-          {hasVerifiedData ? (
+          {metricsLoading ? (
+            <div className="h-8 animate-pulse rounded bg-muted/40" />
+          ) : hasVerifiedData ? (
             <div className="grid grid-cols-3 gap-1.5">
               {/* Response time — computed from first_response_at timestamps */}
               <div className="flex flex-col items-start gap-0.5">

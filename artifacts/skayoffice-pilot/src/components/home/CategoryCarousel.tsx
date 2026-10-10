@@ -210,7 +210,7 @@ export function CategoryCarousel({
                   onClick={() => handleCarouselSelect(cat.key)}
                   aria-pressed={isActive}
                   aria-label={getLabel(cat)}
-                  className="flex flex-col items-center gap-1.5 shrink-0 w-20 group focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-xl"
+                  className="flex flex-col items-center gap-1.5 shrink-0 w-20 group focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-xl cursor-pointer"
                 >
                   {/* w-16 h-16 = 64px — above the 44px minimum touch target */}
                   <div
@@ -241,7 +241,7 @@ export function CategoryCarousel({
                 setSheetOpen(true);
               }}
               aria-label={t('category.more_title')}
-              className="flex flex-col items-center gap-1.5 shrink-0 w-20 group focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-xl"
+              className="flex flex-col items-center gap-1.5 shrink-0 w-20 group focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-xl cursor-pointer"
             >
               <div className="w-16 h-16 rounded-2xl flex items-center justify-center transition-all border bg-card border-border/60 shadow-sm text-muted-foreground group-hover:border-primary/40 group-hover:shadow-md">
                 <Grid3X3 size={22} />
@@ -302,7 +302,7 @@ export function CategoryCarousel({
                     type="button"
                     onClick={() => handleSheetSelect(cat.key)}
                     aria-pressed={isActive}
-                    className="flex flex-col items-center gap-2 group focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-xl p-1"
+                    className="flex flex-col items-center gap-2 group focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-xl p-1 cursor-pointer"
                   >
                     <div
                       className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all border ${

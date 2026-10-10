@@ -47,7 +47,7 @@ export function Favourites() {
             <p className="text-muted-foreground max-w-md mb-8">
               {t('fav.empty_description')}
             </p>
-            <Button size="lg" className="rounded-full px-8" asChild>
+            <Button size="lg" className="rounded-full px-4 sm:px-8" asChild>
               <Link href="/discover">
                 <Search className="mr-2 rtl:ml-2 rtl:mr-0" size={18} />
                 {t('nav.discover')}

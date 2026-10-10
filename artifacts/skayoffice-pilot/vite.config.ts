@@ -48,7 +48,7 @@ const securityHeaders: Record<string, string> = {
   "X-Content-Type-Options": "nosniff",
   "X-Frame-Options": "DENY",
   "Referrer-Policy": "strict-origin-when-cross-origin",
-  "Permissions-Policy": "camera=(), microphone=(), geolocation=(self)",
+  "Permissions-Policy": "camera=(), microphone=(self), geolocation=(self)",
   "Content-Security-Policy": [
     "default-src 'self'",
     // Vite HMR requires unsafe-inline + unsafe-eval in dev server mode
@@ -137,7 +137,7 @@ export default defineConfig({
     // accepts the request as if it came from localhost:8080 itself.
     proxy: {
       '/api': {
-        target: 'http://localhost:8080',
+        target: process.env.API_TARGET || 'http://localhost:8080',
         changeOrigin: true,
       },
     },
