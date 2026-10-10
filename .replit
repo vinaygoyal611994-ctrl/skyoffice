@@ -11,6 +11,76 @@ env = { "CI" = "true" }
 [workflows]
 runButton = "Project"
 
+# ---------------------------------------------------------------------------
+# Project — main run button:
+#   1. Setup  (install deps + migrate + seed)  runs first, exits on error.
+#   2. Start  (API server + Vite frontend)     runs after setup succeeds.
+# ---------------------------------------------------------------------------
+[[workflows.workflow]]
+name = "Project"
+mode = "sequential"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Setup"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Start Servers"
+
+# ---------------------------------------------------------------------------
+# Setup — install, migrate, seed (idempotent, safe every run)
+# ---------------------------------------------------------------------------
+[[workflows.workflow]]
+name = "Setup"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "bash scripts/replit-setup.sh"
+waitForPort = 0
+
+# ---------------------------------------------------------------------------
+# Start Servers — API + frontend in parallel
+# ---------------------------------------------------------------------------
+[[workflows.workflow]]
+name = "Start Servers"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "API Server"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Frontend"
+
+# ---------------------------------------------------------------------------
+# API Server — Express on port 8080 (internal)
+# ---------------------------------------------------------------------------
+[[workflows.workflow]]
+name = "API Server"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd artifacts/api-server && PORT=8080 NODE_ENV=development pnpm run dev"
+waitForPort = 8080
+
+# ---------------------------------------------------------------------------
+# Frontend — Vite dev server on Replit-assigned PORT
+# ---------------------------------------------------------------------------
+[[workflows.workflow]]
+name = "Frontend"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd artifacts/skayoffice-pilot && BASE_PATH=/ API_TARGET=http://localhost:8080 pnpm run dev"
+waitForPort = 5000
+
 [agent]
 stack = "PNPM_WORKSPACE"
 expertMode = true
@@ -23,10 +93,25 @@ timeoutMs = 20000
 channel = "stable-25_05"
 packages = ["ffmpeg"]
 
+# ---------------------------------------------------------------------------
+# Environment variables (non-secret)
+# Secret values (DATABASE_URL, SESSION_SECRET, etc.) must be added via the
+# Replit Secrets tab (lock icon in the left sidebar).
+# ---------------------------------------------------------------------------
 [userenv]
 
 [userenv.shared]
+# Public app URL — update to your Replit dev URL or custom domain
 VITE_PUBLIC_APP_URL = "https://skayoffice.com"
+# Internal API port used by the Express server
+API_PORT = "8080"
+# Frontend port (Replit assigns PORT automatically; this is the fallback)
+PORT = "5000"
+# Base path for the Vite app
+BASE_PATH = "/"
+# Node environment
+NODE_ENV = "development"
+# Cleanup tokens (optional)
 CLEANUP_TOKEN = ""
 CLEANUP_TOKEN_2 = ""
 SEED_OFFICE_USER17 = ""
@@ -34,3 +119,4 @@ SEED_OFFICE_USER17 = ""
 [userenv.production]
 CORS_ALLOWED_ORIGINS = "https://skayoffice.com"
 FRONTEND_URL = "https://skayoffice.com"
+NODE_ENV = "production"

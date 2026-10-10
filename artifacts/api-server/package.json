@@ -9,6 +9,7 @@
     "start": "node --enable-source-maps ./dist/index.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "seed": "tsx src/scripts/seed.ts",
+    "seed:no-images": "tsx src/scripts/seed-no-images.ts",
     "seed:load-test": "tsx src/scripts/seed-load-test.ts",
     "seed:load-test:cleanup": "tsx src/scripts/cleanup-load-test.ts",
     "test": "vitest run",
