@@ -209,7 +209,7 @@ export function Home() {
     }
   };
 
-  const handleVoiceSearch = async () => {
+  const handleVoiceSearch = () => {
     const SpeechRecognition =
       (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
 
@@ -233,11 +233,15 @@ export function Home() {
     recognition.onerror = (event: any) => {
       setListening(false);
       if (event.error === 'not-allowed' || event.error === 'permission-denied') {
-        toast({ title: t('discover.voice_permission_denied') || 'Microphone permission denied. Please allow mic access in browser settings.', variant: 'destructive' });
+        toast({
+          title: t('discover.voice_permission_denied'),
+          description: 'Click the 🔒 lock icon in the address bar → Site settings → Microphone → Allow, then reload the page.',
+          variant: 'destructive',
+        });
       } else if (event.error === 'no-speech') {
-        toast({ title: t('discover.voice_no_speech') || 'No speech detected. Please try again.', variant: 'default' });
+        toast({ title: t('discover.voice_no_speech'), variant: 'default' });
       } else if (event.error !== 'aborted') {
-        toast({ title: t('discover.voice_error') || 'Voice search failed. Please try again.', variant: 'destructive' });
+        toast({ title: t('discover.voice_error'), variant: 'destructive' });
       }
     };
     recognition.onresult = (event: any) => {
@@ -250,24 +254,10 @@ export function Home() {
 
     recognitionRef.current = recognition;
     try {
-      const permStatus = await navigator.permissions.query({ name: 'microphone' as PermissionName });
-      if (permStatus.state === 'denied') {
-        toast({
-          title: 'Microphone blocked',
-          description: 'Click the 🔒 lock icon in the address bar → Site settings → Microphone → Allow, then reload the page.',
-          variant: 'destructive',
-        });
-        return;
-      }
-      await navigator.mediaDevices.getUserMedia({ audio: true });
       recognition.start();
     } catch {
       setListening(false);
-      toast({
-        title: 'Microphone blocked',
-        description: 'Click the 🔒 lock icon in the address bar → Site settings → Microphone → Allow, then reload.',
-        variant: 'destructive',
-      });
+      toast({ title: t('discover.voice_error'), variant: 'destructive' });
     }
   };
 
