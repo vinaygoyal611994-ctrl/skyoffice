@@ -119,14 +119,14 @@ export function LoginAdmin() {
                         <Input
                           type={showPassword ? 'text' : 'password'}
                           dir="ltr"
-                          className="text-left pe-10"
+                          className="text-left pr-10"
                           autoComplete="current-password"
                           {...field}
                         />
                         <button
                           type="button"
                           tabIndex={-1}
-                          className="absolute inset-y-0 end-0 flex items-center pe-3 text-muted-foreground hover:text-foreground transition-colors"
+                          className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground hover:text-foreground transition-colors"
                           aria-label={
                             showPassword ? t('auth.hidePasswordLabel') : t('auth.showPasswordLabel')
                           }

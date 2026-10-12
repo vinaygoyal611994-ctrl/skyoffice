@@ -169,11 +169,11 @@ export function RegisterCustomer() {
                     <FormLabel>{t('auth.password')}</FormLabel>
                     <FormControl>
                       <div className="relative">
-                        <Input type={showPassword ? 'text' : 'password'} dir="ltr" className="text-left pe-10" autoComplete="new-password" {...field} />
+                        <Input type={showPassword ? 'text' : 'password'} dir="ltr" className="text-left pr-10" autoComplete="new-password" {...field} />
                         <button
                           type="button"
                           tabIndex={-1}
-                          className="absolute inset-y-0 end-0 h-11 w-11 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors xl:h-9 xl:w-9"
+                          className="absolute inset-y-0 right-0 h-11 w-11 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors xl:h-9 xl:w-9"
                           aria-label={showPassword ? t('auth.hidePasswordLabel') : t('auth.showPasswordLabel')}
                           onClick={() => setShowPassword(v => !v)}
                         >
@@ -438,11 +438,11 @@ export function RegisterOffice() {
                       <FormLabel>{t('auth.password')}</FormLabel>
                       <FormControl>
                         <div className="relative">
-                          <Input type={showPassword ? 'text' : 'password'} dir="ltr" className="text-left pe-10" autoComplete="new-password" {...field} />
+                          <Input type={showPassword ? 'text' : 'password'} dir="ltr" className="text-left pr-10" autoComplete="new-password" {...field} />
                           <button
                             type="button"
                             tabIndex={-1}
-                            className="absolute inset-y-0 end-0 h-11 w-11 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors xl:h-9 xl:w-9"
+                            className="absolute inset-y-0 right-0 h-11 w-11 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors xl:h-9 xl:w-9"
                             aria-label={showPassword ? t('auth.hidePasswordLabel') : t('auth.showPasswordLabel')}
                             onClick={() => setShowPassword(v => !v)}
                           >
