@@ -167,6 +167,16 @@ app.use(
     frameguard: { action: "deny" }, // X-Frame-Options: DENY
     referrerPolicy: { policy: "no-referrer" },
     permittedCrossDomainPolicies: { permittedPolicies: "none" },
+    // Allow microphone and geolocation for same-origin so the voice search
+    // and location features work. Helmet's default blocks both with ()
+    // which overrides whatever the user allows in browser settings.
+    permissionsPolicy: {
+      features: {
+        microphone: ["self"],
+        geolocation: ["self"],
+        camera: [],
+      },
+    },
   }),
 );
 
