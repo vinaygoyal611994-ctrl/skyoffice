@@ -27,7 +27,22 @@ if [ -n "$MISSING" ]; then
 fi
 
 # ---------------------------------------------------------------------------
-# 2. Install dependencies
+# 2. Write api-server/.env from Replit Secrets so --env-file=.env works
+# ---------------------------------------------------------------------------
+echo "▸ Writing api-server/.env from Replit Secrets..."
+cat > "$(dirname "$0")/../artifacts/api-server/.env" <<EOF
+DATABASE_URL=${DATABASE_URL}
+SESSION_SECRET=${SESSION_SECRET}
+PORT=8080
+NODE_ENV=development
+SEED_ADMIN_PASSWORD=${SEED_ADMIN_PASSWORD:-Admin@123456}
+SEED_DEMO_PASSWORD=${SEED_DEMO_PASSWORD:-Demo@123456}
+EOF
+echo "  ✓ .env written"
+echo ""
+
+# ---------------------------------------------------------------------------
+# 3. Install dependencies
 # ---------------------------------------------------------------------------
 echo "▸ Step 1/3 — Installing dependencies..."
 pnpm install --no-frozen-lockfile --silent
@@ -35,14 +50,14 @@ echo "  ✓ Dependencies ready"
 echo ""
 
 # ---------------------------------------------------------------------------
-# 3. Create/sync database schema (drizzle-kit push — safe for fresh DB)
+# 4. Create/sync database schema (drizzle-kit push — safe for fresh DB)
 # ---------------------------------------------------------------------------
 echo "▸ Step 2/3 — Syncing database schema..."
 DATABASE_URL="$DATABASE_URL" pnpm --filter @workspace/db run push --force
 echo ""
 
 # ---------------------------------------------------------------------------
-# 4. Seed database (idempotent — skips rows that already exist)
+# 5. Seed database (idempotent — skips rows that already exist)
 # ---------------------------------------------------------------------------
 echo "▸ Step 3/3 — Seeding database..."
 DATABASE_URL="$DATABASE_URL" \
