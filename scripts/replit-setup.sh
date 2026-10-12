@@ -13,7 +13,6 @@ echo ""
 # 1. Validate required secrets
 # ---------------------------------------------------------------------------
 MISSING=""
-[ -z "$DATABASE_URL" ]   && MISSING="${MISSING}\n  • DATABASE_URL   — Neon PostgreSQL connection string"
 [ -z "$SESSION_SECRET" ] && MISSING="${MISSING}\n  • SESSION_SECRET — any random string (32+ chars)"
 
 if [ -n "$MISSING" ]; then
@@ -23,6 +22,14 @@ if [ -n "$MISSING" ]; then
   echo "   How to add: open the Secrets tab (lock icon, left sidebar)"
   echo "   then click  '+ New Secret'  for each entry above."
   echo ""
+  exit 1
+fi
+
+# DATABASE_URL is provided automatically by Replit's built-in PostgreSQL.
+# If using an external DB (Neon etc.), add DATABASE_URL as a Replit Secret.
+if [ -z "$DATABASE_URL" ]; then
+  echo "⛔  DATABASE_URL is not set. Enable Replit's built-in PostgreSQL database"
+  echo "   or add DATABASE_URL as a Replit Secret."
   exit 1
 fi
 
