@@ -233,12 +233,15 @@ export function Home() {
       recognition.onend = () => setListening(false);
       recognition.onerror = (event: any) => {
         setListening(false);
-        // not-allowed means the environment (browser or proxy) blocked mic —
-        // silently reset; no toast so users don't see a repeated error they
-        // cannot act on.
-        if (event.error === 'no-speech') {
+        if (event.error === 'not-allowed' || event.error === 'permission-denied') {
+          toast({
+            title: t('discover.voice_permission_denied'),
+            description: t('discover.voice_permission_denied_desc'),
+            variant: 'default',
+          });
+        } else if (event.error === 'no-speech') {
           toast({ title: t('discover.voice_no_speech'), variant: 'default' });
-        } else if (event.error !== 'aborted' && event.error !== 'not-allowed' && event.error !== 'permission-denied') {
+        } else if (event.error !== 'aborted') {
           toast({ title: t('discover.voice_error'), variant: 'destructive' });
         }
       };
@@ -267,7 +270,11 @@ export function Home() {
           startRecognition();
         })
         .catch(() => {
-          // Environment blocks mic (e.g. proxy Permissions-Policy) — silently fail.
+          toast({
+            title: t('discover.voice_permission_denied'),
+            description: t('discover.voice_permission_denied_desc'),
+            variant: 'default',
+          });
         });
     } else {
       startRecognition();
