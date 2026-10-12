@@ -136,13 +136,11 @@ export function Shell({ children }: { children: React.ReactNode }) {
                 requestHomeFiltersReset();
               }}
             >
-              <div className="overflow-hidden h-[24px] md:h-[28px] lg:h-[34px]">
-                <img
-                  src="/brand/skayoffice-logo-horizontal.png"
-                  alt="SkayOffice"
-                  className="h-[30px] md:h-[34px] lg:h-[40px] w-auto max-w-[42vw] md:max-w-none object-contain object-top transition-transform group-hover:scale-105"
-                />
-              </div>
+              <img
+                src="/brand/skayoffice-logo-horizontal.png"
+                alt="SkayOffice"
+                className="h-[30px] md:h-[34px] lg:h-[40px] w-auto max-w-[42vw] md:max-w-none object-contain -translate-y-[2px] transition-transform group-hover:scale-105"
+              />
             </Link>
 
             <nav className="hidden md:flex items-center gap-1 font-medium text-sm text-muted-foreground">

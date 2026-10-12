@@ -223,41 +223,63 @@ export function Home() {
       return;
     }
 
-    const recognition = new SpeechRecognition();
-    recognition.lang = language === 'ar' ? 'ar-SA' : 'en-US';
-    recognition.interimResults = false;
-    recognition.maxAlternatives = 1;
+    const startRecognition = () => {
+      const recognition = new SpeechRecognition();
+      recognition.lang = language === 'ar' ? 'ar-SA' : 'en-US';
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
 
-    recognition.onstart = () => setListening(true);
-    recognition.onend = () => setListening(false);
-    recognition.onerror = (event: any) => {
-      setListening(false);
-      if (event.error === 'not-allowed' || event.error === 'permission-denied') {
-        toast({
-          title: t('discover.voice_permission_denied'),
-          description: 'Click the 🔒 lock icon in the address bar → Site settings → Microphone → Allow, then reload the page.',
-          variant: 'destructive',
-        });
-      } else if (event.error === 'no-speech') {
-        toast({ title: t('discover.voice_no_speech'), variant: 'default' });
-      } else if (event.error !== 'aborted') {
+      recognition.onstart = () => setListening(true);
+      recognition.onend = () => setListening(false);
+      recognition.onerror = (event: any) => {
+        setListening(false);
+        if (event.error === 'not-allowed' || event.error === 'permission-denied') {
+          toast({
+            title: t('discover.voice_permission_denied'),
+            description: t('discover.voice_permission_denied_desc'),
+            variant: 'destructive',
+          });
+        } else if (event.error === 'no-speech') {
+          toast({ title: t('discover.voice_no_speech'), variant: 'default' });
+        } else if (event.error !== 'aborted') {
+          toast({ title: t('discover.voice_error'), variant: 'destructive' });
+        }
+      };
+      recognition.onresult = (event: any) => {
+        const transcript = event.results?.[0]?.[0]?.transcript;
+        if (transcript) {
+          lastInputMethodRef.current = 'voice';
+          setSearch(transcript);
+        }
+      };
+
+      recognitionRef.current = recognition;
+      try {
+        recognition.start();
+      } catch {
+        setListening(false);
         toast({ title: t('discover.voice_error'), variant: 'destructive' });
       }
     };
-    recognition.onresult = (event: any) => {
-      const transcript = event.results?.[0]?.[0]?.transcript;
-      if (transcript) {
-        lastInputMethodRef.current = 'voice';
-        setSearch(transcript);
-      }
-    };
 
-    recognitionRef.current = recognition;
-    try {
-      recognition.start();
-    } catch {
-      setListening(false);
-      toast({ title: t('discover.voice_error'), variant: 'destructive' });
+    // Request mic permission explicitly so the browser shows its native
+    // Allow/Block dialog. If already granted, this resolves immediately.
+    if (navigator.mediaDevices?.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({ audio: true })
+        .then((stream) => {
+          // Stop the stream right away — we only needed it to trigger permission.
+          stream.getTracks().forEach((t) => t.stop());
+          startRecognition();
+        })
+        .catch(() => {
+          toast({
+            title: t('discover.voice_permission_denied'),
+            description: t('discover.voice_permission_denied_desc'),
+            variant: 'destructive',
+          });
+        });
+    } else {
+      startRecognition();
     }
   };
 
