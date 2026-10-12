@@ -139,7 +139,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
               <img
                 src="/brand/skayoffice-logo-horizontal.png"
                 alt="SkayOffice"
-                className="h-[30px] md:h-[34px] lg:h-[40px] w-auto max-w-[42vw] md:max-w-none object-contain transition-transform group-hover:scale-105"
+                className="h-[30px] md:h-[34px] lg:h-[40px] w-auto max-w-[42vw] md:max-w-none object-contain -translate-y-[2px] transition-transform group-hover:scale-105"
               />
             </Link>
 
