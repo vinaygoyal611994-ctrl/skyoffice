@@ -14,6 +14,15 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { consumePostLoginRedirect } from '@/lib/postLoginRedirect';
 import { captureSessionToken } from '@/lib/sessionToken';
 
+function translateServerError(code: string | undefined, t: (k: string) => string): string {
+  switch (code) {
+    case 'INVALID_CREDENTIALS': return t('auth.error_invalid_credentials');
+    case 'ACCOUNT_LOCKED':      return t('auth.error_account_locked');
+    case 'ACCOUNT_DEACTIVATED': return t('auth.error_account_deactivated');
+    default:                    return t('common.error');
+  }
+}
+
 function makeLoginSchema(t: (k: string) => string) {
   return z.object({
     email: z.string()
@@ -73,7 +82,7 @@ export function LoginCustomer() {
           {loginMutation.error && (
             <Alert variant="destructive" className="mb-6">
               <AlertDescription>
-                {loginMutation.error.data?.error || t('common.error')}
+                {translateServerError(loginMutation.error.data?.error, t)}
               </AlertDescription>
             </Alert>
           )}
@@ -206,7 +215,7 @@ export function LoginOffice() {
           {loginMutation.error && (
             <Alert variant="destructive" className="mb-6">
               <AlertDescription>
-                {loginMutation.error.data?.error || t('common.error')}
+                {translateServerError(loginMutation.error.data?.error, t)}
               </AlertDescription>
             </Alert>
           )}

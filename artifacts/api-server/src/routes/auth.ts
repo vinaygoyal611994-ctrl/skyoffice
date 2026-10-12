@@ -360,7 +360,7 @@ router.post(
     // role once the user is found below).
     const preLockout = checkAccountLockout(email);
     if (preLockout.locked) {
-      res.status(429).json({ error: lockoutMessage() });
+      res.status(429).json({ error: "ACCOUNT_LOCKED" });
       return;
     }
 
@@ -368,10 +368,10 @@ router.post(
     if (!user || !(await verifyPassword(parsed.data.password, user.passwordHash))) {
       const lockout = recordFailedLogin(email, user?.role as "admin" | "office" | "customer" | undefined);
       if (lockout.locked) {
-        res.status(429).json({ error: lockoutMessage() });
+        res.status(429).json({ error: "ACCOUNT_LOCKED" });
         return;
       }
-      res.status(401).json({ error: invalidCredentialsMessage() });
+      res.status(401).json({ error: "INVALID_CREDENTIALS" });
       return;
     }
 
@@ -379,9 +379,7 @@ router.post(
     // still log in and browse — it is only blocked from creating new contact
     // events / video-call requests (enforced in requireActiveCustomer).
     if (user.status === "deactivated") {
-      res.status(403).json({
-        error: bilingualDeactivatedMessage(),
-      });
+      res.status(403).json({ error: "ACCOUNT_DEACTIVATED" });
       return;
     }
 
