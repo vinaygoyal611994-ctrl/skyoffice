@@ -16,8 +16,10 @@ import { captureSessionToken } from '@/lib/sessionToken';
 
 function makeLoginSchema(t: (k: string) => string) {
   return z.object({
-    email: z.string().email(t('validation.email_invalid')),
-    password: z.string().min(1, t('validation.required')),
+    email: z.string()
+      .min(1, t('validation.email_required'))
+      .email(t('validation.email_invalid')),
+    password: z.string().min(1, t('validation.password_required')),
   });
 }
 
@@ -83,7 +85,9 @@ export function LoginCustomer() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t('auth.email')}</FormLabel>
+                    <FormLabel>
+                      {t('auth.email')} <span className="text-destructive" aria-hidden="true">*</span>
+                    </FormLabel>
                     <FormControl>
                       <Input type="email" placeholder="name@example.com" dir="ltr" className="text-left" autoComplete="email" autoFocus {...field} />
                     </FormControl>
@@ -98,7 +102,9 @@ export function LoginCustomer() {
                 render={({ field }) => (
                   <FormItem>
                     <div className="flex items-center justify-between">
-                      <FormLabel>{t('auth.password')}</FormLabel>
+                      <FormLabel>
+                        {t('auth.password')} <span className="text-destructive" aria-hidden="true">*</span>
+                      </FormLabel>
                       <Link
                         href="/forgot-password"
                         className="text-xs text-primary hover:underline"
@@ -125,20 +131,24 @@ export function LoginCustomer() {
                 )}
               />
 
-              <Button type="submit" className="w-full" size="lg" disabled={loginMutation.isPending}>
+              <Button type="submit" className="w-full mt-2" size="lg" disabled={loginMutation.isPending}>
                 {loginMutation.isPending ? t('common.loading') : t('common.login')}
               </Button>
             </form>
           </Form>
 
-          <div className="mt-8 text-center text-sm">
+          <p className="mt-3 text-center text-xs text-muted-foreground">
+            <span className="text-destructive">*</span> {t('auth.required_fields')}
+          </p>
+
+          <div className="mt-6 text-center text-sm">
             <p className="text-muted-foreground mb-2">
               {t('auth.no_account')}{' '}
               <Link href="/register/customer" className="text-primary font-medium hover:underline">
                 {t('auth.register_customer')}
               </Link>
             </p>
-            <p className="text-muted-foreground mt-6 text-xs">
+            <p className="text-muted-foreground mt-4 text-xs">
               {t('auth.office_login_prompt')}{' '}
               <Link href="/login/office" className="text-primary font-medium hover:underline">
                 {t('auth.login_office')}
@@ -208,7 +218,9 @@ export function LoginOffice() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t('auth.email')}</FormLabel>
+                    <FormLabel>
+                      {t('auth.email')} <span className="text-destructive" aria-hidden="true">*</span>
+                    </FormLabel>
                     <FormControl>
                       <Input type="email" placeholder="office@example.com" dir="ltr" className="text-left" autoComplete="email" {...field} />
                     </FormControl>
@@ -223,7 +235,9 @@ export function LoginOffice() {
                 render={({ field }) => (
                   <FormItem>
                     <div className="flex items-center justify-between">
-                      <FormLabel>{t('auth.password')}</FormLabel>
+                      <FormLabel>
+                        {t('auth.password')} <span className="text-destructive" aria-hidden="true">*</span>
+                      </FormLabel>
                       <Link
                         href="/forgot-password"
                         className="text-xs text-primary hover:underline"
@@ -250,13 +264,17 @@ export function LoginOffice() {
                 )}
               />
 
-              <Button type="submit" className="w-full" size="lg" disabled={loginMutation.isPending}>
+              <Button type="submit" className="w-full mt-2" size="lg" disabled={loginMutation.isPending}>
                 {loginMutation.isPending ? t('common.loading') : t('common.login')}
               </Button>
             </form>
           </Form>
 
-          <div className="mt-8 text-center text-sm">
+          <p className="mt-3 text-center text-xs text-muted-foreground">
+            <span className="text-destructive">*</span> {t('auth.required_fields')}
+          </p>
+
+          <div className="mt-6 text-center text-sm">
             <p className="text-muted-foreground mb-2">
               {t('auth.no_account')}{' '}
               <Link href="/register/office" className="text-primary font-medium hover:underline">

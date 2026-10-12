@@ -213,6 +213,7 @@ export const translations = {
   'auth.phone': { ar: 'رقم الهاتف', en: 'Phone Number' },
   'auth.city': { ar: 'المدينة', en: 'City' },
   'auth.category': { ar: 'التخصص الرئيسي', en: 'Primary Category' },
+  'auth.required_fields': { ar: 'الحقول المطلوبة', en: 'Required fields' },
   'auth.no_account': { ar: 'ليس لديك حساب؟', en: 'Don\'t have an account?' },
   'auth.have_account': { ar: 'لديك حساب بالفعل؟', en: 'Already have an account?' },
   'auth.login_customer_tagline': { ar: 'سجل دخولك للوصول إلى المكاتب المفضلة لديك والتواصل معها', en: 'Log in to access your favourite offices and contact them directly.' },
@@ -639,7 +640,9 @@ export const translations = {
 
   // ── Form-level validation messages (shown inline by Zod / react-hook-form) ──
   'validation.required':               { ar: 'هذا الحقل مطلوب',                              en: 'This field is required' },
-  'validation.email_invalid':          { ar: 'البريد الإلكتروني غير صالح',                   en: 'Invalid email address' },
+  'validation.email_required':         { ar: 'البريد الإلكتروني مطلوب',                      en: 'Email address is required' },
+  'validation.email_invalid':          { ar: 'يرجى إدخال بريد إلكتروني صحيح',               en: 'Please enter a valid email address' },
+  'validation.password_required':      { ar: 'كلمة المرور مطلوبة',                           en: 'Password is required' },
   'validation.min_2':                  { ar: 'يجب أن يحتوي على حرفين على الأقل',             en: 'Must be at least 2 characters' },
   'validation.min_5':                  { ar: 'يجب أن يحتوي على 5 أحرف على الأقل',            en: 'Must be at least 5 characters' },
   'validation.min_6':                  { ar: 'يجب أن يحتوي على 6 أحرف على الأقل',            en: 'Must be at least 6 characters' },
