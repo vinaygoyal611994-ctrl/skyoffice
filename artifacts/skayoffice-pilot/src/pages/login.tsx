@@ -118,7 +118,7 @@ export function LoginCustomer() {
                         <button
                           type="button"
                           tabIndex={-1}
-                          className="absolute inset-y-0 end-0 h-11 w-11 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors xl:h-9 xl:w-9"
+                          className="absolute inset-y-0 end-0 h-11 w-11 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors cursor-pointer xl:h-9 xl:w-9"
                           aria-label={showPassword ? t('auth.hidePasswordLabel') : t('auth.showPasswordLabel')}
                           onClick={() => setShowPassword(v => !v)}
                         >
@@ -251,7 +251,7 @@ export function LoginOffice() {
                         <button
                           type="button"
                           tabIndex={-1}
-                          className="absolute inset-y-0 end-0 h-11 w-11 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors xl:h-9 xl:w-9"
+                          className="absolute inset-y-0 end-0 h-11 w-11 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors cursor-pointer xl:h-9 xl:w-9"
                           aria-label={showPassword ? t('auth.hidePasswordLabel') : t('auth.showPasswordLabel')}
                           onClick={() => setShowPassword(v => !v)}
                         >
