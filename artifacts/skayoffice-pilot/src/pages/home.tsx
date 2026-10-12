@@ -233,15 +233,12 @@ export function Home() {
       recognition.onend = () => setListening(false);
       recognition.onerror = (event: any) => {
         setListening(false);
-        if (event.error === 'not-allowed' || event.error === 'permission-denied') {
-          toast({
-            title: t('discover.voice_permission_denied'),
-            description: t('discover.voice_permission_denied_desc'),
-            variant: 'destructive',
-          });
-        } else if (event.error === 'no-speech') {
+        // not-allowed means the environment (browser or proxy) blocked mic —
+        // silently reset; no toast so users don't see a repeated error they
+        // cannot act on.
+        if (event.error === 'no-speech') {
           toast({ title: t('discover.voice_no_speech'), variant: 'default' });
-        } else if (event.error !== 'aborted') {
+        } else if (event.error !== 'aborted' && event.error !== 'not-allowed' && event.error !== 'permission-denied') {
           toast({ title: t('discover.voice_error'), variant: 'destructive' });
         }
       };
@@ -258,25 +255,19 @@ export function Home() {
         recognition.start();
       } catch {
         setListening(false);
-        toast({ title: t('discover.voice_error'), variant: 'destructive' });
       }
     };
 
-    // Request mic permission explicitly so the browser shows its native
-    // Allow/Block dialog. If already granted, this resolves immediately.
+    // Request mic permission via getUserMedia to trigger the browser's
+    // native Allow/Block dialog. Silently stop if the environment blocks it.
     if (navigator.mediaDevices?.getUserMedia) {
       navigator.mediaDevices.getUserMedia({ audio: true })
         .then((stream) => {
-          // Stop the stream right away — we only needed it to trigger permission.
           stream.getTracks().forEach((t) => t.stop());
           startRecognition();
         })
         .catch(() => {
-          toast({
-            title: t('discover.voice_permission_denied'),
-            description: t('discover.voice_permission_denied_desc'),
-            variant: 'destructive',
-          });
+          // Environment blocks mic (e.g. proxy Permissions-Policy) — silently fail.
         });
     } else {
       startRecognition();
