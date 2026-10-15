@@ -16,17 +16,17 @@ import { captureSessionToken } from '@/lib/sessionToken';
 import { Checkbox } from '@/components/ui/checkbox';
 import { trackFunnelRegistrationStarted, trackFunnelRegistrationCompleted } from '@/lib/analytics';
 
-// ──────────────────────────────────────────────────────────
-// Schema factories — called inside each component so the
-// active language's t() is used for every validation message.
-// react-hook-form reads the resolver from its internal ref
-// on each validation call, so the latest t() is always used.
-// ──────────────────────────────────────────────────────────
 function makeCustomerSchema(t: (k: string) => string) {
   return z.object({
-    name: z.string().min(2, t('validation.min_2')),
-    email: z.string().email(t('validation.email_invalid')),
-    password: z.string().min(6, t('validation.min_6')),
+    name: z.string()
+      .min(1, t('validation.name_required'))
+      .min(2, t('validation.name_min')),
+    email: z.string()
+      .min(1, t('validation.email_required'))
+      .email(t('validation.email_invalid')),
+    password: z.string()
+      .min(1, t('validation.password_required'))
+      .min(6, t('validation.password_min_6')),
     phone: z.string().optional(),
     termsAccepted: z.boolean().refine((v) => v === true, {
       message: t('auth.terms_error'),
@@ -36,11 +36,21 @@ function makeCustomerSchema(t: (k: string) => string) {
 
 function makeOfficeSchema(t: (k: string) => string) {
   return z.object({
-    officeName: z.string().min(2, t('validation.min_2')),
-    email: z.string().email(t('validation.email_invalid')),
-    password: z.string().min(6, t('validation.min_6')),
-    whatsapp: z.string().min(5, t('validation.min_5')),
-    city: z.string().min(2, t('validation.min_2')),
+    officeName: z.string()
+      .min(1, t('validation.office_name_required'))
+      .min(2, t('validation.office_name_min')),
+    email: z.string()
+      .min(1, t('validation.email_required'))
+      .email(t('validation.email_invalid')),
+    password: z.string()
+      .min(1, t('validation.password_required'))
+      .min(6, t('validation.password_min_6')),
+    whatsapp: z.string()
+      .min(1, t('validation.whatsapp_required'))
+      .min(5, t('validation.whatsapp_min')),
+    city: z.string()
+      .min(1, t('validation.city_required'))
+      .min(2, t('validation.city_min')),
     category: z.enum([
       'translation', 'legal', 'marketing', 'development', 'design',
       'real_estate', 'company_formation', 'business_consulting',
@@ -55,6 +65,10 @@ function makeOfficeSchema(t: (k: string) => string) {
     }),
   });
 }
+
+const RequiredMark = () => (
+  <span className="text-destructive ms-0.5" aria-hidden="true">*</span>
+);
 
 // ──────────────────────────────────────────────────────────
 // Customer registration
@@ -73,8 +87,6 @@ export function RegisterCustomer() {
     }
   });
 
-  // Resolver reads makeCustomerSchema(t) on every validation call,
-  // so it always uses the current language without needing a memo.
   const form = useForm({
     resolver: (...args: Parameters<ReturnType<typeof zodResolver>>) =>
       zodResolver(makeCustomerSchema(t))(...args),
@@ -91,9 +103,6 @@ export function RegisterCustomer() {
     registerMutation.mutate({ data });
   };
 
-  // When the user switches language, clear any displayed errors so the stale-
-  // language messages disappear immediately. Fresh translated errors appear on
-  // the next submit.
   useEffect(() => { form.clearErrors(); }, [language]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
@@ -124,9 +133,9 @@ export function RegisterCustomer() {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t('auth.name')}</FormLabel>
+                    <FormLabel>{t('auth.name')} <RequiredMark /></FormLabel>
                     <FormControl>
-                      <Input autoComplete="name" {...field} />
+                      <Input autoComplete="name" autoFocus {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -138,7 +147,7 @@ export function RegisterCustomer() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t('auth.email')}</FormLabel>
+                    <FormLabel>{t('auth.email')} <RequiredMark /></FormLabel>
                     <FormControl>
                       <Input type="email" dir="ltr" className="text-left" autoComplete="email" {...field} />
                     </FormControl>
@@ -152,7 +161,7 @@ export function RegisterCustomer() {
                 name="phone"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t('auth.phone')} {t('common.optional')}</FormLabel>
+                    <FormLabel>{t('auth.phone')} <span className="text-muted-foreground text-xs font-normal ms-1">({t('common.optional')})</span></FormLabel>
                     <FormControl>
                       <Input type="tel" dir="ltr" className="text-left" autoComplete="tel" {...field} />
                     </FormControl>
@@ -166,14 +175,14 @@ export function RegisterCustomer() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t('auth.password')}</FormLabel>
+                    <FormLabel>{t('auth.password')} <RequiredMark /></FormLabel>
                     <FormControl>
                       <div className="relative">
-                        <Input type={showPassword ? 'text' : 'password'} dir="ltr" className="text-left pr-10" autoComplete="new-password" {...field} />
+                        <Input type={showPassword ? 'text' : 'password'} dir="ltr" className="text-left pr-12" autoComplete="new-password" {...field} />
                         <button
                           type="button"
                           tabIndex={-1}
-                          className="absolute inset-y-0 right-0 h-11 w-11 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors xl:h-9 xl:w-9"
+                          className="absolute inset-y-0 right-0 h-11 w-11 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors cursor-pointer xl:h-9 xl:w-9"
                           aria-label={showPassword ? t('auth.hidePasswordLabel') : t('auth.showPasswordLabel')}
                           onClick={() => setShowPassword(v => !v)}
                         >
@@ -186,20 +195,22 @@ export function RegisterCustomer() {
                 )}
               />
 
+              {/* Terms checkbox — error shown below the full row, not inline */}
               <FormField
                 control={form.control}
                 name="termsAccepted"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-start gap-3 space-y-0 pt-2">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                        data-testid="checkbox-customer-terms-accepted"
-                      />
-                    </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel className="font-normal cursor-pointer">
+                  <FormItem className="space-y-2 pt-1">
+                    <div className="flex flex-row items-start gap-3">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                          className="mt-0.5"
+                          data-testid="checkbox-customer-terms-accepted"
+                        />
+                      </FormControl>
+                      <FormLabel className="font-normal cursor-pointer leading-relaxed">
                         {t('auth.terms_accept_intro')}{' '}
                         <Link href="/terms" className="text-primary underline hover:no-underline">
                           {t('auth.terms_link_label')}
@@ -209,19 +220,23 @@ export function RegisterCustomer() {
                           {t('auth.privacy_link_label')}
                         </Link>
                       </FormLabel>
-                      <FormMessage />
                     </div>
+                    <FormMessage className="ps-7" />
                   </FormItem>
                 )}
               />
 
-              <Button type="submit" className="w-full" size="lg" disabled={registerMutation.isPending}>
+              <Button type="submit" className="w-full mt-2" size="lg" disabled={registerMutation.isPending}>
                 {registerMutation.isPending ? t('common.loading') : t('common.register')}
               </Button>
             </form>
           </Form>
 
-          <div className="mt-8 text-center text-sm">
+          <p className="mt-3 text-center text-xs text-muted-foreground">
+            <span className="text-destructive">*</span> {t('auth.required_fields')}
+          </p>
+
+          <div className="mt-6 text-center text-sm">
             <p className="text-muted-foreground">
               {t('auth.have_account')}{' '}
               <Link href="/login/customer" className="text-primary font-medium hover:underline">
@@ -243,7 +258,6 @@ export function RegisterOffice() {
   const [, setLocation] = useLocation();
   const [showPassword, setShowPassword] = useState(false);
 
-  // Blocker 11: Stage 7 — funnel_registration_started (office form mount)
   useEffect(() => {
     try { trackFunnelRegistrationStarted(); } catch { /* never block */ }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -252,7 +266,6 @@ export function RegisterOffice() {
     mutation: {
       onSuccess: (data) => {
         captureSessionToken(data);
-        // Blocker 11: Stage 8 — funnel_registration_completed
         try { trackFunnelRegistrationCompleted(); } catch { /* never block */ }
         setLocation('/office/dashboard');
       }
@@ -304,18 +317,17 @@ export function RegisterOffice() {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit as any)} className="space-y-5">
 
-              {/* Provider type — must be chosen first; no default so the user is forced to decide */}
               <FormField
                 control={form.control}
                 name="providerType"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t('provider.type_label')}</FormLabel>
-                    <div className="grid grid-cols-2 gap-3">
+                    <FormLabel>{t('provider.type_label')} <RequiredMark /></FormLabel>
+                    <div className="grid grid-cols-2 gap-3 mt-1">
                       <button
                         type="button"
                         onClick={() => field.onChange('office')}
-                        className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all text-sm font-medium ${
+                        className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all text-sm font-medium cursor-pointer ${
                           field.value === 'office'
                             ? 'border-primary bg-primary/5 text-primary'
                             : 'border-border/60 text-muted-foreground hover:border-primary/40'
@@ -330,7 +342,7 @@ export function RegisterOffice() {
                       <button
                         type="button"
                         onClick={() => field.onChange('freelancer')}
-                        className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all text-sm font-medium ${
+                        className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all text-sm font-medium cursor-pointer ${
                           field.value === 'freelancer'
                             ? 'border-primary bg-primary/5 text-primary'
                             : 'border-border/60 text-muted-foreground hover:border-primary/40'
@@ -354,9 +366,9 @@ export function RegisterOffice() {
                   name="officeName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t('auth.office_name')}</FormLabel>
+                      <FormLabel>{t('auth.office_name')} <RequiredMark /></FormLabel>
                       <FormControl>
-                      <Input autoComplete="name" {...field} />
+                        <Input autoComplete="organization" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -368,7 +380,7 @@ export function RegisterOffice() {
                   name="category"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t('auth.category')}</FormLabel>
+                      <FormLabel>{t('auth.category')} <RequiredMark /></FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
@@ -393,9 +405,9 @@ export function RegisterOffice() {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t('auth.email')}</FormLabel>
+                      <FormLabel>{t('auth.email')} <RequiredMark /></FormLabel>
                       <FormControl>
-                      <Input type="email" dir="ltr" className="text-left" autoComplete="email" {...field} />
+                        <Input type="email" dir="ltr" className="text-left" autoComplete="email" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -407,9 +419,9 @@ export function RegisterOffice() {
                   name="whatsapp"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t('dashboard.whatsapp')}</FormLabel>
+                      <FormLabel>{t('dashboard.whatsapp')} <RequiredMark /></FormLabel>
                       <FormControl>
-                      <Input type="tel" dir="ltr" className="text-left" autoComplete="tel" {...field} />
+                        <Input type="tel" dir="ltr" className="text-left" autoComplete="tel" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -421,7 +433,7 @@ export function RegisterOffice() {
                   name="city"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t('auth.city')}</FormLabel>
+                      <FormLabel>{t('auth.city')} <RequiredMark /></FormLabel>
                       <FormControl>
                         <Input {...field} />
                       </FormControl>
@@ -435,14 +447,14 @@ export function RegisterOffice() {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t('auth.password')}</FormLabel>
+                      <FormLabel>{t('auth.password')} <RequiredMark /></FormLabel>
                       <FormControl>
                         <div className="relative">
-                          <Input type={showPassword ? 'text' : 'password'} dir="ltr" className="text-left pr-10" autoComplete="new-password" {...field} />
+                          <Input type={showPassword ? 'text' : 'password'} dir="ltr" className="text-left pr-12" autoComplete="new-password" {...field} />
                           <button
                             type="button"
                             tabIndex={-1}
-                            className="absolute inset-y-0 right-0 h-11 w-11 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors xl:h-9 xl:w-9"
+                            className="absolute inset-y-0 right-0 h-11 w-11 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors cursor-pointer xl:h-9 xl:w-9"
                             aria-label={showPassword ? t('auth.hidePasswordLabel') : t('auth.showPasswordLabel')}
                             onClick={() => setShowPassword(v => !v)}
                           >
@@ -456,20 +468,22 @@ export function RegisterOffice() {
                 />
               </div>
 
+              {/* Terms checkbox — error shown below the full row, not inline */}
               <FormField
                 control={form.control}
                 name="termsAccepted"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-start gap-3 space-y-0 pt-2">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                        data-testid="checkbox-terms-accepted"
-                      />
-                    </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel className="font-normal cursor-pointer">
+                  <FormItem className="space-y-2 pt-1">
+                    <div className="flex flex-row items-start gap-3">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                          className="mt-0.5"
+                          data-testid="checkbox-terms-accepted"
+                        />
+                      </FormControl>
+                      <FormLabel className="font-normal cursor-pointer leading-relaxed">
                         {t('auth.terms_accept_intro')}{' '}
                         <Link href="/terms" className="text-primary underline hover:no-underline">
                           {t('auth.terms_link_label')}
@@ -479,13 +493,13 @@ export function RegisterOffice() {
                           {t('auth.privacy_link_label')}
                         </Link>
                       </FormLabel>
-                      <FormMessage />
                     </div>
+                    <FormMessage className="ps-7" />
                   </FormItem>
                 )}
               />
 
-              <div className="pt-4">
+              <div className="pt-2">
                 <Button type="submit" className="w-full" size="lg" disabled={registerMutation.isPending}>
                   {registerMutation.isPending ? t('common.loading') : t('auth.register_office')}
                 </Button>
@@ -493,7 +507,11 @@ export function RegisterOffice() {
             </form>
           </Form>
 
-          <div className="mt-8 text-center text-sm">
+          <p className="mt-3 text-center text-xs text-muted-foreground">
+            <span className="text-destructive">*</span> {t('auth.required_fields')}
+          </p>
+
+          <div className="mt-6 text-center text-sm">
             <p className="text-muted-foreground">
               {t('auth.have_account')}{' '}
               <Link href="/login/office" className="text-primary font-medium hover:underline">
