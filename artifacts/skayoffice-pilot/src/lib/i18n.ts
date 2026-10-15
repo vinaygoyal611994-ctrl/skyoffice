@@ -652,6 +652,7 @@ export const translations = {
   'validation.name_min':               { ar: 'يجب أن يحتوي الاسم على حرفين على الأقل',      en: 'Name must be at least 2 characters' },
   'validation.office_name_required':   { ar: 'اسم المكتب مطلوب',                             en: 'Office name is required' },
   'validation.office_name_min':        { ar: 'يجب أن يحتوي اسم المكتب على حرفين على الأقل', en: 'Office name must be at least 2 characters' },
+  'validation.phone_invalid':          { ar: 'يرجى إدخال أرقام فقط',                        en: 'Please enter numbers only' },
   'validation.whatsapp_required':      { ar: 'رقم الواتساب مطلوب',                           en: 'WhatsApp number is required' },
   'validation.whatsapp_min':           { ar: 'يرجى إدخال رقم واتساب صحيح',                  en: 'Please enter a valid WhatsApp number' },
   'validation.city_required':          { ar: 'المدينة مطلوبة',                               en: 'City is required' },

@@ -27,7 +27,11 @@ function makeCustomerSchema(t: (k: string) => string) {
     password: z.string()
       .min(1, t('validation.password_required'))
       .min(6, t('validation.password_min_6')),
-    phone: z.string().optional(),
+    phone: z.string()
+      .refine(val => val === '' || /^\+?[\d\s\-]+$/.test(val), {
+        message: t('validation.phone_invalid'),
+      })
+      .optional(),
     termsAccepted: z.boolean().refine((v) => v === true, {
       message: t('auth.terms_error'),
     }),
@@ -161,7 +165,7 @@ export function RegisterCustomer() {
                 name="phone"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t('auth.phone')} <span className="text-muted-foreground text-xs font-normal ms-1">({t('common.optional')})</span></FormLabel>
+                    <FormLabel>{t('auth.phone')} <span className="text-muted-foreground text-xs font-normal ms-1">{t('common.optional')}</span></FormLabel>
                     <FormControl>
                       <Input type="tel" dir="ltr" className="text-left" autoComplete="tel" {...field} />
                     </FormControl>
