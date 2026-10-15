@@ -167,18 +167,17 @@ app.use(
     frameguard: { action: "deny" }, // X-Frame-Options: DENY
     referrerPolicy: { policy: "no-referrer" },
     permittedCrossDomainPolicies: { permittedPolicies: "none" },
-    // Allow microphone and geolocation for same-origin so the voice search
-    // and location features work. Helmet's default blocks both with ()
-    // which overrides whatever the user allows in browser settings.
-    permissionsPolicy: {
-      features: {
-        microphone: ["self"],
-        geolocation: ["self"],
-        camera: [],
-      },
-    },
   }),
 );
+
+// Helmet 8 does not expose permissionsPolicy in its combined options type.
+// Set the header manually so microphone and geolocation are allowed for
+// same-origin — Helmet's default sends microphone=() which blocks the
+// browser mic API even when the user has granted permission.
+app.use((_req, res, next) => {
+  res.setHeader("Permissions-Policy", "camera=(), microphone=(self), geolocation=(self)");
+  next();
+});
 
 // ---------------------------------------------------------------------------
 // CORS
