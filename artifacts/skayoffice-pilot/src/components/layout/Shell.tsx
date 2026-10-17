@@ -366,12 +366,17 @@ export function Shell({ children }: { children: React.ReactNode }) {
       </main>
 
       {/* Footer */}
-      <footer className="border-t bg-muted/30 py-12 mt-auto">
-        <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div>
+      <footer className="mt-auto border-t border-border/60 bg-muted/20">
+        {/* Primary accent strip */}
+        <div className="h-0.5 bg-primary/20" />
+
+        <div className="container mx-auto px-4 pt-10 pb-8 grid grid-cols-1 md:grid-cols-3 gap-10">
+
+          {/* Brand column */}
+          <div className="flex flex-col gap-4">
             <Link
               href="/"
-              className="flex items-center mb-4"
+              className="inline-flex items-center"
               onClick={requestHomeFiltersReset}
             >
               <img
@@ -380,22 +385,27 @@ export function Shell({ children }: { children: React.ReactNode }) {
                 className="h-8 w-auto object-contain"
               />
             </Link>
-            <p className="text-muted-foreground text-sm max-w-sm">
+            <p className="text-muted-foreground text-sm leading-relaxed max-w-xs">
               {t('footer.project_of')}
             </p>
           </div>
-          
+
+          {/* Contact column */}
           <div>
-            <h4 className="font-semibold mb-4">{t('footer.contact_title')}</h4>
-            <ul className="space-y-3 text-sm text-muted-foreground">
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground/60 mb-4">
+              {t('footer.contact_title')}
+            </p>
+            <ul className="space-y-3 text-sm">
               <li>
                 <a
                   href={`mailto:${CONTACT_EMAIL}`}
-                  className="hover:text-primary transition-colors flex items-center gap-2"
+                  className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-2.5 group"
                   data-testid="link-footer-email"
                   onClick={() => { try { trackPilotContactIntent('footer_email'); } catch {} }}
                 >
-                  <Mail size={16} className="shrink-0" />
+                  <span className="w-7 h-7 rounded-md bg-primary/8 flex items-center justify-center group-hover:bg-primary/15 transition-colors shrink-0">
+                    <Mail size={14} />
+                  </span>
                   <span dir="ltr" className="[unicode-bidi:plaintext]">{CONTACT_EMAIL}</span>
                 </a>
               </li>
@@ -404,43 +414,51 @@ export function Shell({ children }: { children: React.ReactNode }) {
                   href={WHATSAPP_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-primary transition-colors flex items-center gap-2"
+                  className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-2.5 group"
                   data-testid="link-footer-whatsapp"
                   onClick={() => { try { trackPilotContactIntent('footer_whatsapp'); } catch {} }}
                 >
-                  <FaWhatsapp size={16} className="shrink-0" />
+                  <span className="w-7 h-7 rounded-md bg-primary/8 flex items-center justify-center group-hover:bg-primary/15 transition-colors shrink-0">
+                    <FaWhatsapp size={14} />
+                  </span>
                   <span dir="ltr">{CONTACT_PHONE_DISPLAY}</span>
                 </a>
               </li>
             </ul>
           </div>
 
+          {/* Legal column */}
           <div>
-            <h4 className="font-semibold mb-4">{t('footer.legal_title')}</h4>
-            <ul className="space-y-2 text-sm text-muted-foreground">
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground/60 mb-4">
+              {t('footer.legal_title')}
+            </p>
+            <ul className="space-y-2.5 text-sm">
               <li>
-                <Link href="/terms" className="hover:text-primary transition-colors">
+                <Link href="/terms" className="text-muted-foreground hover:text-primary transition-colors">
                   {t('footer.terms_link')}
                 </Link>
               </li>
               <li>
-                <Link href="/privacy" className="hover:text-primary transition-colors">
+                <Link href="/privacy" className="text-muted-foreground hover:text-primary transition-colors">
                   {t('footer.privacy_link')}
                 </Link>
               </li>
             </ul>
           </div>
+
         </div>
-        <div className="container mx-auto px-4 pt-8 mt-8 border-t flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground text-center sm:text-start">
-          <p>
-            {language === 'ar'
-              ? `© ${new Date().getFullYear()} شركة فيوتشر رود لابز. جميع الحقوق محفوظة.`
-              : `© ${new Date().getFullYear()} Future Road Labs. All rights reserved.`}
-          </p>
-          <div className="flex gap-4">
+
+        {/* Copyright bar */}
+        <div className="border-t border-border/40">
+          <div className="container mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <p className="text-xs text-muted-foreground/70">
+              {language === 'ar'
+                ? `© ${new Date().getFullYear()} شركة فيوتشر رود لابز. جميع الحقوق محفوظة.`
+                : `© ${new Date().getFullYear()} Future Road Labs. All rights reserved.`}
+            </p>
             <button
               onClick={toggleLang}
-              className="min-h-11 min-w-11 px-2.5 py-1.5 inline-flex items-center justify-center text-xs font-semibold rounded-md border border-border/60 hover:bg-secondary hover:border-border transition-colors uppercase tracking-wider text-muted-foreground hover:text-foreground cursor-pointer"
+              className="min-h-9 px-3 py-1 inline-flex items-center justify-center text-xs font-semibold rounded-md border border-border/50 hover:bg-secondary hover:border-border transition-colors uppercase tracking-wider text-muted-foreground hover:text-foreground cursor-pointer"
               dir="ltr"
               aria-label={language === 'ar' ? t('nav.switch_to_english') : t('nav.switch_to_arabic')}
             >
@@ -448,6 +466,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
             </button>
           </div>
         </div>
+
       </footer>
     </div>
   );

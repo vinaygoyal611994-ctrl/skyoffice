@@ -1,6 +1,7 @@
 import { Link } from 'wouter';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
+import { usePageMeta } from '@/lib/usePageMeta';
 
 // ─────────────────────────────────────────────
 //  Shared layout wrapper
@@ -847,6 +848,20 @@ export function TermsPage() {
   const { language } = useI18n();
   const isAr = language === 'ar';
 
+  usePageMeta(
+    isAr
+      ? {
+          title: 'شروط الاستخدام — سكاي أوفيس',
+          description: 'اقرأ شروط استخدام منصة سكاي أوفيس، منصة الاكتشاف والتواصل المهني التي تُشغّلها شركة فيوتشر رود لابز.',
+          keywords: 'شروط الاستخدام، سكاي أوفيس، فيوتشر رود لابز، القانون، الاتفاقية',
+        }
+      : {
+          title: 'Terms of Use — SkayOffice',
+          description: 'Read the Terms of Use for SkayOffice, a digital discovery and communication platform operated by Future Road Labs in Saudi Arabia.',
+          keywords: 'terms of use, terms and conditions, SkayOffice, Future Road Labs, legal agreement',
+        },
+  );
+
   return (
     <LegalPage
       title={isAr ? 'شروط الاستخدام' : 'Terms of Use'}
@@ -860,6 +875,20 @@ export function TermsPage() {
 export function PrivacyPage() {
   const { language } = useI18n();
   const isAr = language === 'ar';
+
+  usePageMeta(
+    isAr
+      ? {
+          title: 'سياسة الخصوصية — سكاي أوفيس',
+          description: 'تعرّف على كيفية جمع سكاي أوفيس لبياناتك الشخصية واستخدامها وحمايتها. سياسة الخصوصية الصادرة عن شركة فيوتشر رود لابز.',
+          keywords: 'سياسة الخصوصية، حماية البيانات، سكاي أوفيس، فيوتشر رود لابز، خصوصية المستخدم',
+        }
+      : {
+          title: 'Privacy Policy — SkayOffice',
+          description: 'Learn how SkayOffice collects, uses, stores, and protects your personal information. Privacy Policy by Future Road Labs.',
+          keywords: 'privacy policy, data protection, personal data, SkayOffice, Future Road Labs, GDPR',
+        },
+  );
 
   return (
     <LegalPage

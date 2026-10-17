@@ -35,6 +35,7 @@ import {
 } from '@/lib/officeModalNav';
 import { getSessionToken } from '@/lib/sessionToken';
 import { useI18n } from '@/lib/i18n';
+import { SearchX } from 'lucide-react';
 
 // Matches the legacy numeric route (/offices/:id) and the canonical
 // slug-based public routes (/office/:slug, /ar/office/:slug,
@@ -45,13 +46,32 @@ const OFFICE_PROFILE_PATTERN = /^\/offices\/[^/]+|^\/office\/(?!dashboard(?:\/|$
 const NotFound = () => {
   const { t } = useI18n();
   return (
-    <div className="p-20 text-center flex flex-col items-center justify-center min-h-[60vh]">
-      <h1 className="text-6xl font-bold text-primary mb-4">404</h1>
-      <h2 className="text-2xl font-semibold mb-6">{t('not_found.title')}</h2>
-      <p className="text-muted-foreground mb-8 max-w-md">
+    <div className="min-h-[80vh] flex flex-col items-center justify-center px-4 py-16 bg-muted/20">
+      {/* Icon badge */}
+      <div className="w-16 h-16 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-6 shadow-sm">
+        <SearchX size={28} />
+      </div>
+
+      {/* Large decorative 404 */}
+      <p className="text-[7rem] sm:text-[9rem] font-extrabold leading-none text-primary/10 select-none -mb-2">
+        404
+      </p>
+
+      {/* Title */}
+      <h1 className="text-2xl font-bold text-foreground mt-4 mb-3">
+        {t('not_found.title')}
+      </h1>
+
+      {/* Description */}
+      <p className="text-muted-foreground text-sm text-center max-w-sm mb-8 leading-relaxed">
         {t('not_found.description')}
       </p>
-      <a href="/" className="px-6 py-3 bg-primary text-primary-foreground rounded-full hover:bg-primary/90 transition-colors font-medium">
+
+      {/* CTA */}
+      <a
+        href="/"
+        className="inline-flex items-center px-6 py-2.5 bg-primary text-primary-foreground rounded-full hover:bg-primary/90 transition-colors font-medium text-sm shadow-sm"
+      >
         {t('not_found.back_home')}
       </a>
     </div>

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Voice Search</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #f1f5f9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      gap: 20px;
+      color: #1e293b;
+      user-select: none;
+    }
+
+    .label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #94a3b8;
+    }
+
+    .mic-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .ripple {
+      position: absolute;
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background: rgba(51, 65, 85, 0.15);
+      animation: ripple 1.6s ease-out infinite;
+      display: none;
+    }
+    .ripple.r2 { animation-delay: 0.5s; }
+
+    @keyframes ripple {
+      0%   { transform: scale(1);   opacity: 0.6; }
+      100% { transform: scale(2.2); opacity: 0; }
+    }
+
+    .mic-btn {
+      position: relative;
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: #334155;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s, transform 0.15s;
+      box-shadow: 0 4px 14px rgba(51,65,85,0.3);
+      z-index: 1;
+    }
+    .mic-btn:hover  { background: #1e293b; transform: scale(1.06); }
+    .mic-btn:active { transform: scale(0.96); }
+    .mic-btn.listening { background: #ef4444; box-shadow: 0 4px 14px rgba(239,68,68,0.4); }
+    .mic-btn.listening:hover { background: #dc2626; }
+
+    .mic-btn svg { width: 28px; height: 28px; fill: #fff; }
+
+    .status {
+      font-size: 15px;
+      font-weight: 500;
+      color: #475569;
+      text-align: center;
+      min-height: 22px;
+    }
+
+    .error {
+      font-size: 13px;
+      color: #ef4444;
+      text-align: center;
+      max-width: 240px;
+      line-height: 1.5;
+      min-height: 18px;
+    }
+
+    .hint {
+      font-size: 12px;
+      color: #94a3b8;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <p class="label">Voice Search</p>
+
+  <div class="mic-wrap">
+    <div class="ripple r1" id="r1"></div>
+    <div class="ripple r2" id="r2"></div>
+    <button class="mic-btn" id="micBtn" aria-label="Start voice search">
+      <svg viewBox="0 0 24 24">
+        <path d="M12 1a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm-2 15.93A8 8 0 0 0 20 9h-2a6 6 0 0 1-12 0H4a8 8 0 0 0 7 7.93V19H8v2h8v-2h-3v-2.07z"/>
+      </svg>
+    </button>
+  </div>
+
+  <p class="status" id="status">Starting…</p>
+  <p class="error"  id="error"></p>
+  <p class="hint">Speak clearly after the mic turns red</p>
+
+  <script>
+    const btn    = document.getElementById('micBtn');
+    const status = document.getElementById('status');
+    const errorEl= document.getElementById('error');
+    const r1     = document.getElementById('r1');
+    const r2     = document.getElementById('r2');
+
+    // Read ?lang=ar from URL so recognition uses the right locale
+    const lang = new URLSearchParams(location.search).get('lang') === 'ar' ? 'ar-SA' : 'en-US';
+
+    function setListening(on) {
+      btn.classList.toggle('listening', on);
+      r1.style.display = on ? 'block' : 'none';
+      r2.style.display = on ? 'block' : 'none';
+    }
+
+    function start() {
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SR) {
+        status.textContent = 'Not supported';
+        errorEl.textContent = 'Use Chrome or Edge for voice search.';
+        return;
+      }
+
+      const rec = new SR();
+      rec.lang = lang;
+      rec.interimResults = false;
+      rec.maxAlternatives = 1;
+
+      rec.onstart = () => {
+        setListening(true);
+        status.textContent = 'Listening…';
+        errorEl.textContent = '';
+      };
+
+      rec.onresult = (e) => {
+        const transcript = e.results[0][0].transcript;
+        window.opener?.postMessage({ type: 'VOICE_RESULT', transcript }, '*');
+        window.close();
+      };
+
+      rec.onerror = (e) => {
+        setListening(false);
+        if (e.error === 'not-allowed' || e.error === 'permission-denied') {
+          status.textContent = 'Permission denied';
+          errorEl.textContent = 'Allow microphone access in your browser settings, then try again.';
+        } else if (e.error === 'no-speech') {
+          status.textContent = 'No speech detected';
+          errorEl.textContent = '';
+          btn.onclick = start;
+        } else {
+          status.textContent = 'Error — try again';
+          errorEl.textContent = e.error;
+        }
+      };
+
+      rec.onend = () => {
+        setListening(false);
+      };
+
+      rec.start();
+      btn.onclick = () => { rec.stop(); window.close(); };
+    }
+
+    // Auto-start after a short delay so the popup renders first
+    window.addEventListener('load', () => setTimeout(start, 250));
+  </script>
+</body>
+</html>

@@ -6,12 +6,13 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Mail, CheckCircle } from 'lucide-react';
+import { Mail, CheckCircle, ArrowLeft, ArrowRight } from 'lucide-react';
 
 type State = 'idle' | 'loading' | 'success' | 'error';
 
 export function ForgotPassword() {
-  const { t } = useI18n();
+  const { t, language } = useI18n();
+  const BackIcon = language === 'ar' ? ArrowRight : ArrowLeft;
   const [email, setEmail] = useState('');
   const [state, setState] = useState<State>('idle');
   const [errorMsg, setErrorMsg] = useState('');
@@ -66,7 +67,10 @@ export function ForgotPassword() {
 
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="space-y-2">
-                  <Label htmlFor="reset-email">{t('auth.email')}</Label>
+                  <Label htmlFor="reset-email">
+                    {t('auth.email')}
+                    <span className="text-destructive ms-0.5" aria-hidden="true">*</span>
+                  </Label>
                   <Input
                     id="reset-email"
                     type="email"
@@ -91,13 +95,18 @@ export function ForgotPassword() {
                     ? t('auth.sendingResetLink')
                     : t('auth.sendResetLink')}
                 </Button>
+
+                <p className="text-xs text-muted-foreground text-center mt-2">
+                  <span className="text-destructive">*</span> {t('auth.required_fields')}
+                </p>
               </form>
 
-              <div className="mt-8 text-center text-sm">
+              <div className="mt-6 flex justify-center">
                 <Link
                   href="/login/customer"
-                  className="text-primary font-medium hover:underline"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-border/60 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
                 >
+                  <BackIcon size={15} />
                   {t('auth.backToLogin')}
                 </Link>
               </div>

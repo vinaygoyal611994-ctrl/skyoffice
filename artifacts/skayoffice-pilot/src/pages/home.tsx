@@ -38,6 +38,7 @@ import {
 } from 'lucide-react';
 import { QuickOfficeCard } from '@/components/office/QuickOfficeCard';
 import { trackSearch } from '@/lib/analytics';
+import { usePageMeta } from '@/lib/usePageMeta';
 import { SharePlatformSection } from '@/components/home/SharePlatformSection';
 import { CategoryCarousel, type CategoryItem } from '@/components/home/CategoryCarousel';
 import { SortDropdown } from '@/components/home/SortDropdown';
@@ -60,6 +61,20 @@ const CATEGORY_ICONS: Record<string, React.ComponentType<{ size?: number; classN
 
 export function Home() {
   const { t, language } = useI18n();
+
+  usePageMeta(
+    language === 'ar'
+      ? {
+          title: 'سكاي أوفيس — اكتشف المكاتب والمستقلين المهنيين',
+          description: 'ابحث عن مكاتب مهنية ومستقلين في المملكة العربية السعودية. اكتشف الخدمات حسب التخصص والموقع والتوفر وتواصل مباشرة عبر سكاي أوفيس.',
+          keywords: 'مكاتب مهنية، مستقلون، خدمات أعمال، السعودية، الرياض، جدة، مكتب رقمي، سكاي أوفيس',
+        }
+      : {
+          title: 'SkayOffice — Discover Professional Offices & Freelancers',
+          description: 'Find and connect with professional offices and freelancers in Saudi Arabia. Search by specialty, location, and availability on SkayOffice.',
+          keywords: 'offices, freelancers, professional services, Saudi Arabia, Riyadh, Jeddah, digital office, business services, SkayOffice',
+        },
+  );
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [location] = useLocation();
@@ -209,77 +224,60 @@ export function Home() {
     }
   };
 
-  const handleVoiceSearch = () => {
-    const SpeechRecognition =
-      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-
-    if (!SpeechRecognition) {
-      toast({ title: t('discover.voice_unsupported'), variant: 'destructive' });
-      return;
-    }
-
+  const handleVoiceSearch = React.useCallback(() => {
     if (listening) {
-      recognitionRef.current?.stop();
+      // Already waiting — close any existing popup
+      setListening(false);
       return;
     }
 
-    const startRecognition = () => {
-      const recognition = new SpeechRecognition();
-      recognition.lang = language === 'ar' ? 'ar-SA' : 'en-US';
-      recognition.interimResults = false;
-      recognition.maxAlternatives = 1;
+    const popupUrl = `/voice-helper.html?lang=${language}`;
+    const w = 320, h = 320;
+    const left = Math.round(window.screenX + (window.outerWidth - w) / 2);
+    const top  = Math.round(window.screenY + (window.outerHeight - h) / 2);
+    const popup = window.open(
+      popupUrl,
+      'skayoffice-voice',
+      `width=${w},height=${h},left=${left},top=${top},toolbar=no,menubar=no,scrollbars=no,resizable=no,location=no,status=no`,
+    );
 
-      recognition.onstart = () => setListening(true);
-      recognition.onend = () => setListening(false);
-      recognition.onerror = (event: any) => {
-        setListening(false);
-        if (event.error === 'not-allowed' || event.error === 'permission-denied') {
-          toast({
-            title: t('discover.voice_permission_denied'),
-            description: t('discover.voice_permission_denied_desc'),
-            variant: 'default',
-          });
-        } else if (event.error === 'no-speech') {
-          toast({ title: t('discover.voice_no_speech'), variant: 'default' });
-        } else if (event.error !== 'aborted') {
-          toast({ title: t('discover.voice_error'), variant: 'destructive' });
-        }
-      };
-      recognition.onresult = (event: any) => {
-        const transcript = event.results?.[0]?.[0]?.transcript;
+    if (!popup) {
+      toast({
+        title: language === 'ar' ? 'تم حظر النافذة المنبثقة' : 'Popup blocked',
+        description: language === 'ar'
+          ? 'يرجى السماح بالنوافذ المنبثقة لهذا الموقع ثم المحاولة مجدداً.'
+          : 'Please allow popups for this site and try again.',
+        variant: 'default',
+      });
+      return;
+    }
+
+    setListening(true);
+
+    const onMessage = (event: MessageEvent) => {
+      if (event.data?.type === 'VOICE_RESULT') {
+        const transcript = event.data.transcript as string;
         if (transcript) {
           lastInputMethodRef.current = 'voice';
           setSearch(transcript);
         }
-      };
-
-      recognitionRef.current = recognition;
-      try {
-        recognition.start();
-      } catch {
-        setListening(false);
+        cleanup();
       }
     };
 
-    // Request mic permission via getUserMedia to trigger the browser's
-    // native Allow/Block dialog. Silently stop if the environment blocks it.
-    if (navigator.mediaDevices?.getUserMedia) {
-      navigator.mediaDevices.getUserMedia({ audio: true })
-        .then((stream) => {
-          stream.getTracks().forEach((t) => t.stop());
-          startRecognition();
-        })
-        .catch(() => {
-          toast({
-            title: t('discover.voice_permission_denied'),
-            description: t('discover.voice_permission_denied_desc'),
-            variant: 'default',
-          });
-        });
-    } else {
-      startRecognition();
-    }
-  };
+    const cleanup = () => {
+      setListening(false);
+      window.removeEventListener('message', onMessage);
+      clearInterval(pollId);
+    };
+
+    window.addEventListener('message', onMessage);
+
+    // Detect if user closes the popup manually
+    const pollId = setInterval(() => {
+      if (popup.closed) cleanup();
+    }, 400);
+  }, [language, listening, toast, t]);
 
   const handleProviderTypeChange = (type: 'office' | 'freelancer') => {
     setProviderType(type);

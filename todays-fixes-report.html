@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SkayOffice — Today's Bug Fix & Improvement Report</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f4f6f9;
+      color: #1a1a2e;
+      padding: 40px 20px;
+    }
+
+    .wrapper { max-width: 900px; margin: 0 auto; }
+
+    /* ── Header ── */
+    .header {
+      background: linear-gradient(135deg, #1a3a6e, #0d47a1);
+      border-radius: 16px;
+      padding: 36px 40px;
+      color: white;
+      margin-bottom: 36px;
+    }
+    .header .logo { font-size: 12px; letter-spacing: 2px; text-transform: uppercase; opacity: 0.65; margin-bottom: 10px; }
+    .header h1 { font-size: 26px; font-weight: 700; margin-bottom: 8px; }
+    .header p  { font-size: 14px; opacity: 0.82; line-height: 1.6; }
+    .header .meta { margin-top: 22px; display: flex; gap: 28px; flex-wrap: wrap; }
+    .header .meta-item { font-size: 12px; opacity: 0.75; }
+    .header .meta-item strong { display: block; font-size: 22px; font-weight: 700; opacity: 1; color: #fff; }
+
+    /* ── Category heading ── */
+    .cat-title {
+      font-size: 16px; font-weight: 700; color: #fff;
+      margin: 36px 0 14px;
+      padding: 10px 16px;
+      border-radius: 10px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .cat-design   { background: #1a73e8; }
+    .cat-usability{ background: #7b2ff7; }
+    .cat-functional{ background: #0b8a4e; }
+    .cat-seo      { background: #e37400; }
+
+    .cat-title .icon {
+      width: 30px; height: 30px; border-radius: 8px;
+      background: rgba(255,255,255,0.2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; flex-shrink: 0;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: white; border-radius: 12px;
+      border: 1px solid #e8ecf0;
+      margin-bottom: 12px; overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    }
+    .card-header {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 16px 20px 12px;
+    }
+    .num {
+      width: 26px; height: 26px; border-radius: 50%;
+      color: white; font-size: 12px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; margin-top: 1px;
+    }
+    .num-design    { background: #1a73e8; }
+    .num-usability { background: #7b2ff7; }
+    .num-functional{ background: #0b8a4e; }
+    .num-seo       { background: #e37400; }
+
+    .card-title { font-size: 14.5px; font-weight: 700; color: #1a1a2e; line-height: 1.4; }
+
+    .card-body {
+      display: grid; grid-template-columns: 1fr 1fr;
+      border-top: 1px solid #f0f2f5;
+    }
+    .issue-box, .fix-box { padding: 12px 20px 15px; }
+    .issue-box { border-right: 1px solid #f0f2f5; background: #fff8f8; }
+    .fix-box   { background: #f6fff8; }
+    .box-label {
+      font-size: 10px; font-weight: 700; letter-spacing: 1px;
+      text-transform: uppercase; margin-bottom: 5px;
+    }
+    .issue-box .box-label { color: #c0392b; }
+    .fix-box   .box-label { color: #27ae60; }
+    .box-text  { font-size: 13px; line-height: 1.65; color: #444; }
+
+    /* ── Summary ── */
+    .summary {
+      background: white; border-radius: 12px;
+      border: 1px solid #e8ecf0;
+      padding: 20px 24px; margin-top: 36px;
+      display: flex; align-items: center;
+      justify-content: space-between; flex-wrap: wrap; gap: 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    }
+    .summary p { font-size: 14px; color: #555; }
+    .badges { display: flex; gap: 8px; flex-wrap: wrap; }
+    .badge {
+      color: white; font-size: 12px; font-weight: 700;
+      padding: 5px 14px; border-radius: 20px;
+    }
+    .b-design    { background: #1a73e8; }
+    .b-usability { background: #7b2ff7; }
+    .b-functional{ background: #0b8a4e; }
+    .b-seo       { background: #e37400; }
+
+    /* ── Footer ── */
+    .footer { text-align: center; margin-top: 30px; font-size: 11px; color: #999; }
+
+    @media (max-width: 600px) {
+      .card-body { grid-template-columns: 1fr; }
+      .issue-box { border-right: none; border-bottom: 1px solid #f0f2f5; }
+      .header { padding: 24px 20px; }
+      .header h1 { font-size: 20px; }
+    }
+  </style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="logo">SkayOffice · Daily Fix Report</div>
+    <h1>Bug Fixes &amp; Improvements — Today's Session</h1>
+    <p>All issues identified and resolved during today's development session, organised by category for easy review.</p>
+    <div class="meta">
+      <div class="meta-item"><strong>13</strong> Issues Fixed</div>
+      <div class="meta-item"><strong>3</strong> Design</div>
+      <div class="meta-item"><strong>5</strong> Usability</div>
+      <div class="meta-item"><strong>2</strong> Functional</div>
+      <div class="meta-item"><strong>3</strong> SEO</div>
+    </div>
+  </div>
+
+
+  <!-- ══ CATEGORY 1: DESIGN ══ -->
+  <div class="cat-title cat-design">
+    <div class="icon">🎨</div>
+    Design &amp; Visual
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="num num-design">1</div>
+      <div class="card-title">Terms &amp; Privacy pages looked plain and unprofessional</div>
+    </div>
+    <div class="card-body">
+      <div class="issue-box">
+        <div class="box-label">Problem</div>
+        <div class="box-text">The Terms of Use and Privacy Policy pages had a simple white background with plain text and basic headings. There was no visual structure — it looked like an unformatted document, not part of a professional platform.</div>
+      </div>
+      <div class="fix-box">
+        <div class="box-label">Fixed</div>
+        <div class="box-text">Both pages were redesigned to match the app theme: light grey background, a white card with a thin primary colour strip at the top, "SKAYOFFICE · LEGAL" label, bold page title, numbered section badges, custom bullet points, and a clean footer row.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="num num-design">2</div>
+      <div class="card-title">404 "Page Not Found" page looked like a plain error message</div>
+    </div>
+    <div class="card-body">
+      <div class="issue-box">
+        <div class="box-label">Problem</div>
+        <div class="box-text">The 404 error page showed only a large bold "404" number and a plain text message. It had no icon, no visual hierarchy, and did not feel like part of the SkayOffice product — it looked like a developer placeholder.</div>
+      </div>
+      <div class="fix-box">
+        <div class="box-label">Fixed</div>
+        <div class="box-text">The page now has a branded icon badge (search icon in a rounded square), a large ghost-style "404" watermark in a soft colour, a bold title, a readable description, and a properly styled "Back to Home" button — all consistent with the app design.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="num num-design">3</div>
+      <div class="card-title">Footer looked basic with no visual hierarchy</div>
+    </div>
+    <div class="card-body">
+      <div class="issue-box">
+        <div class="box-label">Problem</div>
+        <div class="box-text">The website footer had plain column headings, no visual separation at the top, basic contact links with no icons, and a cluttered copyright bar. It did not feel like a finished, professional footer.</div>
+      </div>
+      <div class="fix-box">
+        <div class="box-label">Fixed</div>
+        <div class="box-text">Footer now has a thin primary colour accent strip at the very top, column headings styled as small uppercase labels, contact links with icon badges that highlight on hover, and a cleaner copyright bar — matching the professional look of the rest of the site.</div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══ CATEGORY 2: USABILITY ══ -->
+  <div class="cat-title cat-usability" style="margin-top: 40px;">
+    <div class="icon">🖱️</div>
+    Usability &amp; User Experience
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="num num-usability">1</div>
+      <div class="card-title">Reset Password page had no star (*) on the required email field</div>
+    </div>
+    <div class="card-body">
+      <div class="issue-box">
+        <div class="box-label">Problem</div>
+        <div class="box-text">The "Reset Password" page showed an Email Address field with no indication that it is required. Users could not tell at a glance what they must fill in — inconsistent with the Login and Register pages which already have the star indicator.</div>
+      </div>
+      <div class="fix-box">
+        <div class="box-label">Fixed</div>
+        <div class="box-text">A red star (*) now appears next to the Email Address label. A small "* Required fields" note was also added below the Submit button — matching the standard used on Login and Register pages for consistency.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="num num-usability">2</div>
+      <div class="card-title">"Back to Login" on Reset Password page looked like plain text, not a button</div>
+    </div>
+    <div class="card-body">
+      <div class="issue-box">
+        <div class="box-label">Problem</div>
+        <div class="box-text">The "Back to Login" link at the bottom of the Reset Password page was styled as plain underlined text. It did not look clickable or stand out as a navigation action — unlike every other secondary action in the app which has a proper button or bordered link style.</div>
+      </div>
+      <div class="fix-box">
+        <div class="box-label">Fixed</div>
+        <div class="box-text">The link is now styled as a proper bordered button with a back-arrow icon, hover background effect, and the correct font weight — consistent with secondary navigation actions across the rest of the app. Also supports right-to-left (Arabic) direction automatically.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="num num-usability">3</div>
+      <div class="card-title">Voice search popup opened in the top-left corner of the screen</div>
+    </div>
+    <div class="card-body">
+      <div class="issue-box">
+        <div class="box-label">Problem</div>
+        <div class="box-text">When a user clicked the microphone button, the voice search popup window opened at the top-left corner of the screen. This felt jarring and unpredictable — users had to look for the popup rather than finding it naturally in front of them.</div>
+      </div>
+      <div class="fix-box">
+        <div class="box-label">Fixed</div>
+        <div class="box-text">The popup now calculates the centre of the user's screen and opens directly in the middle of the window — a smooth, expected behaviour matching how other browser popups (like payment dialogs and OAuth windows) appear.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="num num-usability">4</div>
+      <div class="card-title">Terms &amp; Privacy page design clashed with the app theme</div>
+    </div>
+    <div class="card-body">
+      <div class="issue-box">
+        <div class="box-label">Problem</div>
+        <div class="box-text">After the first redesign of the Terms and Privacy pages, the header section used a dark navy/blue gradient background. This looked completely different from the rest of the app, which uses a clean light grey and white card style throughout.</div>
+      </div>
+      <div class="fix-box">
+        <div class="box-label">Fixed</div>
+        <div class="box-text">The dark gradient header was removed and replaced with a light, card-based layout that perfectly matches the app's existing Login and Register page style — same background colour, same card shape, same rounded corners.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="num num-usability">5</div>
+      <div class="card-title">Home page hero section background box felt out of place</div>
+    </div>
+    <div class="card-body">
+      <div class="issue-box">
+        <div class="box-label">Problem</div>
+        <div class="box-text">A background box was added around the home page title, search bar, and provider toggle buttons to create visual grouping. However, this made the area look like a separate section or card, which felt strange and broke the natural flow of the page.</div>
+      </div>
+      <div class="fix-box">
+        <div class="box-label">Fixed</div>
+        <div class="box-text">The background box was completely removed. The home page title, subtitle, search bar, and Office/Freelancer buttons are back in their clean, natural sequence — no background card, no extra border — exactly as intended in the original design.</div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══ CATEGORY 3: FUNCTIONAL ══ -->
+  <div class="cat-title cat-functional" style="margin-top: 40px;">
+    <div class="icon">⚙️</div>
+    Functional
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="num num-functional">1</div>
+      <div class="card-title">Microphone / Voice Search button did not work on Replit</div>
+    </div>
+    <div class="card-body">
+      <div class="issue-box">
+        <div class="box-label">Problem</div>
+        <div class="box-text">The voice search button on the home page was completely non-functional when the app was hosted on Replit. Replit's hosting platform forces a security rule (<em>Permissions-Policy: microphone=()</em>) on all pages, which blocks the browser from accessing the microphone entirely — regardless of user settings.</div>
+      </div>
+      <div class="fix-box">
+        <div class="box-label">Fixed</div>
+        <div class="box-text">A popup-based approach was implemented. When the user clicks the mic button, a small popup window opens (hosted on a separate domain, not blocked by Replit's policy). The popup captures the user's voice using the browser's speech recognition. Once the user speaks, the popup closes automatically and the spoken text appears in the search box — seamlessly and without any extra steps.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="num num-functional">2</div>
+      <div class="card-title">Browser tab title and page description were the same on all pages</div>
+    </div>
+    <div class="card-body">
+      <div class="issue-box">
+        <div class="box-label">Problem</div>
+        <div class="box-text">Every page of the app showed the same browser tab title "SkayOffice" and the same generic description, regardless of which page the user was on. The Terms, Privacy, and Home pages all had identical tab titles — making it impossible for users or search engines to tell the pages apart.</div>
+      </div>
+      <div class="fix-box">
+        <div class="box-label">Fixed</div>
+        <div class="box-text">Each page now has its own unique browser tab title (e.g. "Terms of Use — SkayOffice", "Privacy Policy — SkayOffice"). The title and description update automatically when switching between pages, and also change when the user switches between English and Arabic language modes.</div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══ CATEGORY 4: SEO ══ -->
+  <div class="cat-title cat-seo" style="margin-top: 40px;">
+    <div class="icon">🔍</div>
+    SEO &amp; Metadata
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="num num-seo">1</div>
+      <div class="card-title">Home page had no unique meta title or search keywords</div>
+    </div>
+    <div class="card-body">
+      <div class="issue-box">
+        <div class="box-label">Problem</div>
+        <div class="box-text">The home page did not have a descriptive meta title or keywords that Google and other search engines could read. The page title was just "SkayOffice" — with no information about what the platform does or who it is for. This makes it very difficult for people to find the site through search.</div>
+      </div>
+      <div class="fix-box">
+        <div class="box-label">Fixed</div>
+        <div class="box-text">The home page now has a full set of meta tags: <em>Title:</em> "SkayOffice — Discover Professional Offices &amp; Freelancers". <em>Description</em> explains what the platform does and where it operates. <em>Keywords</em> include offices, freelancers, Saudi Arabia, Riyadh, Jeddah, and related terms — in both English and Arabic depending on the selected language.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="num num-seo">2</div>
+      <div class="card-title">Terms of Use page had no meta title or description for search engines</div>
+    </div>
+    <div class="card-body">
+      <div class="issue-box">
+        <div class="box-label">Problem</div>
+        <div class="box-text">The Terms of Use page had no unique title or description. If someone searched for "SkayOffice terms" in Google, the result would show a meaningless or auto-generated snippet — not a clear, professional description of the page.</div>
+      </div>
+      <div class="fix-box">
+        <div class="box-label">Fixed</div>
+        <div class="box-text">The Terms page now has its own meta title ("Terms of Use — SkayOffice"), a clear description about what the terms cover and who operates the platform, and relevant keywords including "terms of use", "SkayOffice", and "Future Road Labs" — in both languages.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="num num-seo">3</div>
+      <div class="card-title">Privacy Policy page had no meta title or description for search engines</div>
+    </div>
+    <div class="card-body">
+      <div class="issue-box">
+        <div class="box-label">Problem</div>
+        <div class="box-text">Same issue as the Terms page — the Privacy Policy had no unique title or description. Search engines and browser tabs showed the generic "SkayOffice" title, giving no indication to users or search engines that this page is about data privacy.</div>
+      </div>
+      <div class="fix-box">
+        <div class="box-label">Fixed</div>
+        <div class="box-text">The Privacy Policy page now has its own meta title ("Privacy Policy — SkayOffice"), a description explaining how the platform collects and protects user data, and keywords including "privacy policy", "data protection", and "Future Road Labs" — updating automatically in Arabic when the user switches language.</div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Summary -->
+  <div class="summary">
+    <p>All 13 issues have been identified, fixed, and tested locally. Ready for review before deployment.</p>
+    <div class="badges">
+      <div class="badge b-design">3 Design ✓</div>
+      <div class="badge b-usability">5 Usability ✓</div>
+      <div class="badge b-functional">2 Functional ✓</div>
+      <div class="badge b-seo">3 SEO ✓</div>
+    </div>
+  </div>
+
+  <div class="footer">
+    SkayOffice · Daily Fix Report · October 2026
+  </div>
+
+</div>
+</body>
+</html>
