@@ -20,37 +20,43 @@ function LegalPage({
   const BackIcon = isRtl ? ArrowRight : ArrowLeft;
 
   return (
-    <div className="min-h-screen bg-background py-10 px-4">
-      <div className="max-w-3xl mx-auto">
-        {/* Back link */}
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors mb-8"
-        >
-          <BackIcon size={16} />
-          <span>{isRtl ? 'العودة للرئيسية' : 'Back to Home'}</span>
-        </Link>
+    <div className="min-h-screen bg-muted/40">
+      {/* Hero header */}
+      <div className="bg-gradient-to-br from-primary to-primary/75 text-primary-foreground">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-8 pb-14">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors mb-8"
+          >
+            <BackIcon size={15} />
+            <span>{isRtl ? 'العودة للرئيسية' : 'Back to Home'}</span>
+          </Link>
+          <p className="text-xs font-semibold tracking-widest uppercase text-primary-foreground/55 mb-3">
+            SkayOffice · Legal
+          </p>
+          <h1 className="text-3xl md:text-4xl font-bold mb-2">{title}</h1>
+          <p className="text-sm text-primary-foreground/65">{lastUpdated}</p>
+        </div>
+      </div>
 
-        {/* Page header */}
-        <div className="mb-8 pb-6 border-b">
-          <h1 className="text-3xl font-bold font-serif mb-2">{title}</h1>
-          <p className="text-sm text-muted-foreground">{lastUpdated}</p>
+      {/* Main content card */}
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 -mt-5 pb-16">
+        <div className="bg-card rounded-2xl border shadow-sm overflow-hidden">
+          <div className="p-6 md:p-10 legal-content text-sm leading-7 text-foreground/90 [&>p]:mb-4 [&>p:last-of-type]:mb-0">
+            {children}
+          </div>
         </div>
 
-        {/* Legal content */}
-        <div className="legal-content space-y-8 text-sm leading-7 text-foreground/90">
-          {children}
-        </div>
-
-        {/* Bottom back link */}
-        <div className="mt-12 pt-8 border-t">
+        {/* Footer row */}
+        <div className="mt-8 flex items-center justify-between">
           <Link
             href="/"
             className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
           >
-            <BackIcon size={16} />
+            <BackIcon size={15} />
             <span>{isRtl ? 'العودة للرئيسية' : 'Back to Home'}</span>
           </Link>
+          <p className="text-xs text-muted-foreground">{lastUpdated}</p>
         </div>
       </div>
     </div>
@@ -59,24 +65,30 @@ function LegalPage({
 
 function Section({ number, title, children }: { number: number; title: string; children: React.ReactNode }) {
   return (
-    <section>
-      <h2 className="text-base font-semibold mb-3">
-        {number}. {title}
-      </h2>
-      <div className="space-y-3 text-muted-foreground">{children}</div>
+    <section className="py-6 border-b border-border/50 last:border-b-0">
+      <div className="flex items-start gap-3 mb-3">
+        <span className="flex-shrink-0 w-7 h-7 rounded-lg bg-primary/10 text-primary text-xs font-bold flex items-center justify-center ring-1 ring-primary/20 mt-0.5">
+          {number}
+        </span>
+        <h2 className="text-[15px] font-semibold text-foreground leading-snug pt-0.5">{title}</h2>
+      </div>
+      <div className="space-y-3 text-muted-foreground ps-10">{children}</div>
     </section>
   );
 }
 
 function P({ children }: { children: React.ReactNode }) {
-  return <p>{children}</p>;
+  return <p className="leading-relaxed">{children}</p>;
 }
 
 function UL({ items }: { items: string[] }) {
   return (
-    <ul className="list-disc list-inside space-y-1 ps-2">
+    <ul className="space-y-2">
       {items.map((item, i) => (
-        <li key={i}>{item}</li>
+        <li key={i} className="flex items-start gap-2.5">
+          <span className="mt-2.5 w-1.5 h-1.5 rounded-full bg-primary/40 flex-shrink-0" />
+          <span>{item}</span>
+        </li>
       ))}
     </ul>
   );
@@ -84,7 +96,7 @@ function UL({ items }: { items: string[] }) {
 
 function Placeholder({ label }: { label: string }) {
   return (
-    <span className="font-mono bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-300 px-1 rounded text-xs">
+    <span className="inline-flex items-center font-mono bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-2 py-0.5 rounded-md text-xs border border-amber-200 dark:border-amber-700/50">
       [{label}]
     </span>
   );
