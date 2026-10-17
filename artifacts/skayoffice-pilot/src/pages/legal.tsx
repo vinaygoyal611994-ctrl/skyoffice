@@ -20,28 +20,32 @@ function LegalPage({
   const BackIcon = isRtl ? ArrowRight : ArrowLeft;
 
   return (
-    <div className="min-h-screen bg-muted/40">
-      {/* Hero header */}
-      <div className="bg-gradient-to-br from-primary to-primary/75 text-primary-foreground">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-8 pb-14">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors mb-8"
-          >
-            <BackIcon size={15} />
-            <span>{isRtl ? 'العودة للرئيسية' : 'Back to Home'}</span>
-          </Link>
-          <p className="text-xs font-semibold tracking-widest uppercase text-primary-foreground/55 mb-3">
-            SkayOffice · Legal
-          </p>
-          <h1 className="text-3xl md:text-4xl font-bold mb-2">{title}</h1>
-          <p className="text-sm text-primary-foreground/65">{lastUpdated}</p>
-        </div>
-      </div>
+    <div className="min-h-screen bg-muted/20">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10">
 
-      {/* Main content card */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 -mt-5 pb-16">
-        <div className="bg-card rounded-2xl border shadow-sm overflow-hidden">
+        {/* Back link */}
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors mb-6"
+        >
+          <BackIcon size={15} />
+          <span>{isRtl ? 'العودة للرئيسية' : 'Back to Home'}</span>
+        </Link>
+
+        {/* Header card */}
+        <div className="mb-5 rounded-2xl border border-border/50 bg-card shadow-sm overflow-hidden">
+          <div className="h-1 bg-primary" />
+          <div className="px-8 py-7">
+            <p className="text-xs font-semibold tracking-widest uppercase text-primary/70 mb-3">
+              SkayOffice · Legal
+            </p>
+            <h1 className="text-3xl md:text-[2rem] font-bold text-foreground mb-1.5">{title}</h1>
+            <p className="text-sm text-muted-foreground">{lastUpdated}</p>
+          </div>
+        </div>
+
+        {/* Content card */}
+        <div className="rounded-2xl border border-border/50 bg-card shadow-sm overflow-hidden">
           <div className="p-6 md:p-10 legal-content text-sm leading-7 text-foreground/90 [&>p]:mb-4 [&>p:last-of-type]:mb-0">
             {children}
           </div>
@@ -58,6 +62,7 @@ function LegalPage({
           </Link>
           <p className="text-xs text-muted-foreground">{lastUpdated}</p>
         </div>
+
       </div>
     </div>
   );
