@@ -231,7 +231,7 @@ export function Home() {
       return;
     }
 
-    const popupUrl = `/voice-helper.html?lang=${language}`;
+    const popupUrl = `https://vinaygoyal611994-ctrl.github.io/skyoffice/voice-helper.html?lang=${language}`;
     const w = 320, h = 320;
     const left = Math.round(window.screenX + (window.outerWidth - w) / 2);
     const top  = Math.round(window.screenY + (window.outerHeight - h) / 2);
