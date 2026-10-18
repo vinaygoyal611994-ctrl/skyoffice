@@ -62,7 +62,7 @@ export function ForgotPassword() {
 
         <CardContent className="pb-8">
           {state === 'success' ? (
-            <SuccessState t={t} email={email} />
+            <SuccessState t={t} email={email} onReset={() => { setState('idle'); setEmail(''); }} />
           ) : (
             <>
               {state === 'error' && (
@@ -124,7 +124,7 @@ export function ForgotPassword() {
   );
 }
 
-function SuccessState({ t, email }: { t: (k: string) => string; email: string }) {
+function SuccessState({ t, email, onReset }: { t: (k: string) => string; email: string; onReset: () => void }) {
   return (
     <div className="text-center space-y-6 py-4">
       <div className="mx-auto w-14 h-14 rounded-full bg-green-100 text-green-600 flex items-center justify-center">
@@ -145,12 +145,13 @@ function SuccessState({ t, email }: { t: (k: string) => string; email: string })
 
       <div className="text-center text-sm space-y-2">
         <p className="text-muted-foreground">
-          <Link
-            href="/forgot-password"
-            className="text-primary font-medium hover:underline"
+          <button
+            type="button"
+            onClick={onReset}
+            className="text-primary font-medium hover:underline cursor-pointer"
           >
             {t('auth.requestNewLink')}
-          </Link>
+          </button>
         </p>
         <p>
           <Link
