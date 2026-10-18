@@ -43,6 +43,7 @@
     .cat-usability{ background: #7b2ff7; }
     .cat-functional{ background: #0b8a4e; }
     .cat-seo      { background: #e37400; }
+    .cat-notif    { background: #c0392b; }
 
     .cat-title .icon {
       width: 30px; height: 30px; border-radius: 8px;
@@ -72,6 +73,7 @@
     .num-usability { background: #7b2ff7; }
     .num-functional{ background: #0b8a4e; }
     .num-seo       { background: #e37400; }
+    .num-notif     { background: #c0392b; }
 
     .card-title { font-size: 14.5px; font-weight: 700; color: #1a1a2e; line-height: 1.4; }
 
@@ -109,6 +111,7 @@
     .b-usability { background: #7b2ff7; }
     .b-functional{ background: #0b8a4e; }
     .b-seo       { background: #e37400; }
+    .b-notif     { background: #c0392b; }
 
     /* ── Footer ── */
     .footer { text-align: center; margin-top: 30px; font-size: 11px; color: #999; }
@@ -130,11 +133,12 @@
     <h1>Bug Fixes &amp; Improvements — Today's Session</h1>
     <p>All issues identified and resolved during today's development session, organised by category for easy review.</p>
     <div class="meta">
-      <div class="meta-item"><strong>13</strong> Issues Fixed</div>
+      <div class="meta-item"><strong>27</strong> Issues Fixed</div>
       <div class="meta-item"><strong>3</strong> Design</div>
-      <div class="meta-item"><strong>5</strong> Usability</div>
-      <div class="meta-item"><strong>2</strong> Functional</div>
+      <div class="meta-item"><strong>7</strong> Usability</div>
+      <div class="meta-item"><strong>8</strong> Functional</div>
       <div class="meta-item"><strong>3</strong> SEO</div>
+      <div class="meta-item"><strong>6</strong> Notifications</div>
     </div>
   </div>
 
@@ -388,14 +392,274 @@
   </div>
 
 
+  <!-- ══ NEW USABILITY FIXES (Session 2) ══ -->
+  <div class="cat-title cat-usability" style="margin-top: 40px;">
+    <div class="icon">🖱️</div>
+    Usability &amp; User Experience — Session 2
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="num num-usability">6</div>
+      <div class="card-title">Toast notification appeared in wrong position (bottom / center)</div>
+    </div>
+    <div class="card-body">
+      <div class="issue-box">
+        <div class="box-label">Problem</div>
+        <div class="box-text">After adding toast notifications, they appeared at the bottom or center of the screen instead of the expected top-right corner. This is non-standard behaviour — almost every web application shows brief alerts in the top-right so they don't block content.</div>
+      </div>
+      <div class="fix-box">
+        <div class="box-label">Fixed</div>
+        <div class="box-text">The ToastViewport position was updated to <em>top: 16px; right: 16px</em> — fixed to the top-right corner of the screen. Toast messages now appear where users expect them, without blocking page content.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="num num-usability">7</div>
+      <div class="card-title">Toast close (×) button showed default cursor, not a pointer</div>
+    </div>
+    <div class="card-body">
+      <div class="issue-box">
+        <div class="box-label">Problem</div>
+        <div class="box-text">When hovering over the dismiss (×) button on a toast notification, the mouse cursor stayed as the default arrow instead of changing to a hand/pointer. This made the button feel unclickable — users could not tell it was interactive.</div>
+      </div>
+      <div class="fix-box">
+        <div class="box-label">Fixed</div>
+        <div class="box-text">Added <em>cursor: pointer</em> to the ToastClose button. The hand cursor now appears on hover, clearly signalling to users that the button is clickable and will dismiss the notification.</div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══ NEW FUNCTIONAL FIXES (Session 2) ══ -->
+  <div class="cat-title cat-functional" style="margin-top: 40px;">
+    <div class="icon">⚙️</div>
+    Functional — Session 2
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="num num-functional">3</div>
+      <div class="card-title">Voice popup mic still blocked on Replit production (same domain)</div>
+    </div>
+    <div class="card-body">
+      <div class="issue-box">
+        <div class="box-label">Problem</div>
+        <div class="box-text">After implementing the popup approach for voice search, the popup was still hosted on <em>skayoffice.replit.app</em> — the same domain as the main app. Because Replit applies the microphone restriction to the entire domain, the popup inherited the same block and the mic still did not work.</div>
+      </div>
+      <div class="fix-box">
+        <div class="box-label">Fixed</div>
+        <div class="box-text">The <em>voice-helper.html</em> file was moved to GitHub Pages (<em>vinaygoyal611994-ctrl.github.io/skyoffice/voice-helper.html</em>), a completely different domain that is not subject to Replit's Permissions-Policy. The popup URL in the app was updated to point to GitHub Pages, with <em>.nojekyll</em> added to prevent Jekyll processing.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="num num-functional">4</div>
+      <div class="card-title">Office/Freelancer type not selected by default on Register page</div>
+    </div>
+    <div class="card-body">
+      <div class="issue-box">
+        <div class="box-label">Problem</div>
+        <div class="box-text">On the office registration page, the Provider Type field (Office / Freelancer card selector) had no option selected by default. Users who submitted the form without explicitly clicking one of the cards would get a validation error — creating unnecessary friction for the majority of users who are registering as an Office.</div>
+      </div>
+      <div class="fix-box">
+        <div class="box-label">Fixed</div>
+        <div class="box-text">The form's <em>defaultValues</em> was updated to set <em>providerType: 'office'</em> so the Office card is pre-selected (highlighted) when the page loads. Users registering as Freelancers simply click the Freelancer card to switch — saving a step for the majority while remaining fully flexible.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="num num-functional">5</div>
+      <div class="card-title">Footer overlapping dashboard sidebar on office dashboard page</div>
+    </div>
+    <div class="card-body">
+      <div class="issue-box">
+        <div class="box-label">Problem</div>
+        <div class="box-text">After registering, office users were redirected to their dashboard. The dashboard has a fixed sidebar that covers the full viewport height. The Shell footer was still being rendered beneath the dashboard, creating a layout conflict where the footer appeared behind or was partially hidden by the sidebar.</div>
+      </div>
+      <div class="fix-box">
+        <div class="box-label">Fixed</div>
+        <div class="box-text">The Shell component now checks the current route. When the user is on <em>/office/dashboard</em> or <em>/admin</em>, the footer is hidden entirely — these pages have their own full-height layouts and do not need the global footer. The footer continues to appear normally on all public pages.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="num num-functional">6</div>
+      <div class="card-title">Frontend API calls failing — Vite proxy pointing to wrong backend port</div>
+    </div>
+    <div class="card-body">
+      <div class="issue-box">
+        <div class="box-label">Problem</div>
+        <div class="box-text">The frontend dev server (Vite) was configured to proxy <em>/api</em> requests to <em>localhost:8080</em> by default, but the backend actually runs on <em>localhost:3001</em>. All API calls from the frontend silently failed, meaning login, registration, and all data fetching did not work in local development.</div>
+      </div>
+      <div class="fix-box">
+        <div class="box-label">Fixed</div>
+        <div class="box-text">The default proxy target in <em>vite.config.ts</em> was corrected from port <em>8080</em> to <em>3001</em>. The frontend now correctly routes all API calls through the Vite dev server proxy to the running backend, so all features work without needing to set environment variables manually.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="num num-functional">7</div>
+      <div class="card-title">"Request a new link" on Forgot Password success screen did nothing</div>
+    </div>
+    <div class="card-body">
+      <div class="issue-box">
+        <div class="box-label">Problem</div>
+        <div class="box-text">After submitting a forgot-password request, the success screen appeared with a "Request a new link" link. Clicking it navigated to the same <em>/forgot-password</em> route but the component was not re-mounted (same URL = no re-render in Wouter), so the form never came back and the link appeared broken.</div>
+      </div>
+      <div class="fix-box">
+        <div class="box-label">Fixed</div>
+        <div class="box-text">The link was replaced with a button that directly calls <em>setState('idle')</em> and clears the email field. The form instantly reappears without any navigation. This is the correct pattern — no route change needed when the reset just needs to clear local component state.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="num num-functional">8</div>
+      <div class="card-title">Header Login/Logout state not updating after login without page refresh</div>
+    </div>
+    <div class="card-body">
+      <div class="issue-box">
+        <div class="box-label">Problem</div>
+        <div class="box-text">After a successful login or registration, the navigation header continued to show the "Login" and "Register" buttons instead of switching to "My Account" and "Logout". Only a manual page refresh would update the header to the correct logged-in state — a confusing and unprofessional experience.</div>
+      </div>
+      <div class="fix-box">
+        <div class="box-label">Fixed</div>
+        <div class="box-text">After <em>captureSessionToken()</em> stores the session, <em>queryClient.invalidateQueries()</em> is now called immediately with the <em>getCurrentUser</em> query key. This forces React Query to re-fetch the current user, so the header updates within milliseconds of login — no page refresh required.</div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══ CATEGORY 5: NOTIFICATIONS ══ -->
+  <div class="cat-title cat-notif" style="margin-top: 40px;">
+    <div class="icon">🔔</div>
+    Notifications &amp; User Feedback
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="num num-notif">1</div>
+      <div class="card-title">No feedback shown to user after successful customer registration</div>
+    </div>
+    <div class="card-body">
+      <div class="issue-box">
+        <div class="box-label">Problem</div>
+        <div class="box-text">When a new customer registered successfully, the app silently redirected them to the Discover page with no message or confirmation. The user had no indication that registration worked — they were just suddenly on a different page, which felt abrupt and confusing.</div>
+      </div>
+      <div class="fix-box">
+        <div class="box-label">Fixed</div>
+        <div class="box-text">A top-right toast notification now appears: <em>"Registration Successful! — Welcome to SkayOffice. You are now logged in."</em> Available in both English and Arabic. The toast appears instantly after redirect so the user sees confirmation on the new page.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="num num-notif">2</div>
+      <div class="card-title">No feedback shown after office/freelancer registration</div>
+    </div>
+    <div class="card-body">
+      <div class="issue-box">
+        <div class="box-label">Problem</div>
+        <div class="box-text">Same issue for office/freelancer registration — the user was redirected to the dashboard with no message. There was no acknowledgement that their account was created or that it would be reviewed.</div>
+      </div>
+      <div class="fix-box">
+        <div class="box-label">Fixed</div>
+        <div class="box-text">Toast notification now shows: <em>"Office Created! — Your profile will be reviewed and verified shortly."</em> This sets the correct expectation (approval process) while also confirming the registration succeeded.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="num num-notif">3</div>
+      <div class="card-title">No confirmation message shown after successful login</div>
+    </div>
+    <div class="card-body">
+      <div class="issue-box">
+        <div class="box-label">Problem</div>
+        <div class="box-text">When a customer or office user logged in successfully, they were redirected with no message. There was no "Welcome back" or any other confirmation — the user had to infer they were logged in from the header change, which (before the header fix) was also broken.</div>
+      </div>
+      <div class="fix-box">
+        <div class="box-label">Fixed</div>
+        <div class="box-text">Customer login now shows: <em>"Welcome Back! — You have successfully logged in."</em> Office login shows: <em>"Welcome to Your Dashboard! — Your office account has been logged in successfully."</em> Both in English and Arabic.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="num num-notif">4</div>
+      <div class="card-title">No confirmation message shown after logout</div>
+    </div>
+    <div class="card-body">
+      <div class="issue-box">
+        <div class="box-label">Problem</div>
+        <div class="box-text">Clicking "Logout" redirected the user to the home page silently. There was no message confirming the logout was successful — the user had to check the header to verify they were signed out, which is an extra and unnecessary step.</div>
+      </div>
+      <div class="fix-box">
+        <div class="box-label">Fixed</div>
+        <div class="box-text">A toast now appears after logout: <em>"Logged Out — You have been successfully logged out. See you soon!"</em> The message appears on the home page immediately after redirect, giving clear confirmation of the action.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="num num-notif">5</div>
+      <div class="card-title">No toast shown after submitting forgot-password email</div>
+    </div>
+    <div class="card-body">
+      <div class="issue-box">
+        <div class="box-label">Problem</div>
+        <div class="box-text">After submitting the forgot-password form, only an inline success state was shown within the card. There was no brief top-level notification to acknowledge the action — just the card changing its content, which users might miss if they looked away.</div>
+      </div>
+      <div class="fix-box">
+        <div class="box-label">Fixed</div>
+        <div class="box-text">A toast notification now also appears: <em>"Reset Link Sent — If this email is registered, a reset link has been sent to your inbox."</em> The inline success state is still shown inside the card, and the toast provides an additional top-right confirmation.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="num num-notif">6</div>
+      <div class="card-title">No toast shown after successfully resetting password</div>
+    </div>
+    <div class="card-body">
+      <div class="issue-box">
+        <div class="box-label">Problem</div>
+        <div class="box-text">After a successful password reset, the app showed a success card and then redirected to the login page after 3 seconds. There was no toast notification — users who looked away during the 3-second window could miss the confirmation entirely.</div>
+      </div>
+      <div class="fix-box">
+        <div class="box-label">Fixed</div>
+        <div class="box-text">A toast now fires immediately after a successful reset: <em>"Password Changed! — You can now log in with your new password."</em> The toast appears at the top-right and persists long enough for the user to read it before the redirect to the login page.</div>
+      </div>
+    </div>
+  </div>
+
+
   <!-- Summary -->
   <div class="summary">
-    <p>All 13 issues have been identified, fixed, and tested locally. Ready for review before deployment.</p>
+    <p>All 27 issues have been identified, fixed, tested locally, and pushed to GitHub. Ready for Replit deployment.</p>
     <div class="badges">
       <div class="badge b-design">3 Design ✓</div>
-      <div class="badge b-usability">5 Usability ✓</div>
-      <div class="badge b-functional">2 Functional ✓</div>
+      <div class="badge b-usability">7 Usability ✓</div>
+      <div class="badge b-functional">8 Functional ✓</div>
       <div class="badge b-seo">3 SEO ✓</div>
+      <div class="badge b-notif">6 Notifications ✓</div>
     </div>
   </div>
 
