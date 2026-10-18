@@ -286,7 +286,7 @@ export function RegisterOffice() {
       whatsapp: '',
       city: '',
       category: 'translation' as any,
-      providerType: undefined as any,
+      providerType: 'office' as any,
       termsAccepted: false,
     }
   });

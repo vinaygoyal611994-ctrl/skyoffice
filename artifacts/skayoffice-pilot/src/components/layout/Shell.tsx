@@ -365,8 +365,8 @@ export function Shell({ children }: { children: React.ReactNode }) {
         {children}
       </main>
 
-      {/* Footer */}
-      <footer className="mt-auto border-t border-border/60 bg-muted/20">
+      {/* Footer — hidden on pages that have their own full-height sidebar layout */}
+      {!/^\/(office\/dashboard|admin)/.test(location) && <footer className="mt-auto border-t border-border/60 bg-muted/20">
         {/* Primary accent strip */}
         <div className="h-0.5 bg-primary/20" />
 
@@ -467,7 +467,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
           </div>
         </div>
 
-      </footer>
+      </footer>}
     </div>
   );
 }
