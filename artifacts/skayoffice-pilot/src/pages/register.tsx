@@ -1,7 +1,8 @@
 import z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { useRegisterCustomer, useRegisterOffice } from '@workspace/api-client-react';
+import { useRegisterCustomer, useRegisterOffice, getGetCurrentUserQueryKey } from '@workspace/api-client-react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useI18n, categoriesMap } from '@/lib/i18n';
 import { Link, useLocation } from 'wouter';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -83,11 +84,13 @@ export function RegisterCustomer() {
   const [, setLocation] = useLocation();
   const [showPassword, setShowPassword] = useState(false);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const registerMutation = useRegisterCustomer({
     mutation: {
       onSuccess: (data) => {
         captureSessionToken(data);
+        queryClient.invalidateQueries({ queryKey: getGetCurrentUserQueryKey() });
         toast({
           title: t('auth.register_customer_success_title'),
           description: t('auth.register_customer_success_desc'),
@@ -273,10 +276,13 @@ export function RegisterOffice() {
     try { trackFunnelRegistrationStarted(); } catch { /* never block */ }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const queryClient = useQueryClient();
+
   const registerMutation = useRegisterOffice({
     mutation: {
       onSuccess: (data) => {
         captureSessionToken(data);
+        queryClient.invalidateQueries({ queryKey: getGetCurrentUserQueryKey() });
         try { trackFunnelRegistrationCompleted(); } catch { /* never block */ }
         toast({
           title: t('auth.register_office_success_title'),

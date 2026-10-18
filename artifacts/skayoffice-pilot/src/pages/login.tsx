@@ -1,7 +1,8 @@
 import z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { useLogin } from '@workspace/api-client-react';
+import { useLogin, getGetCurrentUserQueryKey } from '@workspace/api-client-react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useI18n } from '@/lib/i18n';
 import { Link, useLocation } from 'wouter';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -38,11 +39,13 @@ export function LoginCustomer() {
   const [, setLocation] = useLocation();
   const [showPassword, setShowPassword] = useState(false);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const loginMutation = useLogin({
     mutation: {
       onSuccess: (data) => {
         captureSessionToken(data);
+        queryClient.invalidateQueries({ queryKey: getGetCurrentUserQueryKey() });
         toast({
           title: t('auth.login_customer_success_title'),
           description: t('auth.login_customer_success_desc'),
@@ -179,11 +182,13 @@ export function LoginOffice() {
   const [, setLocation] = useLocation();
   const [showPassword, setShowPassword] = useState(false);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const loginMutation = useLogin({
     mutation: {
       onSuccess: (data) => {
         captureSessionToken(data);
+        queryClient.invalidateQueries({ queryKey: getGetCurrentUserQueryKey() });
         toast({
           title: t('auth.login_office_success_title'),
           description: t('auth.login_office_success_desc'),
