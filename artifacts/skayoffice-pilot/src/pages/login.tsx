@@ -13,6 +13,7 @@ import { useState, useEffect } from 'react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { consumePostLoginRedirect } from '@/lib/postLoginRedirect';
 import { captureSessionToken } from '@/lib/sessionToken';
+import { useToast } from '@/hooks/use-toast';
 
 function translateServerError(code: string | undefined, t: (k: string) => string): string {
   switch (code) {
@@ -36,13 +37,16 @@ export function LoginCustomer() {
   const { t, language } = useI18n();
   const [, setLocation] = useLocation();
   const [showPassword, setShowPassword] = useState(false);
+  const { toast } = useToast();
 
   const loginMutation = useLogin({
     mutation: {
       onSuccess: (data) => {
         captureSessionToken(data);
-        // Customer login — redirect to the customer portal only.
-        // Admins have their own dedicated login at /admin/login.
+        toast({
+          title: t('auth.login_customer_success_title'),
+          description: t('auth.login_customer_success_desc'),
+        });
         const redirectTo = consumePostLoginRedirect();
         setLocation(redirectTo || '/discover');
       }
@@ -174,11 +178,16 @@ export function LoginOffice() {
   const { t, language } = useI18n();
   const [, setLocation] = useLocation();
   const [showPassword, setShowPassword] = useState(false);
+  const { toast } = useToast();
 
   const loginMutation = useLogin({
     mutation: {
       onSuccess: (data) => {
         captureSessionToken(data);
+        toast({
+          title: t('auth.login_office_success_title'),
+          description: t('auth.login_office_success_desc'),
+        });
         setLocation('/office/dashboard');
       }
     }

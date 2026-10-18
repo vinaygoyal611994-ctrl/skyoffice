@@ -7,11 +7,13 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Mail, CheckCircle, ArrowLeft, ArrowRight } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 type State = 'idle' | 'loading' | 'success' | 'error';
 
 export function ForgotPassword() {
   const { t, language } = useI18n();
+  const { toast } = useToast();
   const BackIcon = language === 'ar' ? ArrowRight : ArrowLeft;
   const [email, setEmail] = useState('');
   const [state, setState] = useState<State>('idle');
@@ -35,6 +37,10 @@ export function ForgotPassword() {
         });
         // Regardless of the response code, show the generic success message.
         setState('success');
+        toast({
+          title: t('auth.forgot_password_toast_title'),
+          description: t('auth.forgot_password_toast_desc'),
+        });
       } catch {
         setState('error');
         setErrorMsg(t('common.error'));

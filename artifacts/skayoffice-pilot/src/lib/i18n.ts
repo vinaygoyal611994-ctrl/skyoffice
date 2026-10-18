@@ -235,6 +235,14 @@ export const translations = {
   'auth.register_office_success_desc':    { ar: 'مرحباً! سيتم مراجعة ملفك والتحقق منه قريباً.', en: 'Welcome! Your profile will be reviewed and verified shortly.' },
   'auth.logout_success_title':            { ar: 'تم تسجيل الخروج', en: 'Logged Out' },
   'auth.logout_success_desc':             { ar: 'تم تسجيل خروجك بنجاح. إلى اللقاء!', en: 'You have been successfully logged out. See you soon!' },
+  'auth.login_customer_success_title':    { ar: 'أهلاً بعودتك!', en: 'Welcome Back!' },
+  'auth.login_customer_success_desc':     { ar: 'تم تسجيل دخولك بنجاح.', en: 'You have successfully logged in.' },
+  'auth.login_office_success_title':      { ar: 'مرحباً بك في لوحة التحكم!', en: 'Welcome to Your Dashboard!' },
+  'auth.login_office_success_desc':       { ar: 'تم تسجيل دخول مكتبك بنجاح.', en: 'Your office account has been logged in successfully.' },
+  'auth.forgot_password_toast_title':     { ar: 'تم إرسال الرابط', en: 'Reset Link Sent' },
+  'auth.forgot_password_toast_desc':      { ar: 'إذا كان البريد مسجلاً، ستصل رسالة الاسترداد قريباً.', en: 'If this email is registered, a reset link has been sent to your inbox.' },
+  'auth.reset_password_toast_title':      { ar: 'تم تغيير كلمة المرور!', en: 'Password Changed!' },
+  'auth.reset_password_toast_desc':       { ar: 'يمكنك الآن تسجيل الدخول بكلمة المرور الجديدة.', en: 'You can now log in with your new password.' },
 
   // Password reset
   'auth.forgotPassword': { ar: 'نسيت كلمة المرور؟', en: 'Forgot Password?' },

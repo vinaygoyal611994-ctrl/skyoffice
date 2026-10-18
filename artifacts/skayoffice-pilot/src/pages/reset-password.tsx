@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { Link, useSearch, useLocation } from 'wouter';
 import { useI18n } from '@/lib/i18n';
+import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -12,6 +13,7 @@ type State = 'idle' | 'loading' | 'success' | 'expired' | 'invalid' | 'error';
 
 export function ResetPassword() {
   const { t } = useI18n();
+  const { toast } = useToast();
   const search = useSearch();
   const [, setLocation] = useLocation();
   const token = new URLSearchParams(search).get('token') ?? '';
@@ -60,7 +62,10 @@ export function ResetPassword() {
 
         if (res.ok) {
           setState('success');
-          // Redirect to login after 3 seconds
+          toast({
+            title: t('auth.reset_password_toast_title'),
+            description: t('auth.reset_password_toast_desc'),
+          });
           setTimeout(() => setLocation('/login/customer'), 3000);
           return;
         }
