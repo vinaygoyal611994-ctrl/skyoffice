@@ -15,6 +15,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { captureSessionToken } from '@/lib/sessionToken';
 import { Checkbox } from '@/components/ui/checkbox';
 import { trackFunnelRegistrationStarted, trackFunnelRegistrationCompleted } from '@/lib/analytics';
+import { useToast } from '@/hooks/use-toast';
 
 function makeCustomerSchema(t: (k: string) => string) {
   return z.object({
@@ -81,11 +82,16 @@ export function RegisterCustomer() {
   const { t, language } = useI18n();
   const [, setLocation] = useLocation();
   const [showPassword, setShowPassword] = useState(false);
+  const { toast } = useToast();
 
   const registerMutation = useRegisterCustomer({
     mutation: {
       onSuccess: (data) => {
         captureSessionToken(data);
+        toast({
+          title: t('auth.register_customer_success_title'),
+          description: t('auth.register_customer_success_desc'),
+        });
         setLocation('/discover');
       }
     }
@@ -261,6 +267,7 @@ export function RegisterOffice() {
   const { t, language } = useI18n();
   const [, setLocation] = useLocation();
   const [showPassword, setShowPassword] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     try { trackFunnelRegistrationStarted(); } catch { /* never block */ }
@@ -271,6 +278,10 @@ export function RegisterOffice() {
       onSuccess: (data) => {
         captureSessionToken(data);
         try { trackFunnelRegistrationCompleted(); } catch { /* never block */ }
+        toast({
+          title: t('auth.register_office_success_title'),
+          description: t('auth.register_office_success_desc'),
+        });
         setLocation('/office/dashboard');
       }
     }

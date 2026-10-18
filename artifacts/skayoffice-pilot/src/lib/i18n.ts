@@ -228,6 +228,14 @@ export const translations = {
   'auth.terms_accept_label': { ar: 'أوافق على شروط الاستخدام وسياسة الخصوصية الخاصة بـ SkayOffice.', en: 'I agree to SkayOffice\'s Terms of Use and Privacy Policy.' },
   'auth.account_type': { ar: 'نوع الحساب', en: 'Account Type' },
 
+  // Registration & logout toasts
+  'auth.register_customer_success_title': { ar: 'تم التسجيل بنجاح!', en: 'Registration Successful!' },
+  'auth.register_customer_success_desc':  { ar: 'مرحباً بك في SkayOffice. أنت الآن مسجّل دخول.', en: 'Welcome to SkayOffice. You are now logged in.' },
+  'auth.register_office_success_title':   { ar: 'تم إنشاء مكتبك!', en: 'Office Created!' },
+  'auth.register_office_success_desc':    { ar: 'مرحباً! سيتم مراجعة ملفك والتحقق منه قريباً.', en: 'Welcome! Your profile will be reviewed and verified shortly.' },
+  'auth.logout_success_title':            { ar: 'تم تسجيل الخروج', en: 'Logged Out' },
+  'auth.logout_success_desc':             { ar: 'تم تسجيل خروجك بنجاح. إلى اللقاء!', en: 'You have been successfully logged out. See you soon!' },
+
   // Password reset
   'auth.forgotPassword': { ar: 'نسيت كلمة المرور؟', en: 'Forgot Password?' },
   'auth.forgotPasswordLink': { ar: 'نسيت كلمة المرور؟', en: 'Forgot your password?' },

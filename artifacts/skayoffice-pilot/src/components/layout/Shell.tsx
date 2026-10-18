@@ -9,6 +9,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { clearSessionToken } from '@/lib/sessionToken';
 import { requestHomeFiltersReset } from '@/lib/homeReset';
 import { trackPilotContactIntent } from '@/lib/analytics';
+import { useToast } from '@/hooks/use-toast';
 
 // Official brand contact details (per SkayOffice branding requirements).
 const CONTACT_EMAIL = 'info@skayoffice.com';
@@ -18,6 +19,7 @@ const WHATSAPP_URL = `https://wa.me/${CONTACT_PHONE_TECHNICAL.replace(/[^\d]/g, 
 
 export function Shell({ children }: { children: React.ReactNode }) {
   const { t, language, setLanguage } = useI18n();
+  const { toast } = useToast();
   const [location, setLocation] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const menuButtonRef = React.useRef<HTMLButtonElement>(null);
@@ -52,10 +54,10 @@ export function Shell({ children }: { children: React.ReactNode }) {
         // immediately, before the background refetch even resolves.
         clearSessionToken();
         queryClient.removeQueries();
-        // Use replace so the protected page is removed from the browser history
-        // stack entirely. A plain pushState keeps it in history and the browser
-        // can restore it from bfcache when the user presses Back, briefly
-        // exposing authenticated content on a now-invalid session.
+        toast({
+          title: t('auth.logout_success_title'),
+          description: t('auth.logout_success_desc'),
+        });
         setLocation('/', { replace: true });
       },
       // If the destroy call fails (network error, server 5xx), the session
