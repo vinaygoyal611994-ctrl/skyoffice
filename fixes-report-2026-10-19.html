@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SkayOffice — Fix Report · 19 October 2026</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f4f6f9;
+      color: #1a1a2e;
+      padding: 40px 20px;
+    }
+
+    .wrapper { max-width: 900px; margin: 0 auto; }
+
+    /* ── Header ── */
+    .header {
+      background: linear-gradient(135deg, #1a3a6e, #0d47a1);
+      border-radius: 16px;
+      padding: 36px 40px;
+      color: white;
+      margin-bottom: 36px;
+    }
+    .header .logo { font-size: 12px; letter-spacing: 2px; text-transform: uppercase; opacity: 0.65; margin-bottom: 10px; }
+    .header h1 { font-size: 26px; font-weight: 700; margin-bottom: 8px; }
+    .header p  { font-size: 14px; opacity: 0.82; line-height: 1.6; }
+    .header .meta { margin-top: 22px; display: flex; gap: 28px; flex-wrap: wrap; }
+    .header .meta-item { font-size: 12px; opacity: 0.75; }
+    .header .meta-item strong { display: block; font-size: 22px; font-weight: 700; opacity: 1; color: #fff; }
+
+    /* ── Category heading ── */
+    .cat-title {
+      font-size: 16px; font-weight: 700; color: #fff;
+      margin: 36px 0 14px;
+      padding: 10px 16px;
+      border-radius: 10px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .cat-usability  { background: #7b2ff7; }
+    .cat-notif      { background: #c0392b; }
+    .cat-design     { background: #1a73e8; }
+
+    .cat-title .icon {
+      width: 30px; height: 30px; border-radius: 8px;
+      background: rgba(255,255,255,0.2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; flex-shrink: 0;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: white; border-radius: 12px;
+      border: 1px solid #e8ecf0;
+      margin-bottom: 12px; overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    }
+    .card-header {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 16px 20px 12px;
+    }
+    .num {
+      width: 26px; height: 26px; border-radius: 50%;
+      color: white; font-size: 12px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; margin-top: 1px;
+    }
+    .num-usability { background: #7b2ff7; }
+    .num-notif     { background: #c0392b; }
+    .num-design    { background: #1a73e8; }
+
+    .card-title { font-size: 14.5px; font-weight: 700; color: #1a1a2e; line-height: 1.4; }
+
+    .card-body {
+      display: grid; grid-template-columns: 1fr 1fr;
+      border-top: 1px solid #f0f2f5;
+    }
+    .issue-box, .fix-box { padding: 12px 20px 15px; }
+    .issue-box { border-right: 1px solid #f0f2f5; background: #fff8f8; }
+    .fix-box   { background: #f6fff8; }
+    .box-label {
+      font-size: 10px; font-weight: 700; letter-spacing: 1px;
+      text-transform: uppercase; margin-bottom: 5px;
+    }
+    .issue-box .box-label { color: #c0392b; }
+    .fix-box   .box-label { color: #27ae60; }
+    .box-text  { font-size: 13px; line-height: 1.65; color: #444; }
+
+    /* ── Summary ── */
+    .summary {
+      background: white; border-radius: 12px;
+      border: 1px solid #e8ecf0;
+      padding: 20px 24px; margin-top: 36px;
+      display: flex; align-items: center;
+      justify-content: space-between; flex-wrap: wrap; gap: 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    }
+    .summary p { font-size: 14px; color: #555; }
+    .badges { display: flex; gap: 8px; flex-wrap: wrap; }
+    .badge {
+      color: white; font-size: 12px; font-weight: 700;
+      padding: 5px 14px; border-radius: 20px;
+    }
+    .b-usability { background: #7b2ff7; }
+    .b-notif     { background: #c0392b; }
+    .b-design    { background: #1a73e8; }
+
+    /* ── Footer ── */
+    .footer { text-align: center; margin-top: 30px; font-size: 11px; color: #999; }
+
+    @media (max-width: 600px) {
+      .card-body { grid-template-columns: 1fr; }
+      .issue-box { border-right: none; border-bottom: 1px solid #f0f2f5; }
+      .header { padding: 24px 20px; }
+      .header h1 { font-size: 20px; }
+    }
+  </style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="logo">SkayOffice · Daily Fix Report · 19 October 2026</div>
+    <h1>Bug Fixes &amp; Improvements — 19 Oct 2026</h1>
+    <p>All issues identified and resolved during today's development session, organised by category.</p>
+    <div class="meta">
+      <div class="meta-item"><strong>12</strong> Issues Fixed</div>
+      <div class="meta-item"><strong>5</strong> Usability</div>
+      <div class="meta-item"><strong>2</strong> Notifications</div>
+      <div class="meta-item"><strong>5</strong> Design / UI</div>
+    </div>
+  </div>
+
+
+  <!-- ══ CATEGORY 1: USABILITY ══ -->
+  <div class="cat-title cat-usability">
+    <div class="icon">🖱️</div>
+    Usability &amp; User Experience
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="num num-usability">1</div>
+      <div class="card-title">Favourite (heart) button on office card had no pointer cursor</div>
+    </div>
+    <div class="card-body">
+      <div class="issue-box">
+        <div class="box-label">Problem</div>
+        <div class="box-text">When hovering over the heart/favourite icon on office cards, the cursor stayed as the default arrow instead of changing to a pointer. Users could not tell the button was clickable — it felt broken or decorative.</div>
+      </div>
+      <div class="fix-box">
+        <div class="box-label">Fixed</div>
+        <div class="box-text">Added <em>cursor: pointer</em> to the favourite heart button on <em>QuickOfficeCard</em>. The hand cursor now appears on hover, clearly signalling that the button is interactive and will toggle the favourite state.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="num num-usability">2</div>
+      <div class="card-title">About &amp; Services tab buttons in office popup had no pointer cursor</div>
+    </div>
+    <div class="card-body">
+      <div class="issue-box">
+        <div class="box-label">Problem</div>
+        <div class="box-text">The "About" and "Services" tab buttons inside the office detail popup showed an arrow cursor on hover instead of a pointer. This made it unclear that the tabs were clickable toggles, not just labels.</div>
+      </div>
+      <div class="fix-box">
+        <div class="box-label">Fixed</div>
+        <div class="box-text">Added <em>cursor: pointer</em> to both tab buttons in the <em>TabBar</em> component inside the office profile page. Both tabs now show the hand cursor on hover — consistent with standard web interaction patterns.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="num num-usability">3</div>
+      <div class="card-title">Share Office button in office popup had no pointer cursor</div>
+    </div>
+    <div class="card-body">
+      <div class="issue-box">
+        <div class="box-label">Problem</div>
+        <div class="box-text">The "Share Office" action button in the utility grid at the bottom of the office popup showed an arrow cursor instead of a pointer, making it inconsistent with the other interactive buttons on the page.</div>
+      </div>
+      <div class="fix-box">
+        <div class="box-label">Fixed</div>
+        <div class="box-text">Added <em>cursor: pointer</em> to the Share Office button. The hand cursor now appears consistently on all three utility buttons — Location, Share Office, and Save Office.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="num num-usability">4</div>
+      <div class="card-title">Close (×) button on all popups/dialogs had no pointer cursor</div>
+    </div>
+    <div class="card-body">
+      <div class="issue-box">
+        <div class="box-label">Problem</div>
+        <div class="box-text">The × dismiss button at the top-right of every dialog/popup in the app showed a default arrow cursor. This is a well-known UX anti-pattern — close buttons without a pointer cursor feel non-interactive and confuse users who expect the hand cursor.</div>
+      </div>
+      <div class="fix-box">
+        <div class="box-label">Fixed</div>
+        <div class="box-text">Added <em>cursor: pointer</em> to the <em>DialogPrimitive.Close</em> button inside the shared <em>dialog.tsx</em> UI component. This fix applies globally — every dialog and popup throughout the entire app now shows the correct pointer cursor on the close button.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="num num-usability">5</div>
+      <div class="card-title">Favourite office cards on Account page had unequal heights (zigzag layout)</div>
+    </div>
+    <div class="card-body">
+      <div class="issue-box">
+        <div class="box-label">Problem</div>
+        <div class="box-text">On the Account page's Favourite Offices section, cards in the same row had different heights depending on their content. This created an uneven zigzag layout that looked unfinished and unprofessional in a two-column grid.</div>
+      </div>
+      <div class="fix-box">
+        <div class="box-label">Fixed</div>
+        <div class="box-text">Added <em>h-full</em> to both the outer wrapper <em>div</em> and the <em>Link</em> element inside <em>QuickOfficeCard</em>. Cards in the same row now always stretch to the same height — the grid stays visually balanced regardless of content differences.</div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══ CATEGORY 2: NOTIFICATIONS ══ -->
+  <div class="cat-title cat-notif" style="margin-top: 40px;">
+    <div class="icon">🔔</div>
+    Notifications &amp; User Feedback
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="num num-notif">1</div>
+      <div class="card-title">No toast shown when adding an office to favourites</div>
+    </div>
+    <div class="card-body">
+      <div class="issue-box">
+        <div class="box-label">Problem</div>
+        <div class="box-text">When a logged-in customer clicked the heart button to add an office to favourites, the button turned red but there was no toast or message to confirm the action. Users had no feedback that the save was successful — they could easily double-tap or wonder if it worked.</div>
+      </div>
+      <div class="fix-box">
+        <div class="box-label">Fixed</div>
+        <div class="box-text">A top-right toast now appears immediately after favouriting: <em>"Added to Favourites — Office saved to your favourites list."</em> Available in both English and Arabic. Works from both the office card (QuickOfficeCard) and the full office profile popup.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="num num-notif">2</div>
+      <div class="card-title">No toast shown when removing an office from favourites</div>
+    </div>
+    <div class="card-body">
+      <div class="issue-box">
+        <div class="box-label">Problem</div>
+        <div class="box-text">Similarly, when removing a saved office from favourites, there was no confirmation message. The heart just turned grey with no feedback — users could not be sure the removal was saved or whether they accidentally clicked.</div>
+      </div>
+      <div class="fix-box">
+        <div class="box-label">Fixed</div>
+        <div class="box-text">A toast now appears on removal: <em>"Removed from Favourites — Office removed from your favourites list."</em> Both add and remove toasts are bilingual and appear at the top-right — consistent with the rest of the app's notification system.</div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══ CATEGORY 3: DESIGN / UI ══ -->
+  <div class="cat-title cat-design" style="margin-top: 40px;">
+    <div class="icon">🎨</div>
+    Design &amp; UI Improvements
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="num num-design">1</div>
+      <div class="card-title">No favourites counter visible in the navigation header</div>
+    </div>
+    <div class="card-body">
+      <div class="issue-box">
+        <div class="box-label">Problem</div>
+        <div class="box-text">The heart icon in the navigation header linked to the Favourites page but showed no count. Customers had no at-a-glance indication of how many offices they had saved — they had to navigate to the Favourites page to see the number.</div>
+      </div>
+      <div class="fix-box">
+        <div class="box-label">Fixed</div>
+        <div class="box-text">A rose-red badge counter now appears on the heart icon whenever the customer has one or more saved offices. The count updates automatically when offices are added or removed (React Query cache), shows on both desktop header and mobile menu, and displays <em>99+</em> for counts above 99.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="num num-design">2</div>
+      <div class="card-title">Account page had a basic, plain card-list layout</div>
+    </div>
+    <div class="card-body">
+      <div class="issue-box">
+        <div class="box-label">Problem</div>
+        <div class="box-text">The Account (My Account) page used a plain stacked-card layout with no visual hierarchy, no user identity area, and no quick summary of the customer's activity. It looked like a basic settings page rather than a professional profile dashboard.</div>
+      </div>
+      <div class="fix-box">
+        <div class="box-label">Fixed</div>
+        <div class="box-text">Full page redesign: a gradient hero banner at the top displays the user's initials avatar, full name, email, and account status badge. A three-column stats strip below the banner shows live counts for Favourites, Contact History, and Video Call Requests. All sections are now white rounded cards with icon section headers. Empty states have proper icons and styled dashed borders.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="num num-design">3</div>
+      <div class="card-title">Account page was constrained to a narrow max-width instead of full screen</div>
+    </div>
+    <div class="card-body">
+      <div class="issue-box">
+        <div class="box-label">Problem</div>
+        <div class="box-text">After the redesign, the account page content was restricted to a maximum width of <em>max-w-3xl</em> (~768px), leaving large empty grey areas on both sides on wider screens. This wasted screen real estate and looked unfinished on desktop.</div>
+      </div>
+      <div class="fix-box">
+        <div class="box-label">Fixed</div>
+        <div class="box-text">Removed the <em>max-w-3xl</em> constraint from all content sections. The page now uses the full container width — the hero banner, stats strip, and section cards all expand to use the available screen width on desktop, matching the layout of other full-width pages in the app.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="num num-design">4</div>
+      <div class="card-title">Account page background colour did not match the app theme</div>
+    </div>
+    <div class="card-body">
+      <div class="issue-box">
+        <div class="box-label">Problem</div>
+        <div class="box-text">The account page used a <em>bg-muted/20</em> background — a slightly tinted off-white — which was visually different from the rest of the app. Other pages use <em>bg-background</em>, so the account page looked slightly out of place when navigating to it.</div>
+      </div>
+      <div class="fix-box">
+        <div class="box-label">Fixed</div>
+        <div class="box-text">Changed the page background from <em>bg-muted/20</em> to <em>bg-background</em> — the same base colour used by all other pages in the app. The account page now feels visually consistent and part of the same design system.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="num num-design">5</div>
+      <div class="card-title">Account page hero banner colour did not reflect the app's theme palette</div>
+    </div>
+    <div class="card-body">
+      <div class="issue-box">
+        <div class="box-label">Problem</div>
+        <div class="box-text">The hero banner at the top of the account page used a flat <em>from-primary/90 to-primary</em> gradient — effectively a near-solid dark block. It looked flat rather than designed, and did not express the depth or richness that the rest of the app's theme implies.</div>
+      </div>
+      <div class="fix-box">
+        <div class="box-label">Fixed</div>
+        <div class="box-text">Updated the gradient to <em>from-[hsl(215,25%,18%)] via-[hsl(215,25%,27%)] to-[hsl(215,30%,36%)]</em> — a three-stop horizontal gradient that goes from a deep dark slate on the left to a slightly lighter slate-blue on the right. This adds natural depth and is derived directly from the theme's primary colour variable (<em>hsl(215, 25%, 27%)</em>).</div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Summary -->
+  <div class="summary">
+    <p>All 12 issues fixed, tested locally, and pushed to GitHub on 19 Oct 2026.</p>
+    <div class="badges">
+      <div class="badge b-usability">5 Usability ✓</div>
+      <div class="badge b-notif">2 Notifications ✓</div>
+      <div class="badge b-design">5 Design / UI ✓</div>
+    </div>
+  </div>
+
+  <div class="footer">
+    SkayOffice · Daily Fix Report · 19 October 2026
+  </div>
+
+</div>
+</body>
+</html>
