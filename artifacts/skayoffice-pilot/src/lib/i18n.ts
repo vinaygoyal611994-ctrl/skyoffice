@@ -563,6 +563,10 @@ export const translations = {
   'fav.subtitle': { ar: 'قائمة المكاتب التي قمت بحفظها للرجوع إليها لاحقاً.', en: 'The offices you have saved to come back to later.' },
   'fav.empty': { ar: 'لم تقم بإضافة أي مكاتب للمفضلة بعد.', en: 'You haven\'t added any offices to your favourites yet.' },
   'fav.empty_description': { ar: 'يمكنك استكشاف المكاتب المهنية وحفظ المكاتب التي تهمك بالنقر على زر الإضافة للمفضلة في صفحة المكتب.', en: 'Explore professional offices and save the ones you like by tapping the favourite button on the office page.' },
+  'fav.added_title':       { ar: 'تمت الإضافة للمفضلة', en: 'Added to Favourites' },
+  'fav.added_desc':        { ar: 'تم حفظ المكتب في قائمة مفضلتك.', en: 'Office saved to your favourites list.' },
+  'fav.removed_title':     { ar: 'تمت الإزالة من المفضلة', en: 'Removed from Favourites' },
+  'fav.removed_desc':      { ar: 'تم حذف المكتب من قائمة مفضلتك.', en: 'Office removed from your favourites list.' },
 
   // Admin
   'admin.title': { ar: 'لوحة إدارة المنصة', en: 'Platform Administration' },
@@ -634,6 +638,7 @@ export const translations = {
   'account.video_requests_section': { ar: 'طلبات مكالمات الفيديو', en: 'Video Call Requests' },
   'account.no_contact_history': { ar: 'لا يوجد سجل تواصل حتى الآن.', en: 'No contact history yet.' },
   'account.no_video_requests': { ar: 'لا توجد طلبات مكالمات فيديو حتى الآن.', en: 'No video call requests yet.' },
+  'account.service_requests_section': { ar: 'طلبات الخدمة', en: 'Service Requests' },
 
   // Footer / branding
   'footer.project_of': { ar: 'SkayOffice أحد مشاريع شركة Future Road Labs', en: 'SkayOffice is a project of Future Road Labs.' },

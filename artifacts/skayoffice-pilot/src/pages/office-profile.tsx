@@ -328,7 +328,7 @@ function TabBar({
           aria-selected={active === tab.key}
           data-testid={`tab-${tab.key}`}
           onClick={() => onChange(active === tab.key ? null : tab.key)}
-          className={`flex-1 rounded-lg px-2 py-1.5 text-xs font-semibold transition-colors min-h-[36px] ${
+          className={`flex-1 rounded-lg px-2 py-1.5 text-xs font-semibold transition-colors min-h-[36px] cursor-pointer ${
             active === tab.key
               ? 'bg-primary/10 text-primary shadow-sm'
               : 'text-muted-foreground hover:text-foreground hover:bg-muted/60'
@@ -431,8 +431,10 @@ export function OfficeProfile({
     if (isFav) {
       const fav = favourites?.find((f) => f.id === officeId);
       if (fav) removeFavMutation.mutate({ officeId: fav.id });
+      toast({ title: t('fav.removed_title'), description: t('fav.removed_desc') });
     } else {
       addFavMutation.mutate({ data: { officeId } });
+      toast({ title: t('fav.added_title'), description: t('fav.added_desc') });
     }
   };
 
@@ -1262,7 +1264,7 @@ export function OfficeProfile({
               <Dialog open={shareDialogOpen} onOpenChange={setShareDialogOpen}>
                 <button
                   type="button"
-                  className="flex flex-col items-center justify-center gap-1 rounded-xl border border-border/50 bg-background min-h-[60px] py-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                  className="flex flex-col items-center justify-center gap-1 rounded-xl border border-border/50 bg-background min-h-[60px] py-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground cursor-pointer"
                   data-testid="button-share-office"
                   onClick={handleOpenShareDialog}
                 >
@@ -1301,7 +1303,7 @@ export function OfficeProfile({
                 type="button"
                 onClick={isCustomer ? toggleFavourite : () => requireLogin()}
                 disabled={addFavMutation.isPending || removeFavMutation.isPending}
-                className={`flex flex-col items-center justify-center gap-1 rounded-xl border min-h-[60px] py-2 transition-colors ${
+                className={`flex flex-col items-center justify-center gap-1 rounded-xl border min-h-[60px] py-2 transition-colors cursor-pointer ${
                   isFav
                     ? 'border-rose-200/60 bg-rose-50 text-rose-500 dark:bg-rose-950/20 hover:bg-rose-100'
                     : 'border-border/50 bg-background text-muted-foreground hover:bg-muted hover:text-foreground'

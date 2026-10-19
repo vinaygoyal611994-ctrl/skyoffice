@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'wouter';
 import { useI18n, categoriesMap, localizedCity, pickLocalized } from '@/lib/i18n';
 import { trackCardClick, useImpressionTracker } from '@/lib/analytics';
+import { useToast } from '@/hooks/use-toast';
 import { useGetOfficeServiceMetrics } from '@workspace/api-client-react';
 import { Badge } from '@/components/ui/badge';
 import { ImageLightbox } from '@/components/ImageLightbox';
@@ -121,6 +122,7 @@ export function QuickOfficeCard({
   showFavourite = false,
 }: QuickOfficeCardProps) {
   const { t, language } = useI18n();
+  const { toast } = useToast();
   const displayName = pickLocalized(office.name, office.nameAr, language) || office.name;
   const displayCity = localizedCity(office.city, language);
   const [imageLoaded, setImageLoaded] = React.useState(false);
@@ -144,11 +146,11 @@ export function QuickOfficeCard({
   const impressionCallbackRef = useImpressionTracker(office.id, index);
 
   return (
-    <div ref={impressionCallbackRef}>
+    <div ref={impressionCallbackRef} className="h-full">
     <Link
       href={`/offices/${office.id}`}
       data-testid={`card-office-${office.id}`}
-      className="group relative flex flex-col overflow-hidden rounded-2xl border border-border/50 bg-card shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-lg animate-in fade-in slide-in-from-bottom-4"
+      className="group relative flex flex-col h-full overflow-hidden rounded-2xl border border-border/50 bg-card shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-lg animate-in fade-in slide-in-from-bottom-4"
       style={{ animationDelay: `${index * 50}ms` }}
       onClick={() => { try { trackCardClick({ officeId: office.id, position: index }); } catch {} }}
     >
@@ -201,10 +203,14 @@ export function QuickOfficeCard({
               e.preventDefault();
               e.stopPropagation();
               onToggleFavourite?.();
+              toast({
+                title: isFavourite ? t('fav.removed_title') : t('fav.added_title'),
+                description: isFavourite ? t('fav.removed_desc') : t('fav.added_desc'),
+              });
             }}
             disabled={favouriteDisabled}
-            aria-label={t('profile.add_favourite')}
-            className={`absolute top-3 ltr:right-3 rtl:left-3 flex h-8 w-8 items-center justify-center rounded-full backdrop-blur transition-colors ${
+            aria-label={isFavourite ? t('profile.remove_favourite') : t('profile.add_favourite')}
+            className={`absolute top-3 ltr:right-3 rtl:left-3 flex h-8 w-8 items-center justify-center rounded-full backdrop-blur transition-colors cursor-pointer ${
               isFavourite
                 ? 'bg-rose-500 text-white'
                 : 'bg-black/30 text-white hover:bg-black/50'

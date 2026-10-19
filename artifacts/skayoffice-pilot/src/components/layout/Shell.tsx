@@ -4,7 +4,7 @@ import { Link, useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Menu, X, LogOut, Heart, LayoutDashboard, UserCircle, Mail, Building2, Users, ShieldCheck, ChevronRight, LogIn, UserPlus, Lock } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
-import { useGetCurrentUser, useLogout, getGetCurrentUserQueryKey } from '@workspace/api-client-react';
+import { useGetCurrentUser, useLogout, getGetCurrentUserQueryKey, useListFavourites, getListFavouritesQueryKey } from '@workspace/api-client-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { clearSessionToken } from '@/lib/sessionToken';
 import { requestHomeFiltersReset } from '@/lib/homeReset';
@@ -32,6 +32,15 @@ export function Shell({ children }: { children: React.ReactNode }) {
       queryKey: getGetCurrentUserQueryKey(),
     }
   });
+
+  const { data: favourites } = useListFavourites({
+    query: {
+      enabled: user?.role === 'customer',
+      queryKey: getListFavouritesQueryKey(),
+      staleTime: 60_000,
+    },
+  });
+  const favCount = favourites?.length ?? 0;
 
   const logoutMutation = useLogout({
     mutation: {
@@ -168,8 +177,13 @@ export function Shell({ children }: { children: React.ReactNode }) {
                 <>
                   {user.role === 'customer' && (
                     <>
-                      <Link href="/favourites" className="text-muted-foreground hover:text-foreground p-2 rounded-md hover:bg-secondary transition-colors" aria-label={t('nav.favourites')}>
+                      <Link href="/favourites" className="relative text-muted-foreground hover:text-foreground p-2 rounded-md hover:bg-secondary transition-colors" aria-label={t('nav.favourites')}>
                         <Heart size={18} />
+                        {favCount > 0 && (
+                          <span className="absolute -top-0.5 -right-0.5 min-w-[17px] h-[17px] rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center px-1 leading-none">
+                            {favCount > 99 ? '99+' : favCount}
+                          </span>
+                        )}
                       </Link>
                       <Link href="/account" className="text-muted-foreground hover:text-foreground p-2 rounded-md hover:bg-secondary transition-colors flex items-center gap-2" data-testid="link-account">
                         <UserCircle size={18} />
@@ -243,7 +257,14 @@ export function Shell({ children }: { children: React.ReactNode }) {
                 {user.role === 'customer' && (
                   <>
                     <Link href="/favourites" onClick={closeMenu} className="flex items-center gap-3.5 px-5 py-3.5 hover:bg-secondary/70 transition-colors text-[15px] font-medium" data-testid="link-favourites-mobile">
-                      <Heart size={18} className="shrink-0 text-muted-foreground" />
+                      <span className="relative shrink-0">
+                        <Heart size={18} className="text-muted-foreground" />
+                        {favCount > 0 && (
+                          <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center px-1 leading-none">
+                            {favCount > 99 ? '99+' : favCount}
+                          </span>
+                        )}
+                      </span>
                       {t('nav.favourites')}
                     </Link>
                     <Link href="/account" onClick={closeMenu} className="flex items-center gap-3.5 px-5 py-3.5 hover:bg-secondary/70 transition-colors text-[15px] font-medium" data-testid="link-account-mobile">
