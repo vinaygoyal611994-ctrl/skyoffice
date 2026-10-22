@@ -15,6 +15,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -145,6 +146,7 @@ export function ProfileSection() {
   const [spokenLanguages, setSpokenLanguages] = useState<string[]>([]);
   const [customLanguages, setCustomLanguages] = useState<string[]>([]);
   const [newService, setNewService] = useState('');
+  const [deleteServiceId, setDeleteServiceId] = useState<number | null>(null);
   const initRef = useRef(false);
 
   React.useEffect(() => {
@@ -295,42 +297,18 @@ export function ProfileSection() {
         </div>
       )}
 
-      {/* Action buttons */}
-      <div className="flex gap-3 flex-wrap">
-        {canSubmit && (
-          <Button
-            onClick={() => submitMut.mutate()}
-            disabled={submitMut.isPending}
-            variant="secondary"
-            className="gap-2"
-            data-testid="button-submit-application"
-          >
-            <Send size={15} />
-            {submitMut.isPending ? t('dashboard.submitting') : t('dashboard.submit_for_review')}
-          </Button>
-        )}
-        <Button
-          onClick={handleSave}
-          disabled={updateMutation.isPending || fieldsReadOnly}
-          className="gap-2"
-          title={fieldsReadOnly ? t('dashboard.readonly_tooltip') : undefined}
-        >
-          {updateMutation.isPending ? t('common.saving') : isLocked ? t('dashboard.save_as_pending_edit') : t('common.save')}
-        </Button>
-      </div>
-
       {/* Basic Info */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
-            <User size={16} className="text-primary" />
+      <Card className="overflow-hidden shadow-sm border-border/60">
+        <CardHeader className="bg-muted/30 border-b border-border/50 px-5 py-4">
+          <CardTitle className="flex items-center gap-2 text-sm font-semibold">
+            <span className="w-7 h-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0"><User size={14} /></span>
             {t('dashboard.basic_info_title')}
           </CardTitle>
-          <CardDescription>{t('dashboard.basic_info_description')}</CardDescription>
+          <CardDescription className="text-xs mt-0.5">{t('dashboard.basic_info_description')}</CardDescription>
         </CardHeader>
-        <CardContent className={`grid grid-cols-1 md:grid-cols-2 gap-5 ${fieldsReadOnly ? 'opacity-60' : ''}`}>
+        <CardContent className={`grid grid-cols-1 md:grid-cols-2 gap-5 pt-5 px-5 ${fieldsReadOnly ? 'opacity-60' : ''}`}>
           <div className="space-y-1.5">
-            <Label>{t('auth.office_name')}</Label>
+            <Label>{t('auth.office_name')} <span className="text-red-500 ms-0.5">*</span></Label>
             <Input name="name" value={formData.name} onChange={handleChange} disabled={fieldsReadOnly || !!(isLocked && proposedName)} />
             {isLocked && <p className="text-xs text-muted-foreground">{language === 'ar' ? 'تتطلب تغييرات اسم المكتب موافقة الإدارة قبل ظهورها للعامة.' : 'Changes to your office name require admin approval before appearing publicly.'}</p>}
             {isLocked && proposedName && (
@@ -348,7 +326,7 @@ export function ProfileSection() {
             {isLocked && hasProposedNameAr && <p className="text-xs text-amber-700">{language === 'ar' ? 'الاسم العربي المقترح:' : 'Proposed Arabic name:'} {String(proposedNameAr || (language === 'ar' ? 'فارغ — استخدام الاسم الأساسي' : 'Empty — use base name'))}</p>}
           </div>
           <div className="space-y-1.5">
-            <Label>{t('dashboard.field.category')}</Label>
+            <Label>{t('dashboard.field.category')} <span className="text-red-500 ms-0.5">*</span></Label>
             <Select value={formData.category === 'other' ? undefined : formData.category} onValueChange={category => setFormData(p => ({ ...p, category: category as SelectableOfficeCategory }))} disabled={fieldsReadOnly}>
               <SelectTrigger data-testid="select-office-category"><SelectValue placeholder={language === 'ar' ? 'اختر تصنيفاً حالياً' : 'Select a current category'} /></SelectTrigger>
               <SelectContent>
@@ -361,11 +339,11 @@ export function ProfileSection() {
             {isLocked && proposedCategory && <p className="text-xs text-amber-700">{language === 'ar' ? 'التصنيف المقترح قيد المراجعة:' : 'Proposed category pending review:'} {categoriesMap[proposedCategory]?.[language] ?? proposedCategory}</p>}
           </div>
           <div className="space-y-1.5">
-            <Label>{t('auth.city')}</Label>
+            <Label>{t('auth.city')} <span className="text-red-500 ms-0.5">*</span></Label>
             <Input name="city" value={formData.city} onChange={handleChange} disabled={fieldsReadOnly} />
           </div>
           <div className="space-y-1.5 col-span-1 md:col-span-2">
-            <Label>{t('dashboard.short_desc')}</Label>
+            <Label>{t('dashboard.short_desc')} <span className="text-red-500 ms-0.5">*</span></Label>
             <Input name="shortDescription" value={formData.shortDescription} onChange={handleChange} placeholder={t('dashboard.short_desc_placeholder')} disabled={fieldsReadOnly} />
           </div>
           <div className="space-y-1.5 col-span-1 md:col-span-2">
@@ -393,16 +371,16 @@ export function ProfileSection() {
       </Card>
 
       {/* Contact Info */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Phone size={16} className="text-primary" />
+      <Card className="overflow-hidden shadow-sm border-border/60">
+        <CardHeader className="bg-muted/30 border-b border-border/50 px-5 py-4">
+          <CardTitle className="flex items-center gap-2 text-sm font-semibold">
+            <span className="w-7 h-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0"><Phone size={14} /></span>
             {t('dashboard.contact_info_title')}
           </CardTitle>
         </CardHeader>
-        <CardContent className={`grid grid-cols-1 md:grid-cols-2 gap-5 ${fieldsReadOnly ? 'opacity-60' : ''}`}>
+        <CardContent className={`grid grid-cols-1 md:grid-cols-2 gap-5 pt-5 px-5 ${fieldsReadOnly ? 'opacity-60' : ''}`}>
           <div className="space-y-1.5">
-            <Label>{t('dashboard.whatsapp')}</Label>
+            <Label>{t('dashboard.whatsapp')} <span className="text-red-500 ms-0.5">*</span></Label>
             <Input name="whatsapp" value={formData.whatsapp} onChange={handleChange} dir="ltr" className="text-start" placeholder={t('dashboard.whatsapp_placeholder')} disabled={fieldsReadOnly} data-testid="input-whatsapp" />
           </div>
           <div className="flex items-center gap-3 md:pt-6">
@@ -445,15 +423,15 @@ export function ProfileSection() {
       </Card>
 
       {/* Location coordinates */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
-            <MapPin size={16} className="text-primary" />
+      <Card className="overflow-hidden shadow-sm border-border/60">
+        <CardHeader className="bg-muted/30 border-b border-border/50 px-5 py-4">
+          <CardTitle className="flex items-center gap-2 text-sm font-semibold">
+            <span className="w-7 h-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0"><MapPin size={14} /></span>
             {t('dashboard.location_title')}
           </CardTitle>
           <CardDescription>{t('dashboard.location_description')}</CardDescription>
         </CardHeader>
-        <CardContent className={`grid grid-cols-1 md:grid-cols-2 gap-5 ${fieldsReadOnly ? 'opacity-60' : ''}`}>
+        <CardContent className={`grid grid-cols-1 md:grid-cols-2 gap-5 pt-5 px-5 ${fieldsReadOnly ? 'opacity-60' : ''}`}>
           <div className="space-y-1.5">
             <Label>{t('dashboard.latitude')} <span className="text-muted-foreground font-normal">{t('common.optional')}</span></Label>
             <Input
@@ -498,15 +476,15 @@ export function ProfileSection() {
       </Card>
 
       {/* Languages */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Globe2 size={16} className="text-primary" />
-            {t('dashboard.languages_title')}
+      <Card className="overflow-hidden shadow-sm border-border/60">
+        <CardHeader className="bg-muted/30 border-b border-border/50 px-5 py-4">
+          <CardTitle className="flex items-center gap-2 text-sm font-semibold">
+            <span className="w-7 h-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0"><Globe2 size={14} /></span>
+            {t('dashboard.languages_title')} <span className="text-red-500 ms-0.5">*</span>
           </CardTitle>
-          <CardDescription>{t('dashboard.languages_description')}</CardDescription>
+          <CardDescription className="text-xs mt-0.5">{t('dashboard.languages_description')}</CardDescription>
         </CardHeader>
-        <CardContent className={fieldsReadOnly ? 'opacity-60' : ''}>
+        <CardContent className={`pt-5 px-5 ${fieldsReadOnly ? 'opacity-60' : ''}`}>
           <SpokenLanguagesSelect
             options={SPOKEN_LANGUAGE_OPTIONS}
             selectedCodes={spokenLanguages}
@@ -519,15 +497,15 @@ export function ProfileSection() {
       </Card>
 
       {/* Services */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Briefcase size={16} className="text-primary" />
-            {t('profile.services')}
+      <Card className="overflow-hidden shadow-sm border-border/60">
+        <CardHeader className="bg-muted/30 border-b border-border/50 px-5 py-4">
+          <CardTitle className="flex items-center gap-2 text-sm font-semibold">
+            <span className="w-7 h-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0"><Briefcase size={14} /></span>
+            {t('profile.services')} <span className="text-red-500 ms-0.5">*</span>
           </CardTitle>
-          <CardDescription>{t('dashboard.services_description')}</CardDescription>
+          <CardDescription className="text-xs mt-0.5">{t('dashboard.services_description')}</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-5 px-5">
           <div className="flex gap-3 mb-5">
             <Input
               value={newService}
@@ -557,7 +535,7 @@ export function ProfileSection() {
                   variant="ghost"
                   size="icon"
                   className="h-8 w-8 shrink-0 text-destructive opacity-70 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
-                  onClick={() => removeServiceMut.mutate({ serviceId: srv.id })}
+                  onClick={() => setDeleteServiceId(srv.id)}
                   data-testid={`button-remove-service-${srv.id}`}
                 >
                   <Trash2 size={14} />
@@ -572,6 +550,37 @@ export function ProfileSection() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Delete service confirmation */}
+      <AlertDialog open={deleteServiceId !== null} onOpenChange={open => { if (!open) setDeleteServiceId(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {language === 'ar' ? 'حذف الخدمة؟' : 'Delete Service?'}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {language === 'ar'
+                ? 'هل أنت متأكد أنك تريد حذف هذه الخدمة؟ لا يمكن التراجع عن هذا الإجراء.'
+                : 'Are you sure you want to delete this service? This action cannot be undone.'}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setDeleteServiceId(null)}>
+              {language === 'ar' ? 'إلغاء' : 'Cancel'}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (deleteServiceId !== null) removeServiceMut.mutate({ serviceId: deleteServiceId });
+                setDeleteServiceId(null);
+              }}
+              data-testid="button-confirm-delete-service"
+            >
+              {language === 'ar' ? 'حذف' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Bottom save button for long form */}
       <div className="flex gap-3 flex-wrap pb-4">

@@ -80,6 +80,8 @@ export function Shell({ children }: { children: React.ReactNode }) {
     }
   });
 
+  const isAdminDashboard = /^\/admin(?:\/|$)/.test(location) && user?.role === 'admin';
+
   const toggleLang = () => {
     setLanguage(language === 'ar' ? 'en' : 'ar');
   };
@@ -154,92 +156,100 @@ export function Shell({ children }: { children: React.ReactNode }) {
               />
             </Link>
 
-            <nav className="hidden md:flex items-center gap-1 font-medium text-sm text-muted-foreground">
-              <Link href="/discover" className="px-3 py-2 rounded-md hover:text-foreground hover:bg-secondary transition-colors">
-                {t('nav.discover')}
-              </Link>
-            </nav>
+            {!isAdminDashboard && (
+              <nav className="hidden md:flex items-center gap-1 font-medium text-sm text-muted-foreground">
+                <Link href="/discover" className="px-3 py-2 rounded-md hover:text-foreground hover:bg-secondary transition-colors">
+                  {t('nav.discover')}
+                </Link>
+              </nav>
+            )}
           </div>
 
           <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={toggleLang}
-              className="min-h-11 min-w-11 px-2.5 py-1.5 inline-flex items-center justify-center text-xs font-semibold rounded-md border border-border/60 hover:bg-secondary hover:border-border transition-colors uppercase tracking-wider text-muted-foreground hover:text-foreground cursor-pointer"
-              dir="ltr"
-              aria-label={language === 'ar' ? t('nav.switch_to_english') : t('nav.switch_to_arabic')}
-            >
-              {language === 'ar' ? 'EN' : 'عربي'}
-            </button>
+            {!isAdminDashboard && (
+              <button
+                type="button"
+                onClick={toggleLang}
+                className="min-h-11 min-w-11 px-2.5 py-1.5 inline-flex items-center justify-center text-xs font-semibold rounded-md border border-border/60 hover:bg-secondary hover:border-border transition-colors uppercase tracking-wider text-muted-foreground hover:text-foreground cursor-pointer"
+                dir="ltr"
+                aria-label={language === 'ar' ? t('nav.switch_to_english') : t('nav.switch_to_arabic')}
+              >
+                {language === 'ar' ? 'EN' : 'عربي'}
+              </button>
+            )}
 
-            <div className="hidden md:flex items-center gap-2">
-              {user ? (
-                <>
-                  {user.role === 'customer' && (
-                    <>
-                      <Link href="/favourites" className="relative text-muted-foreground hover:text-foreground p-2 rounded-md hover:bg-secondary transition-colors" aria-label={t('nav.favourites')}>
-                        <Heart size={18} />
-                        {favCount > 0 && (
-                          <span className="absolute -top-0.5 -right-0.5 min-w-[17px] h-[17px] rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center px-1 leading-none">
-                            {favCount > 99 ? '99+' : favCount}
-                          </span>
-                        )}
+            {!isAdminDashboard && (
+              <div className="hidden md:flex items-center gap-2">
+                {user ? (
+                  <>
+                    {user.role === 'customer' && (
+                      <>
+                        <Link href="/favourites" className="relative text-muted-foreground hover:text-foreground p-2 rounded-md hover:bg-secondary transition-colors" aria-label={t('nav.favourites')}>
+                          <Heart size={18} />
+                          {favCount > 0 && (
+                            <span className="absolute -top-0.5 -right-0.5 min-w-[17px] h-[17px] rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center px-1 leading-none">
+                              {favCount > 99 ? '99+' : favCount}
+                            </span>
+                          )}
+                        </Link>
+                        <Link href="/account" className="text-muted-foreground hover:text-foreground p-2 rounded-md hover:bg-secondary transition-colors flex items-center gap-2" data-testid="link-account">
+                          <UserCircle size={18} />
+                          <span className="text-sm font-medium">{t('account.title')}</span>
+                        </Link>
+                      </>
+                    )}
+
+                    {user.role === 'office' && (
+                      <Link href="/office/dashboard" className="text-muted-foreground hover:text-foreground p-2 rounded-md hover:bg-secondary transition-colors flex items-center gap-2">
+                        <LayoutDashboard size={18} />
+                        <span className="text-sm font-medium">{t('nav.dashboard')}</span>
                       </Link>
-                      <Link href="/account" className="text-muted-foreground hover:text-foreground p-2 rounded-md hover:bg-secondary transition-colors flex items-center gap-2" data-testid="link-account">
-                        <UserCircle size={18} />
-                        <span className="text-sm font-medium">{t('account.title')}</span>
+                    )}
+
+                    {user.role === 'admin' && (
+                      <Link href="/admin" className="text-muted-foreground hover:text-foreground p-2 rounded-md hover:bg-secondary transition-colors flex items-center gap-2">
+                        <LayoutDashboard size={18} />
+                        <span className="text-sm font-medium">{t('nav.admin')}</span>
                       </Link>
-                    </>
-                  )}
-                  
-                  {user.role === 'office' && (
-                    <Link href="/office/dashboard" className="text-muted-foreground hover:text-foreground p-2 rounded-md hover:bg-secondary transition-colors flex items-center gap-2">
-                      <LayoutDashboard size={18} />
-                      <span className="text-sm font-medium">{t('nav.dashboard')}</span>
-                    </Link>
-                  )}
-                  
-                  {user.role === 'admin' && (
-                    <Link href="/admin" className="text-muted-foreground hover:text-foreground p-2 rounded-md hover:bg-secondary transition-colors">
-                      <LayoutDashboard size={18} />
-                      <span className="text-sm font-medium">{t('nav.admin')}</span>
-                    </Link>
-                  )}
+                    )}
 
-                  <Button variant="ghost" size="sm" onClick={() => logoutMutation.mutate()} className="gap-2">
-                    <LogOut size={16} className="text-muted-foreground" />
-                    <span>{t('common.logout')}</span>
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Button variant="ghost" size="sm" asChild>
-                    <Link href="/login/customer">{t('common.login')}</Link>
-                  </Button>
-                  <Button size="sm" asChild className="rounded-full px-5">
-                    <Link href="/register/office">{t('auth.register_office')}</Link>
-                  </Button>
-                </>
-              )}
-            </div>
+                    <Button variant="ghost" size="sm" onClick={() => logoutMutation.mutate()} className="gap-2">
+                      <LogOut size={16} className="text-muted-foreground" />
+                      <span>{t('common.logout')}</span>
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button variant="ghost" size="sm" asChild>
+                      <Link href="/login/customer">{t('common.login')}</Link>
+                    </Button>
+                    <Button size="sm" asChild className="rounded-full px-5">
+                      <Link href="/register/office">{t('auth.register_office')}</Link>
+                    </Button>
+                  </>
+                )}
+              </div>
+            )}
 
-            <button
-              ref={menuButtonRef}
-              type="button"
-              className="md:hidden h-11 w-11 p-0 inline-flex items-center justify-center text-muted-foreground"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              aria-expanded={mobileMenuOpen}
-              aria-controls="mobile-navigation-menu"
-              aria-label={mobileMenuOpen ? t('nav.close_menu') : t('nav.open_menu')}
-            >
-              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
+            {!isAdminDashboard && (
+              <button
+                ref={menuButtonRef}
+                type="button"
+                className="md:hidden h-11 w-11 p-0 inline-flex items-center justify-center text-muted-foreground"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                aria-expanded={mobileMenuOpen}
+                aria-controls="mobile-navigation-menu"
+                aria-label={mobileMenuOpen ? t('nav.close_menu') : t('nav.open_menu')}
+              >
+                {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+              </button>
+            )}
           </div>
         </div>
       </header>
 
       {/* Mobile Menu */}
-      {mobileMenuOpen && (
+      {mobileMenuOpen && !isAdminDashboard && (
         <div
           ref={mobileMenuRef}
           id="mobile-navigation-menu"

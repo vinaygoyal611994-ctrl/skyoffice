@@ -202,6 +202,10 @@
     @apply font-sans antialiased bg-background text-foreground overflow-x-hidden;
     min-width: 320px;
   }
+
+  button:not(:disabled) {
+    cursor: pointer;
+  }
 }
 
 @layer utilities {

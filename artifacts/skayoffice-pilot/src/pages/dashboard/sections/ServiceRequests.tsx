@@ -274,7 +274,7 @@ export function ServiceRequestsSection() {
           </DialogHeader>
           <div className="flex flex-col gap-4 py-2">
             <div className="space-y-1.5">
-              <Label className="text-xs">{t('sr.price')}</Label>
+              <Label className="text-xs">{t('sr.price')} <span className="text-red-500 ms-0.5">*</span></Label>
               <Input
                 dir="auto"
                 value={offerDialog?.price ?? ''}
@@ -284,7 +284,7 @@ export function ServiceRequestsSection() {
               />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs">{t('sr.execution_duration')}</Label>
+              <Label className="text-xs">{t('sr.execution_duration')} <span className="text-red-500 ms-0.5">*</span></Label>
               <Input
                 dir="auto"
                 value={offerDialog?.executionDuration ?? ''}

@@ -92,7 +92,7 @@ export function LoginAdmin() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t('auth.email')}</FormLabel>
+                    <FormLabel>{t('auth.email')} <span className="text-red-500 ms-0.5">*</span></FormLabel>
                     <FormControl>
                       <Input
                         type="email"
@@ -113,7 +113,7 @@ export function LoginAdmin() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t('auth.password')}</FormLabel>
+                    <FormLabel>{t('auth.password')} <span className="text-red-500 ms-0.5">*</span></FormLabel>
                     <FormControl>
                       <div className="relative">
                         <Input
