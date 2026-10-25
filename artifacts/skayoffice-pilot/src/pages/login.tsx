@@ -1,7 +1,7 @@
 import z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { useLogin, getGetCurrentUserQueryKey } from '@workspace/api-client-react';
+import { useLogin, useGetCurrentUser, getGetCurrentUserQueryKey } from '@workspace/api-client-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useI18n } from '@/lib/i18n';
 import { Link, useLocation } from 'wouter';
@@ -40,6 +40,14 @@ export function LoginCustomer() {
   const [showPassword, setShowPassword] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { data: currentUser } = useGetCurrentUser({ query: { retry: false } });
+
+  useEffect(() => {
+    if (!currentUser) return;
+    if (currentUser.role === 'customer') setLocation('/account');
+    else if (currentUser.role === 'office') setLocation('/office/dashboard');
+    else if (currentUser.role === 'admin') setLocation('/admin');
+  }, [currentUser, setLocation]);
 
   const loginMutation = useLogin({
     mutation: {
@@ -51,7 +59,7 @@ export function LoginCustomer() {
           description: t('auth.login_customer_success_desc'),
         });
         const redirectTo = consumePostLoginRedirect();
-        setLocation(redirectTo || '/discover');
+        setLocation(redirectTo || '/account');
       }
     }
   });
@@ -183,6 +191,14 @@ export function LoginOffice() {
   const [showPassword, setShowPassword] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { data: currentUser } = useGetCurrentUser({ query: { retry: false } });
+
+  useEffect(() => {
+    if (!currentUser) return;
+    if (currentUser.role === 'office') setLocation('/office/dashboard');
+    else if (currentUser.role === 'customer') setLocation('/account');
+    else if (currentUser.role === 'admin') setLocation('/admin');
+  }, [currentUser, setLocation]);
 
   const loginMutation = useLogin({
     mutation: {

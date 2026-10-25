@@ -1,7 +1,7 @@
 import z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { useLogin } from '@workspace/api-client-react';
+import { useLogin, useGetCurrentUser } from '@workspace/api-client-react';
 import { useI18n } from '@/lib/i18n';
 import { Link, useLocation } from 'wouter';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -24,8 +24,15 @@ export function LoginAdmin() {
   const { t, language } = useI18n();
   const [, setLocation] = useLocation();
   const [showPassword, setShowPassword] = useState(false);
-  // Shown when a non-admin account successfully authenticates on this form.
   const [wrongRoleError, setWrongRoleError] = useState(false);
+  const { data: currentUser } = useGetCurrentUser({ query: { retry: false } });
+
+  useEffect(() => {
+    if (!currentUser) return;
+    if (currentUser.role === 'admin') setLocation('/admin');
+    else if (currentUser.role === 'office') setLocation('/office/dashboard');
+    else if (currentUser.role === 'customer') setLocation('/account');
+  }, [currentUser, setLocation]);
 
   const loginMutation = useLogin({
     mutation: {
