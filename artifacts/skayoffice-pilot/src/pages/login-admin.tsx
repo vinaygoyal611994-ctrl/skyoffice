@@ -13,6 +13,15 @@ import { useState, useEffect } from 'react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { captureSessionToken } from '@/lib/sessionToken';
 
+function translateServerError(code: string | undefined, t: (k: string) => string): string {
+  switch (code) {
+    case 'INVALID_CREDENTIALS': return t('auth.error_invalid_credentials');
+    case 'ACCOUNT_LOCKED':      return t('auth.error_account_locked');
+    case 'ACCOUNT_DEACTIVATED': return t('auth.error_account_deactivated');
+    default:                    return t('common.error');
+  }
+}
+
 function makeAdminSchema(t: (k: string) => string) {
   return z.object({
     email: z.string().email(t('validation.email_invalid')),
@@ -80,7 +89,7 @@ export function LoginAdmin() {
           {loginMutation.error && !wrongRoleError && (
             <Alert variant="destructive" className="mb-6">
               <AlertDescription>
-                {loginMutation.error.data?.error || t('common.error')}
+                {translateServerError(loginMutation.error.data?.error, t)}
               </AlertDescription>
             </Alert>
           )}
