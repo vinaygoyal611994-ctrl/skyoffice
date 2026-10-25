@@ -114,7 +114,7 @@ export function OverviewSection({ navigate }: { navigate: (s: string) => void })
       count: pendingApproval,
       priority: 'high' as const,
       icon: <FileText size={18} />,
-      section: 'requests',
+      section: 'office-management',
     },
     {
       key: 'awaiting_activation',
@@ -123,7 +123,7 @@ export function OverviewSection({ navigate }: { navigate: (s: string) => void })
       count: awaitingActivation,
       priority: 'high' as const,
       icon: <PlayCircle size={18} />,
-      section: 'requests',
+      section: 'office-management',
     },
     {
       key: 'requiring_changes',
@@ -132,7 +132,7 @@ export function OverviewSection({ navigate }: { navigate: (s: string) => void })
       count: needsChanges,
       priority: 'medium' as const,
       icon: <AlertTriangle size={18} />,
-      section: 'requests',
+      section: 'office-management',
     },
     {
       key: 'suspended',
@@ -141,22 +141,22 @@ export function OverviewSection({ navigate }: { navigate: (s: string) => void })
       count: suspendedOffices,
       priority: 'low' as const,
       icon: <PauseCircle size={18} />,
-      section: 'offices',
+      section: 'office-management',
     },
   ];
   const actionItems: ActionItem[] = rawActionItems.filter(item => item.count > 0);
 
   const kpiCards = [
-    { label: language === 'ar' ? 'إجمالي المكاتب' : 'Total Offices',          value: totalOffices,                          icon: <Building2 size={20} />,     tone: 'text-foreground' },
-    { label: language === 'ar' ? 'مكاتب نشطة' : 'Active Offices',              value: activeOffices,                         icon: <CheckCircle2 size={20} />,  tone: 'text-emerald-600' },
-    { label: language === 'ar' ? 'قيد المراجعة' : 'Pending Approval',          value: pendingApproval,                       icon: <Clock size={20} />,         tone: 'text-blue-600', onClick: () => navigate('requests') },
-    { label: language === 'ar' ? 'مطلوب تعديلات' : 'Needs Changes',            value: needsChanges,                          icon: <AlertTriangle size={20} />, tone: needsChanges > 0 ? 'text-amber-600' : 'text-foreground', onClick: needsChanges > 0 ? () => navigate('requests') : undefined },
-    { label: language === 'ar' ? 'مكاتب معلّقة' : 'Suspended Offices',         value: suspendedOffices,                      icon: <PauseCircle size={20} />,   tone: suspendedOffices > 0 ? 'text-amber-600' : 'text-foreground' },
-    { label: language === 'ar' ? 'مكاتب مرفوضة' : 'Rejected Offices',          value: rejectedOffices,                       icon: <XCircle size={20} />,       tone: rejectedOffices > 0 ? 'text-red-600' : 'text-foreground' },
-    { label: language === 'ar' ? 'عملاء مسجلون' : 'Registered Customers',      value: customers.length,                      icon: <Users size={20} />,         tone: 'text-foreground', onClick: () => navigate('customers') },
-    { label: language === 'ar' ? 'تواصل اليوم' : "Today's Contacts",           value: stats?.contactsToday   ?? '…',         icon: <MessageCircle size={20} />, tone: 'text-foreground', onClick: () => navigate('analytics') },
-    { label: language === 'ar' ? 'مكالمات فيديو اليوم' : 'Video Calls Today',  value: stats?.videoCallsToday ?? '…',         icon: <Video size={20} />,         tone: 'text-foreground' },
-    { label: language === 'ar' ? 'إجمالي التفاعلات' : 'Total Interactions',     value: stats?.totalInteractions ?? '…',       icon: <TrendingUp size={20} />,    tone: 'text-foreground', onClick: () => navigate('analytics') },
+    { label: language === 'ar' ? 'إجمالي المكاتب' : 'Total Offices',          value: totalOffices,                          icon: <Building2 size={20} />,     tone: 'text-foreground',                                          onClick: () => navigate('office-management') },
+    { label: language === 'ar' ? 'مكاتب نشطة' : 'Active Offices',              value: activeOffices,                         icon: <CheckCircle2 size={20} />,  tone: 'text-emerald-600',                                         onClick: () => navigate('office-management') },
+    { label: language === 'ar' ? 'قيد المراجعة' : 'Pending Approval',          value: pendingApproval,                       icon: <Clock size={20} />,         tone: 'text-blue-600',                                            onClick: () => navigate('office-management') },
+    { label: language === 'ar' ? 'مطلوب تعديلات' : 'Needs Changes',            value: needsChanges,                          icon: <AlertTriangle size={20} />, tone: needsChanges > 0 ? 'text-amber-600' : 'text-foreground',     onClick: () => navigate('office-management') },
+    { label: language === 'ar' ? 'مكاتب معلّقة' : 'Suspended Offices',         value: suspendedOffices,                      icon: <PauseCircle size={20} />,   tone: suspendedOffices > 0 ? 'text-amber-600' : 'text-foreground', onClick: () => navigate('office-management') },
+    { label: language === 'ar' ? 'مكاتب مرفوضة' : 'Rejected Offices',          value: rejectedOffices,                       icon: <XCircle size={20} />,       tone: rejectedOffices > 0 ? 'text-red-600' : 'text-foreground',    onClick: () => navigate('office-management') },
+    { label: language === 'ar' ? 'عملاء مسجلون' : 'Registered Customers',      value: customers.length,                      icon: <Users size={20} />,         tone: 'text-foreground',                                          onClick: () => navigate('customers') },
+    { label: language === 'ar' ? 'تواصل اليوم' : "Today's Contacts",           value: stats?.contactsToday   ?? '…',         icon: <MessageCircle size={20} />, tone: 'text-foreground',                                          onClick: () => navigate('intelligence') },
+    { label: language === 'ar' ? 'مكالمات فيديو اليوم' : 'Video Calls Today',  value: stats?.videoCallsToday ?? '…',         icon: <Video size={20} />,         tone: 'text-foreground',                                          onClick: () => navigate('intelligence') },
+    { label: language === 'ar' ? 'إجمالي التفاعلات' : 'Total Interactions',     value: stats?.totalInteractions ?? '…',       icon: <TrendingUp size={20} />,    tone: 'text-foreground',                                          onClick: () => navigate('intelligence') },
   ];
 
   return (
