@@ -121,7 +121,7 @@ export function Admin() {
       onSettled: () => {
         clearSessionToken();
         queryClient.removeQueries();
-        setLocation('/login/admin', { replace: true });
+        setLocation('/admin', { replace: true });
       },
     });
   };
