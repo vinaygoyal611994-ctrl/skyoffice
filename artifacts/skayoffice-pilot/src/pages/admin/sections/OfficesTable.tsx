@@ -75,14 +75,14 @@ const STATUS_FILTERS = [
   { value: 'draft',             labelAr: 'مسودة',          labelEn: 'Draft' },
 ];
 
-export function OfficesTableSection() {
+export function OfficesTableSection({ initialStatus = 'all' }: { initialStatus?: string }) {
   const { language } = useI18n();
   const { toast }    = useToast();
   const queryClient  = useQueryClient();
 
   // List / filter / pagination state
   const [search,             setSearch]             = useState('');
-  const [statusFilter,       setStatusFilter]       = useState('all');
+  const [statusFilter,       setStatusFilter]       = useState(initialStatus);
   const [categoryFilter,     setCategoryFilter]     = useState('all');
   const [providerTypeFilter, setProviderTypeFilter] = useState<'all' | 'office' | 'freelancer'>('all');
   const [page,               setPage]               = useState(1);

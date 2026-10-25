@@ -80,10 +80,10 @@ const SB = {
 };
 
 // ── Section router ────────────────────────────────────────────────────────────
-function SectionContent({ section, navigate }: { section: AdminSection; navigate: (s: string) => void }) {
+function SectionContent({ section, navigate, filter }: { section: AdminSection; navigate: (s: string, f?: string) => void; filter?: string }) {
   switch (section) {
     case 'overview':          return <OverviewSection navigate={navigate} />;
-    case 'office-management': return <OfficeManagementSection />;
+    case 'office-management': return <OfficeManagementSection initialStatus={filter} />;
     case 'customers':         return <CustomerManagementSection />;
     case 'intelligence':      return <IntelligenceHubSection />;
     case 'activity':          return <ActivityLogSection />;
@@ -99,6 +99,7 @@ export function Admin() {
   const isRtl = language === 'ar';
 
   const [activeSection, setActiveSectionState] = useState<AdminSection>(getStoredSection);
+  const [sectionFilter,  setSectionFilter]      = useState<string | undefined>(undefined);
   const [moreDrawerOpen, setMoreDrawerOpen]     = useState(false);
 
   const logoutMut    = useLogout();
@@ -112,8 +113,9 @@ export function Admin() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
-  const navigate = useCallback((section: string) => {
+  const navigate = useCallback((section: string, filter?: string) => {
     setActiveSection(section as AdminSection);
+    setSectionFilter(filter);
   }, [setActiveSection]);
 
   const handleLogout = () => {
@@ -252,7 +254,7 @@ export function Admin() {
             </h1>
           </div>
           <div className="dashboard-surface">
-            <SectionContent section={activeSection} navigate={navigate} />
+            <SectionContent section={activeSection} navigate={navigate} filter={sectionFilter} />
           </div>
         </div>
       </main>

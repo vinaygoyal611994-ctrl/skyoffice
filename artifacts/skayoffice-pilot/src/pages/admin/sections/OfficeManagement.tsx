@@ -11,9 +11,11 @@ import { OfficesTableSection } from './OfficesTable';
 
 type OfficeView = 'intake' | 'all';
 
-export function OfficeManagementSection() {
+export function OfficeManagementSection({ initialStatus }: { initialStatus?: string }) {
   const { language } = useI18n();
-  const [view, setView] = useState<OfficeView>('intake');
+  // under_review → intake tab; everything else → all tab
+  const initialView: OfficeView = (!initialStatus || initialStatus === 'under_review') ? 'intake' : 'all';
+  const [view, setView] = useState<OfficeView>(initialView);
 
   const tabs = [
     {
@@ -54,7 +56,7 @@ export function OfficeManagementSection() {
 
       {/* Content */}
       {view === 'intake' && <RegistrationRequestsSection />}
-      {view === 'all'    && <OfficesTableSection />}
+      {view === 'all'    && <OfficesTableSection initialStatus={initialStatus && initialStatus !== 'under_review' ? initialStatus : 'all'} />}
     </div>
   );
 }
