@@ -37,6 +37,7 @@ export function LoginAdmin() {
         }
         setWrongRoleError(false);
         captureSessionToken(data);
+        try { localStorage.removeItem('skayoffice-admin-section'); } catch {}
         setLocation('/admin');
       },
     },
