@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SkayOffice — Bug Fixes Report · 25 October 2026</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #f0f4f8;
+      color: #1e293b;
+      min-height: 100vh;
+      padding: 48px 24px;
+    }
+
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);
+      border-radius: 16px;
+      padding: 44px 48px;
+      margin-bottom: 36px;
+      color: #fff;
+      position: relative;
+      overflow: hidden;
+    }
+    .header::before {
+      content: '';
+      position: absolute;
+      top: -60px; right: -60px;
+      width: 220px; height: 220px;
+      background: rgba(255,255,255,0.04);
+      border-radius: 50%;
+    }
+    .header::after {
+      content: '';
+      position: absolute;
+      bottom: -40px; left: 40px;
+      width: 140px; height: 140px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 50%;
+    }
+    .brand {
+      font-size: 12px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #94a3b8;
+      margin-bottom: 12px;
+    }
+    .header h1 {
+      font-size: 30px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+    }
+    .header .subtitle {
+      font-size: 15px;
+      color: #cbd5e1;
+      margin-bottom: 28px;
+    }
+    .meta-row {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 13px;
+      color: #e2e8f0;
+    }
+    .meta-item .dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #22d3ee;
+      flex-shrink: 0;
+    }
+    .meta-item .dot.green { background: #4ade80; }
+
+    /* Summary bar */
+    .summary-bar {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 36px;
+    }
+    .summary-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 22px 24px;
+      border: 1px solid #e2e8f0;
+      text-align: center;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    }
+    .summary-card .number {
+      font-size: 36px;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+    .summary-card .label {
+      font-size: 12px;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .number.green { color: #16a34a; }
+    .number.blue  { color: #2563eb; }
+    .number.slate { color: #0f172a; }
+
+    /* Section */
+    .section-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: #94a3b8;
+      margin-bottom: 16px;
+    }
+
+    /* Fix cards */
+    .fixes-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-bottom: 40px;
+    }
+
+    .fix-card {
+      background: #fff;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+      padding: 22px 26px;
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+      transition: box-shadow 0.2s;
+    }
+    .fix-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+
+    .fix-number {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      background: #0f172a;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .fix-body { flex: 1; min-width: 0; }
+
+    .fix-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 6px;
+      flex-wrap: wrap;
+    }
+
+    .fix-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: #0f172a;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      flex-shrink: 0;
+    }
+    .badge.bug      { background: #fee2e2; color: #b91c1c; }
+    .badge.ux       { background: #fef3c7; color: #92400e; }
+    .badge.security { background: #ede9fe; color: #6d28d9; }
+    .badge.feature  { background: #dbeafe; color: #1d4ed8; }
+
+    .fix-desc {
+      font-size: 14px;
+      color: #475569;
+      line-height: 1.65;
+    }
+
+    /* Area tags */
+    .area-tag {
+      display: inline-block;
+      background: #f1f5f9;
+      color: #475569;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-top: 10px;
+      border: 1px solid #e2e8f0;
+    }
+
+    /* Footer */
+    .footer {
+      background: #fff;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+      padding: 28px 32px;
+      text-align: center;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .footer p {
+      font-size: 13px;
+      color: #64748b;
+      line-height: 1.7;
+    }
+    .footer .status-dot {
+      display: inline-block;
+      width: 8px; height: 8px;
+      background: #22c55e;
+      border-radius: 50%;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+    .divider {
+      height: 1px;
+      background: #e2e8f0;
+      margin: 24px 0;
+    }
+
+    @media (max-width: 600px) {
+      .summary-bar { grid-template-columns: 1fr; }
+      .header { padding: 32px 28px; }
+      .header h1 { font-size: 22px; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="brand">SkayOffice Platform</div>
+    <h1>Bug Fixes &amp; Improvements Report</h1>
+    <div class="subtitle">Session: 25 October 2026 — All issues resolved &amp; deployed</div>
+    <div class="meta-row">
+      <div class="meta-item"><span class="dot green"></span> All Fixes Live</div>
+      <div class="meta-item"><span class="dot"></span> 25 Oct 2026</div>
+      <div class="meta-item"><span class="dot"></span> Platform: SkayOffice</div>
+    </div>
+  </div>
+
+  <!-- Summary -->
+  <div class="summary-bar">
+    <div class="summary-card">
+      <div class="number slate">9</div>
+      <div class="label">Total Fixes</div>
+    </div>
+    <div class="summary-card">
+      <div class="number green">9</div>
+      <div class="label">Resolved</div>
+    </div>
+    <div class="summary-card">
+      <div class="number blue">0</div>
+      <div class="label">Pending</div>
+    </div>
+  </div>
+
+  <!-- Fixes -->
+  <div class="section-title">Resolved Issues</div>
+  <div class="fixes-list">
+
+    <div class="fix-card">
+      <div class="fix-number">1</div>
+      <div class="fix-body">
+        <div class="fix-header">
+          <span class="fix-title">Office Login Redirecting to Home Page</span>
+          <span class="badge bug">Bug</span>
+        </div>
+        <div class="fix-desc">
+          After a successful office login, users were being sent to the site's home page instead of their dashboard. The session was established correctly but navigation was landing on the wrong destination. Fixed so that office users always land on their dashboard after login.
+        </div>
+        <div class="area-tag">Office Login</div>
+      </div>
+    </div>
+
+    <div class="fix-card">
+      <div class="fix-number">2</div>
+      <div class="fix-body">
+        <div class="fix-header">
+          <span class="fix-title">Admin Dashboard Opening on Account Settings Instead of Overview</span>
+          <span class="badge ux">UX</span>
+        </div>
+        <div class="fix-desc">
+          When an admin logged in, the dashboard was opening on whichever section they had last visited — often Account Settings — instead of the main Command Center (Overview). Admins now always land on the Overview / Command Center immediately after login.
+        </div>
+        <div class="area-tag">Admin Dashboard</div>
+      </div>
+    </div>
+
+    <div class="fix-card">
+      <div class="fix-number">3</div>
+      <div class="fix-body">
+        <div class="fix-header">
+          <span class="fix-title">KPI Cards Not Navigating to Relevant Sections</span>
+          <span class="badge ux">UX</span>
+        </div>
+        <div class="fix-desc">
+          Clicking on Key Performance Indicator cards in the admin Command Center was not navigating to the corresponding management section. All cards are now clickable and take the admin directly to the relevant section — Offices, Customers, or Intelligence Hub.
+        </div>
+        <div class="area-tag">Admin Command Center</div>
+      </div>
+    </div>
+
+    <div class="fix-card">
+      <div class="fix-number">4</div>
+      <div class="fix-body">
+        <div class="fix-header">
+          <span class="fix-title">KPI Cards with Zero Count Were Still Clickable</span>
+          <span class="badge ux">UX</span>
+        </div>
+        <div class="fix-desc">
+          Cards showing a count of zero were still responding to clicks and navigating to sections that had no relevant records to display. Cards now only become clickable when they have data to show — a count of zero means the card is static and non-interactive.
+        </div>
+        <div class="area-tag">Admin Command Center</div>
+      </div>
+    </div>
+
+    <div class="fix-card">
+      <div class="fix-number">5</div>
+      <div class="fix-body">
+        <div class="fix-header">
+          <span class="fix-title">Admin Logout Redirecting to Site Home Page</span>
+          <span class="badge bug">Bug</span>
+        </div>
+        <div class="fix-desc">
+          Logging out from the admin dashboard was sending the admin to the public home page of the site. Admin logout now correctly redirects to the Admin Login page so the admin can sign back in without navigating manually.
+        </div>
+        <div class="area-tag">Admin Logout</div>
+      </div>
+    </div>
+
+    <div class="fix-card">
+      <div class="fix-number">6</div>
+      <div class="fix-body">
+        <div class="fix-header">
+          <span class="fix-title">Raw Error Code Shown on Wrong Admin Credentials</span>
+          <span class="badge ux">UX</span>
+        </div>
+        <div class="fix-desc">
+          When an admin entered incorrect login credentials, the system was displaying a raw technical error code such as <strong>INVALID_CREDENTIALS</strong> instead of a clear, readable message. The error display now shows a proper human-friendly message for all credential error scenarios.
+        </div>
+        <div class="area-tag">Admin Login</div>
+      </div>
+    </div>
+
+    <div class="fix-card">
+      <div class="fix-number">7</div>
+      <div class="fix-body">
+        <div class="fix-header">
+          <span class="fix-title">Office User Able to Log In via Customer Login Portal</span>
+          <span class="badge security">Security</span>
+        </div>
+        <div class="fix-desc">
+          An office account could successfully authenticate through the Customer Login page, gaining access to the customer area with the wrong role. The Customer Login portal now validates the role of the account — only customer accounts are accepted, and any other role is rejected with a clear message directing them to the correct login portal.
+        </div>
+        <div class="area-tag">Customer Login · Role Enforcement</div>
+      </div>
+    </div>
+
+    <div class="fix-card">
+      <div class="fix-number">8</div>
+      <div class="fix-body">
+        <div class="fix-header">
+          <span class="fix-title">Customer User Able to Log In via Office Login Portal</span>
+          <span class="badge security">Security</span>
+        </div>
+        <div class="fix-desc">
+          Similarly, a customer account could authenticate through the Office Login page. The Office Login portal now enforces role validation — only office accounts are accepted, with a clear message shown for any mismatch.
+        </div>
+        <div class="area-tag">Office Login · Role Enforcement</div>
+      </div>
+    </div>
+
+    <div class="fix-card">
+      <div class="fix-number">9</div>
+      <div class="fix-body">
+        <div class="fix-header">
+          <span class="fix-title">Logged-in Admin Could Access the Admin Login Page</span>
+          <span class="badge ux">UX</span>
+        </div>
+        <div class="fix-desc">
+          An admin who was already logged in could still navigate directly to the Admin Login URL and see the login form. The page now detects an active admin session and automatically redirects to the dashboard, preventing the login form from showing unnecessarily.
+        </div>
+        <div class="area-tag">Admin Login · Session Guard</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <p><span class="status-dot"></span><strong>All 9 issues resolved and live.</strong></p>
+    <div class="divider"></div>
+    <p>SkayOffice Platform &nbsp;·&nbsp; Bug Fix Session: 25 October 2026<br>
+    All fixes verified and deployed to production environment.</p>
+  </div>
+
+</div>
+</body>
+</html>
