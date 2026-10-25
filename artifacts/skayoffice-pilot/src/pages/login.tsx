@@ -38,12 +38,18 @@ export function LoginCustomer() {
   const { t, language } = useI18n();
   const [, setLocation] = useLocation();
   const [showPassword, setShowPassword] = useState(false);
+  const [wrongRoleError, setWrongRoleError] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const loginMutation = useLogin({
     mutation: {
       onSuccess: (data) => {
+        if (data.role !== 'customer') {
+          setWrongRoleError(true);
+          return;
+        }
+        setWrongRoleError(false);
         captureSessionToken(data);
         queryClient.invalidateQueries({ queryKey: getGetCurrentUserQueryKey() });
         toast({
@@ -86,7 +92,13 @@ export function LoginCustomer() {
           </CardDescription>
         </CardHeader>
         <CardContent className="pb-8">
-          {loginMutation.error && (
+          {wrongRoleError && (
+            <Alert variant="destructive" className="mb-6">
+              <AlertDescription>{t('auth.login_customer_wrong_role')}</AlertDescription>
+            </Alert>
+          )}
+
+          {loginMutation.error && !wrongRoleError && (
             <Alert variant="destructive" className="mb-6">
               <AlertDescription>
                 {translateServerError(loginMutation.error.data?.error, t)}
@@ -181,12 +193,18 @@ export function LoginOffice() {
   const { t, language } = useI18n();
   const [, setLocation] = useLocation();
   const [showPassword, setShowPassword] = useState(false);
+  const [wrongRoleError, setWrongRoleError] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const loginMutation = useLogin({
     mutation: {
       onSuccess: (data) => {
+        if (data.role !== 'office') {
+          setWrongRoleError(true);
+          return;
+        }
+        setWrongRoleError(false);
         captureSessionToken(data);
         queryClient.invalidateQueries({ queryKey: getGetCurrentUserQueryKey() });
         toast({
@@ -226,7 +244,13 @@ export function LoginOffice() {
           </CardDescription>
         </CardHeader>
         <CardContent className="pb-8">
-          {loginMutation.error && (
+          {wrongRoleError && (
+            <Alert variant="destructive" className="mb-6">
+              <AlertDescription>{t('auth.login_office_wrong_role')}</AlertDescription>
+            </Alert>
+          )}
+
+          {loginMutation.error && !wrongRoleError && (
             <Alert variant="destructive" className="mb-6">
               <AlertDescription>
                 {translateServerError(loginMutation.error.data?.error, t)}
