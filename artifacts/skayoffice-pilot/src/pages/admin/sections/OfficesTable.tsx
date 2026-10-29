@@ -122,7 +122,32 @@ export function OfficesTableSection({ initialStatus = 'all' }: { initialStatus?:
   };
 
   const deleteMut     = useDeleteAdminOffice({ mutation: { onSuccess: () => { invalidate(); setSelectedId(null); toast({ title: language === 'ar' ? 'تم الحذف' : 'Deleted' }); }, onError: onErr } });
-  const verifyMut     = useSetOfficeVerification({ mutation: { onSuccess: invalidate, onError: onErr } });
+  const verifyMut     = useSetOfficeVerification({
+    mutation: {
+      onMutate: async (vars) => {
+        await queryClient.cancelQueries({ queryKey: getListAdminOfficesQueryKey() });
+        const prev = queryClient.getQueryData(getListAdminOfficesQueryKey());
+        queryClient.setQueryData(getListAdminOfficesQueryKey(), (old: any) =>
+          Array.isArray(old)
+            ? old.map((o: any) => o.id === vars.officeId ? { ...o, isVerified: vars.data.isVerified } : o)
+            : old,
+        );
+        return { prev };
+      },
+      onSuccess: (_data, vars) => {
+        invalidate();
+        toast({
+          title: vars.data.isVerified
+            ? (language === 'ar' ? 'تم توثيق المكتب' : 'Office verified')
+            : (language === 'ar' ? 'تم إلغاء توثيق المكتب' : 'Office unverified'),
+        });
+      },
+      onError: (err, _vars, ctx: any) => {
+        if (ctx?.prev) queryClient.setQueryData(getListAdminOfficesQueryKey(), ctx.prev);
+        onErr(err);
+      },
+    },
+  });
   const activateMut   = useActivateAdminApplication({ mutation: { onSuccess: invalidate, onError: onActivationErr } });
   const suspendMut    = useSuspendAdminApplication({ mutation: { onSuccess: invalidate, onError: onErr } });
   const reactivateMut = useReactivateAdminApplication({ mutation: { onSuccess: invalidate, onError: onActivationErr } });
