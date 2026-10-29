@@ -496,7 +496,6 @@ const ChangePasswordBody = z.object({
 router.post(
   "/auth/change-password",
   requireAuth,
-  requireRole("admin"),
   changePasswordLimiter,
   async (req: Request, res: Response): Promise<void> => {
     const parsed = ChangePasswordBody.safeParse(req.body);
@@ -577,6 +576,65 @@ router.post(
     req.session.destroy(() => {
       res.sendStatus(204);
     });
+  },
+);
+
+// ---------------------------------------------------------------------------
+// PATCH /auth/me  — update own name and/or phone (all roles)
+// ---------------------------------------------------------------------------
+const UpdateMeBody = z.object({
+  name:  z.string().min(1).max(100).optional(),
+  phone: z.string().optional(),
+});
+
+router.patch(
+  "/auth/me",
+  requireAuth,
+  async (req: Request, res: Response): Promise<void> => {
+    const parsed = UpdateMeBody.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({ error: parsed.error.issues[0]?.message ?? "Invalid request" });
+      return;
+    }
+
+    const { name, phone } = parsed.data;
+    const userId = req.session.user!.id;
+
+    const updates: Record<string, unknown> = {};
+
+    if (name !== undefined) {
+      updates.name = name.trim();
+    }
+
+    if (phone !== undefined) {
+      if (phone === '') {
+        updates.phone = null;
+      } else {
+        if (!isValidPhone(phone)) {
+          res.status(400).json({ error: "Please provide a valid phone number" });
+          return;
+        }
+        const normalized = normalizePhone(phone);
+        // Check if phone is taken by another user
+        const existing = await db.select({ id: usersTable.id }).from(usersTable)
+          .where(eq(usersTable.phone, normalized));
+        if (existing.length > 0 && existing[0].id !== userId) {
+          res.status(409).json({ error: "This phone number is already in use" });
+          return;
+        }
+        updates.phone = normalized;
+      }
+    }
+
+    if (Object.keys(updates).length === 0) {
+      res.status(400).json({ error: "Nothing to update" });
+      return;
+    }
+
+    await db.update(usersTable).set(updates).where(eq(usersTable.id, userId));
+
+    const [updated] = await db.select().from(usersTable).where(eq(usersTable.id, userId));
+    res.json(GetCurrentUserResponse.parse(await toAuthUser(updated)));
   },
 );
 

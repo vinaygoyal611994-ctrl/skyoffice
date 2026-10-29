@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useI18n } from '@/lib/i18n';
 import { Link, useLocation } from 'wouter';
-import { clearSessionToken } from '@/lib/sessionToken';
+import { clearSessionToken, authFetch } from '@/lib/sessionToken';
 import {
   useGetCurrentUser,
   useLogout,
@@ -15,12 +15,15 @@ import {
 import { useQueryClient } from '@tanstack/react-query';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { QuickOfficeCard } from '@/components/office/QuickOfficeCard';
+import { useToast } from '@/hooks/use-toast';
 import {
   Mail, Phone, LogOut, HeartCrack, Search, Video,
   ShieldCheck, ShieldAlert, MessageCircle, MapPin, Share2,
-  History, Heart, Clock, CalendarCheck,
+  History, Heart, Clock, CalendarCheck, User, KeyRound, Eye, EyeOff,
 } from 'lucide-react';
 import { MyServiceRequests } from '@/components/account/MyServiceRequests';
 import { format } from 'date-fns';
@@ -51,11 +54,89 @@ export function Account() {
   const { t } = useI18n();
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
+  const { toast } = useToast();
 
   const { data: user } = useGetCurrentUser({ query: { retry: false, queryKey: getGetCurrentUserQueryKey() } });
   const { data: favourites, isLoading: favouritesLoading } = useListFavourites();
   const { data: videoRequests, isLoading: videoRequestsLoading } = useListMyVideoCallRequests();
   const { data: contactEvents, isLoading: contactEventsLoading } = useListMyContactEvents({ limit: 20 });
+
+  // Edit profile state
+  const [profileName,  setProfileName]  = useState('');
+  const [profilePhone, setProfilePhone] = useState('');
+  const [profileSaving, setProfileSaving] = useState(false);
+  const [profileInit,  setProfileInit]  = useState(false);
+
+  // Change password state
+  const [currentPw,  setCurrentPw]  = useState('');
+  const [newPw,      setNewPw]      = useState('');
+  const [confirmPw,  setConfirmPw]  = useState('');
+  const [showCur,    setShowCur]    = useState(false);
+  const [showNew,    setShowNew]    = useState(false);
+  const [showConf,   setShowConf]   = useState(false);
+  const [pwSaving,   setPwSaving]   = useState(false);
+  const [pwError,    setPwError]    = useState('');
+
+  // Initialise profile fields once user loads
+  React.useEffect(() => {
+    if (user && !profileInit) {
+      setProfileName(user.name ?? '');
+      setProfilePhone(user.phone ?? '');
+      setProfileInit(true);
+    }
+  }, [user, profileInit]);
+
+  const handleProfileSave = async () => {
+    setProfileSaving(true);
+    try {
+      const res = await authFetch('/api/auth/me', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: profileName, phone: profilePhone }),
+      });
+      if (!res.ok) {
+        const json = await res.json().catch(() => ({}));
+        toast({ title: 'Error', description: json.error || 'Failed to update profile', variant: 'destructive' });
+      } else {
+        queryClient.invalidateQueries({ queryKey: getGetCurrentUserQueryKey() });
+        toast({ title: 'Profile updated', description: 'Your name and phone have been saved.' });
+      }
+    } catch {
+      toast({ title: 'Error', description: 'Something went wrong', variant: 'destructive' });
+    } finally {
+      setProfileSaving(false);
+    }
+  };
+
+  const handlePasswordChange = async () => {
+    setPwError('');
+    if (newPw !== confirmPw) { setPwError('Passwords do not match'); return; }
+    if (newPw.length < 8 || !/[a-zA-Z]/.test(newPw) || !/[0-9]/.test(newPw)) {
+      setPwError('Password must be at least 8 characters with at least one letter and one number');
+      return;
+    }
+    setPwSaving(true);
+    try {
+      const res = await authFetch('/api/auth/change-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ currentPassword: currentPw, newPassword: newPw, confirmPassword: confirmPw }),
+      });
+      if (!res.ok) {
+        const json = await res.json().catch(() => ({}));
+        setPwError(json.error || 'Failed to change password');
+      } else {
+        clearSessionToken();
+        queryClient.removeQueries();
+        toast({ title: 'Password changed', description: 'Please log in again with your new password.' });
+        setLocation('/login/customer');
+      }
+    } catch {
+      setPwError('Something went wrong');
+    } finally {
+      setPwSaving(false);
+    }
+  };
 
   const removeFavMutation = useRemoveFavourite({
     mutation: {
@@ -177,6 +258,78 @@ export function Account() {
             >
               <LogOut size={15} />
               {t('common.logout')}
+            </Button>
+          </div>
+        </div>
+
+        {/* Edit Profile */}
+        <div className="bg-white rounded-2xl border border-border/50 shadow-sm p-5">
+          <SectionHeader icon={<User size={17} />} title="Edit Profile" description="Update your name and phone number" />
+          <div className="space-y-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="profile-name">Full Name</Label>
+              <Input
+                id="profile-name"
+                value={profileName}
+                onChange={e => setProfileName(e.target.value)}
+                placeholder="Your full name"
+                autoComplete="name"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="profile-phone">Phone Number</Label>
+              <Input
+                id="profile-phone"
+                value={profilePhone}
+                onChange={e => setProfilePhone(e.target.value)}
+                placeholder="+1234567890"
+                dir="ltr"
+                autoComplete="tel"
+              />
+            </div>
+            <Button onClick={handleProfileSave} disabled={profileSaving} className="w-full">
+              {profileSaving ? 'Saving…' : 'Save Changes'}
+            </Button>
+          </div>
+        </div>
+
+        {/* Change Password */}
+        <div className="bg-white rounded-2xl border border-border/50 shadow-sm p-5">
+          <SectionHeader icon={<KeyRound size={17} />} title="Change Password" description="Password must be at least 8 characters with a letter and number" />
+          <div className="space-y-4">
+            {/* Current Password */}
+            <div className="space-y-1.5">
+              <Label htmlFor="cur-pw">Current Password</Label>
+              <div className="relative">
+                <Input id="cur-pw" type={showCur ? 'text' : 'password'} value={currentPw} onChange={e => setCurrentPw(e.target.value)} autoComplete="current-password" dir="ltr" className="pr-10" />
+                <button type="button" tabIndex={-1} onClick={() => setShowCur(v => !v)} className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground hover:text-foreground">
+                  {showCur ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+            </div>
+            {/* New Password */}
+            <div className="space-y-1.5">
+              <Label htmlFor="new-pw">New Password</Label>
+              <div className="relative">
+                <Input id="new-pw" type={showNew ? 'text' : 'password'} value={newPw} onChange={e => setNewPw(e.target.value)} autoComplete="new-password" dir="ltr" className="pr-10" />
+                <button type="button" tabIndex={-1} onClick={() => setShowNew(v => !v)} className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground hover:text-foreground">
+                  {showNew ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+            </div>
+            {/* Confirm Password */}
+            <div className="space-y-1.5">
+              <Label htmlFor="conf-pw">Confirm New Password</Label>
+              <div className="relative">
+                <Input id="conf-pw" type={showConf ? 'text' : 'password'} value={confirmPw} onChange={e => setConfirmPw(e.target.value)} autoComplete="new-password" dir="ltr" className="pr-10" />
+                <button type="button" tabIndex={-1} onClick={() => setShowConf(v => !v)} className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground hover:text-foreground">
+                  {showConf ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+            </div>
+            {pwError && <p className="text-sm text-destructive">{pwError}</p>}
+            <Button onClick={handlePasswordChange} disabled={pwSaving || !currentPw || !newPw || !confirmPw} className="w-full">
+              {pwSaving ? 'Changing…' : 'Change Password'}
             </Button>
           </div>
         </div>
