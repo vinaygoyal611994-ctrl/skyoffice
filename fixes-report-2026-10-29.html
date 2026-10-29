@@ -180,11 +180,11 @@
   <!-- Summary -->
   <div class="summary-bar">
     <div class="summary-card">
-      <div class="number slate">14</div>
+      <div class="number slate">6</div>
       <div class="label">Total Fixes</div>
     </div>
     <div class="summary-card">
-      <div class="number green">14</div>
+      <div class="number green">6</div>
       <div class="label">Resolved</div>
     </div>
     <div class="summary-card">
@@ -193,88 +193,7 @@
     </div>
   </div>
 
-  <!-- Auth & Login -->
   <div class="section-title">Resolved Issues</div>
-
-  <div class="category-header">
-    <span class="category-label">Login &amp; Authentication</span>
-    <span class="category-line"></span>
-  </div>
-  <div class="fixes-list">
-
-    <div class="fix-card">
-      <div class="fix-number">1</div>
-      <div class="fix-body">
-        <div class="fix-header">
-          <span class="fix-title">Office Login Redirecting to Home Page After Login</span>
-          <span class="badge bug">Bug</span>
-        </div>
-        <div class="fix-desc">After a successful office login, the user was being sent to the site's home page instead of the office dashboard. The root cause was a competing navigation triggered by a background data refetch that fired before navigation completed. Fixed so that every role is taken directly to its correct dashboard after login.</div>
-        <div class="area-tag">Office Login</div>
-      </div>
-    </div>
-
-    <div class="fix-card">
-      <div class="fix-number">2</div>
-      <div class="fix-body">
-        <div class="fix-header">
-          <span class="fix-title">Wrong Credentials Show Raw Error Code on Admin Login</span>
-          <span class="badge ux">UX</span>
-        </div>
-        <div class="fix-desc">Entering incorrect credentials on the Admin Login page was displaying raw server error codes such as INVALID_CREDENTIALS directly to the user. The error display now shows clear, human-readable messages for all error scenarios including wrong credentials, locked accounts, and deactivated accounts.</div>
-        <div class="area-tag">Admin Login</div>
-      </div>
-    </div>
-
-    <div class="fix-card">
-      <div class="fix-number">3</div>
-      <div class="fix-body">
-        <div class="fix-header">
-          <span class="fix-title">Office User Able to Log In via Customer Login Portal</span>
-          <span class="badge security">Security</span>
-        </div>
-        <div class="fix-desc">An office account could successfully authenticate through the Customer Login page, gaining unintended access. The Customer Login portal now strictly validates the role — only customer accounts are accepted. Any other role is rejected with a message directing the user to their correct login portal.</div>
-        <div class="area-tag">Customer Login · Role Enforcement</div>
-      </div>
-    </div>
-
-    <div class="fix-card">
-      <div class="fix-number">4</div>
-      <div class="fix-body">
-        <div class="fix-header">
-          <span class="fix-title">Customer User Able to Log In via Office Login Portal</span>
-          <span class="badge security">Security</span>
-        </div>
-        <div class="fix-desc">Similarly, a customer account could authenticate through the Office Login page. Role validation has been added to the Office Login portal — only office accounts are accepted, with a clear message for any mismatch.</div>
-        <div class="area-tag">Office Login · Role Enforcement</div>
-      </div>
-    </div>
-
-    <div class="fix-card">
-      <div class="fix-number">5</div>
-      <div class="fix-body">
-        <div class="fix-header">
-          <span class="fix-title">Logged-In Admin Could Access the Admin Login Page</span>
-          <span class="badge ux">UX</span>
-        </div>
-        <div class="fix-desc">An admin who was already logged in could still navigate directly to the Admin Login URL and see the login form. The page now detects an active admin session and automatically redirects to the dashboard, preventing the login form from appearing unnecessarily.</div>
-        <div class="area-tag">Admin Login · Session Guard</div>
-      </div>
-    </div>
-
-    <div class="fix-card">
-      <div class="fix-number">6</div>
-      <div class="fix-body">
-        <div class="fix-header">
-          <span class="fix-title">Admin Logout Redirecting to Wrong Page</span>
-          <span class="badge bug">Bug</span>
-        </div>
-        <div class="fix-desc">Logging out from the admin dashboard was redirecting to the public home page of the site. Admin logout now correctly redirects to the dedicated Admin Login page so the admin can sign back in without manual navigation.</div>
-        <div class="area-tag">Admin Logout</div>
-      </div>
-    </div>
-
-  </div>
 
   <!-- Admin Dashboard -->
   <div class="category-header">
@@ -284,31 +203,7 @@
   <div class="fixes-list">
 
     <div class="fix-card">
-      <div class="fix-number">7</div>
-      <div class="fix-body">
-        <div class="fix-header">
-          <span class="fix-title">Admin Dashboard Opening on Last-Visited Section Instead of Overview</span>
-          <span class="badge ux">UX</span>
-        </div>
-        <div class="fix-desc">After login, the admin dashboard was restoring whichever section was last visited — often Account Settings — instead of opening the main Command Center. Admins now always land on the Overview (Command Center) immediately after logging in.</div>
-        <div class="area-tag">Admin Dashboard</div>
-      </div>
-    </div>
-
-    <div class="fix-card">
-      <div class="fix-number">8</div>
-      <div class="fix-body">
-        <div class="fix-header">
-          <span class="fix-title">KPI Cards Not Navigating to Relevant Sections</span>
-          <span class="badge ux">UX</span>
-        </div>
-        <div class="fix-desc">Clicking on Key Performance Indicator cards in the Command Center was not navigating anywhere. All cards are now clickable and take the admin directly to the relevant section — Office Management, Customers, or Intelligence Hub. Cards showing zero are kept non-interactive since there is nothing to view.</div>
-        <div class="area-tag">Admin Command Center</div>
-      </div>
-    </div>
-
-    <div class="fix-card">
-      <div class="fix-number">9</div>
+      <div class="fix-number">1</div>
       <div class="fix-body">
         <div class="fix-header">
           <span class="fix-title">KPI Cards Not Filtering by Status When Navigating</span>
@@ -320,7 +215,7 @@
     </div>
 
     <div class="fix-card">
-      <div class="fix-number">10</div>
+      <div class="fix-number">2</div>
       <div class="fix-body">
         <div class="fix-header">
           <span class="fix-title">Verify Office Action Had No Feedback and Was Slow</span>
@@ -332,7 +227,7 @@
     </div>
 
     <div class="fix-card">
-      <div class="fix-number">11</div>
+      <div class="fix-number">3</div>
       <div class="fix-body">
         <div class="fix-header">
           <span class="fix-title">Deactivate Account Dialog Had Broken Layout</span>
@@ -344,7 +239,7 @@
     </div>
 
     <div class="fix-card">
-      <div class="fix-number">12</div>
+      <div class="fix-number">4</div>
       <div class="fix-body">
         <div class="fix-header">
           <span class="fix-title">Dropdown Menu Items Had No Pointer Cursor</span>
@@ -365,7 +260,7 @@
   <div class="fixes-list">
 
     <div class="fix-card">
-      <div class="fix-number">13</div>
+      <div class="fix-number">5</div>
       <div class="fix-body">
         <div class="fix-header">
           <span class="fix-title">No Option to Update Name or Phone Number</span>
@@ -377,7 +272,7 @@
     </div>
 
     <div class="fix-card">
-      <div class="fix-number">14</div>
+      <div class="fix-number">6</div>
       <div class="fix-body">
         <div class="fix-header">
           <span class="fix-title">No Option to Change Password for Customers</span>
@@ -392,7 +287,7 @@
 
   <!-- Footer -->
   <div class="footer">
-    <p><span class="status-dot"></span><strong>All 14 issues resolved and live.</strong></p>
+    <p><span class="status-dot"></span><strong>All 6 issues resolved and live.</strong></p>
     <div class="divider"></div>
     <p>SkayOffice Platform &nbsp;·&nbsp; Bug Fix Session: 29 October 2026<br>
     All fixes verified and deployed to production environment.</p>
