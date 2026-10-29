@@ -225,7 +225,7 @@ export function CustomerManagementSection() {
 
       {/* Status reason dialog */}
       <Dialog open={statusReasonFor !== null} onOpenChange={open => { if (!open) setStatusReasonFor(null); }}>
-        <DialogContent>
+        <DialogContent className="max-w-sm">
           <DialogHeader>
             <DialogTitle>
               {statusReasonFor?.status === 'suspended'
@@ -233,19 +233,23 @@ export function CustomerManagementSection() {
                 : (language === 'ar' ? 'تعطيل الحساب' : 'Deactivate Account')}
             </DialogTitle>
             <DialogDescription>
-              {statusReasonFor?.name} — {language === 'ar' ? 'سبب تغيير الحالة (اختياري)' : 'Reason for status change (optional)'}
+              <span className="font-medium text-foreground">{statusReasonFor?.name}</span>
+              <span className="block text-xs mt-1 text-muted-foreground">
+                {language === 'ar' ? 'سبب تغيير الحالة (اختياري)' : 'Reason for status change (optional)'}
+              </span>
             </DialogDescription>
           </DialogHeader>
-          <Label className="sr-only">{language === 'ar' ? 'السبب' : 'Reason'}</Label>
           <Textarea
             value={reasonText}
             onChange={e => setReasonText(e.target.value)}
-            className="min-h-[80px]"
+            className="min-h-[90px] max-h-[140px] resize-none text-sm"
             placeholder={language === 'ar' ? 'أدخل السبب...' : 'Enter reason...'}
             data-testid="input-customer-status-reason"
           />
-          <div className="flex gap-2 justify-end">
-            <Button variant="ghost" size="sm" onClick={() => setStatusReasonFor(null)}>{language === 'ar' ? 'إلغاء' : 'Cancel'}</Button>
+          <div className="flex items-center justify-end gap-2 pt-1">
+            <Button variant="outline" size="sm" onClick={() => setStatusReasonFor(null)}>
+              {language === 'ar' ? 'إلغاء' : 'Cancel'}
+            </Button>
             <Button
               size="sm"
               variant="destructive"
@@ -253,7 +257,7 @@ export function CustomerManagementSection() {
               onClick={confirmStatus}
               data-testid="button-confirm-customer-status"
             >
-              {language === 'ar' ? 'تأكيد' : 'Confirm'}
+              {setStatusMut.isPending ? '...' : (language === 'ar' ? 'تأكيد' : 'Confirm')}
             </Button>
           </div>
         </DialogContent>
