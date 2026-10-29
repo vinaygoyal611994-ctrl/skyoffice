@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SkayOffice — Bug Fixes Report · 29 October 2026</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    @media print {
+      body { background: #f0f4f8 !important; padding: 32px 24px; }
+      .fix-card { break-inside: avoid; page-break-inside: avoid; }
+      .summary-bar { break-inside: avoid; page-break-inside: avoid; }
+      .header { break-inside: avoid; page-break-inside: avoid; }
+      .footer { break-inside: avoid; page-break-inside: avoid; }
+      .section-title { break-after: avoid; page-break-after: avoid; }
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #f0f4f8;
+      color: #1e293b;
+      min-height: 100vh;
+      padding: 48px 24px;
+    }
+
+    .container { max-width: 860px; margin: 0 auto; }
+
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);
+      border-radius: 16px;
+      padding: 44px 48px;
+      margin-bottom: 36px;
+      color: #fff;
+      position: relative;
+      overflow: hidden;
+    }
+    .header::before {
+      content: '';
+      position: absolute;
+      top: -60px; right: -60px;
+      width: 220px; height: 220px;
+      background: rgba(255,255,255,0.04);
+      border-radius: 50%;
+    }
+    .header::after {
+      content: '';
+      position: absolute;
+      bottom: -40px; left: 40px;
+      width: 140px; height: 140px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 50%;
+    }
+    .brand { font-size: 12px; letter-spacing: 3px; text-transform: uppercase; color: #94a3b8; margin-bottom: 12px; }
+    .header h1 { font-size: 30px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 8px; }
+    .header .subtitle { font-size: 15px; color: #cbd5e1; margin-bottom: 28px; }
+    .meta-row { display: flex; gap: 16px; flex-wrap: wrap; }
+    .meta-item {
+      display: flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px; padding: 8px 14px;
+      font-size: 13px; color: #e2e8f0;
+    }
+    .meta-item .dot { width: 7px; height: 7px; border-radius: 50%; background: #22d3ee; flex-shrink: 0; }
+    .meta-item .dot.green { background: #4ade80; }
+
+    /* Summary */
+    .summary-bar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 36px; }
+    .summary-card {
+      background: #fff; border-radius: 12px; padding: 22px 24px;
+      border: 1px solid #e2e8f0; text-align: center;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    }
+    .summary-card .number { font-size: 36px; font-weight: 800; line-height: 1; margin-bottom: 6px; }
+    .summary-card .label { font-size: 12px; color: #64748b; text-transform: uppercase; letter-spacing: 1px; }
+    .number.green { color: #16a34a; }
+    .number.blue  { color: #2563eb; }
+    .number.slate { color: #0f172a; }
+
+    /* Section label */
+    .section-title {
+      font-size: 11px; font-weight: 700; letter-spacing: 2.5px;
+      text-transform: uppercase; color: #94a3b8; margin-bottom: 16px;
+    }
+
+    /* Category header */
+    .category-header {
+      display: flex; align-items: center; gap: 10px;
+      margin: 28px 0 12px;
+    }
+    .category-label {
+      font-size: 13px; font-weight: 700; color: #0f172a;
+      letter-spacing: 0.3px;
+    }
+    .category-line { flex: 1; height: 1px; background: #e2e8f0; }
+
+    /* Fix cards */
+    .fixes-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 8px; }
+
+    .fix-card {
+      background: #fff; border-radius: 12px; border: 1px solid #e2e8f0;
+      padding: 20px 24px; display: flex; gap: 18px; align-items: flex-start;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+      break-inside: avoid; page-break-inside: avoid;
+    }
+    .fix-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+
+    .fix-number {
+      width: 30px; height: 30px; border-radius: 8px;
+      background: #0f172a; color: #fff;
+      font-size: 12px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; margin-top: 2px;
+    }
+
+    .fix-body { flex: 1; min-width: 0; }
+
+    .fix-header { display: flex; align-items: center; gap: 10px; margin-bottom: 5px; flex-wrap: wrap; }
+
+    .fix-title { font-size: 14px; font-weight: 600; color: #0f172a; }
+
+    .badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 10px; font-weight: 600; padding: 2px 8px;
+      border-radius: 20px; text-transform: uppercase;
+      letter-spacing: 0.5px; flex-shrink: 0;
+    }
+    .badge.bug      { background: #fee2e2; color: #b91c1c; }
+    .badge.ux       { background: #fef3c7; color: #92400e; }
+    .badge.security { background: #ede9fe; color: #6d28d9; }
+    .badge.feature  { background: #dbeafe; color: #1d4ed8; }
+    .badge.perf     { background: #d1fae5; color: #065f46; }
+
+    .fix-desc { font-size: 13px; color: #475569; line-height: 1.65; }
+
+    .area-tag {
+      display: inline-block; background: #f1f5f9; color: #475569;
+      font-size: 11px; padding: 2px 8px; border-radius: 4px;
+      margin-top: 8px; border: 1px solid #e2e8f0;
+    }
+
+    /* Footer */
+    .footer {
+      background: #fff; border-radius: 12px; border: 1px solid #e2e8f0;
+      padding: 28px 32px; text-align: center;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04); margin-top: 36px;
+    }
+    .footer p { font-size: 13px; color: #64748b; line-height: 1.7; }
+    .footer .status-dot {
+      display: inline-block; width: 8px; height: 8px;
+      background: #22c55e; border-radius: 50%;
+      margin-right: 6px; vertical-align: middle;
+    }
+    .divider { height: 1px; background: #e2e8f0; margin: 20px 0; }
+
+    @media (max-width: 600px) {
+      .summary-bar { grid-template-columns: 1fr; }
+      .header { padding: 32px 28px; }
+      .header h1 { font-size: 22px; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="brand">SkayOffice Platform</div>
+    <h1>Bug Fixes &amp; Improvements Report</h1>
+    <div class="subtitle">Session: 29 October 2026 — All issues resolved &amp; deployed</div>
+    <div class="meta-row">
+      <div class="meta-item"><span class="dot green"></span> All Fixes Live</div>
+      <div class="meta-item"><span class="dot"></span> 29 Oct 2026</div>
+      <div class="meta-item"><span class="dot"></span> Platform: SkayOffice</div>
+    </div>
+  </div>
+
+  <!-- Summary -->
+  <div class="summary-bar">
+    <div class="summary-card">
+      <div class="number slate">14</div>
+      <div class="label">Total Fixes</div>
+    </div>
+    <div class="summary-card">
+      <div class="number green">14</div>
+      <div class="label">Resolved</div>
+    </div>
+    <div class="summary-card">
+      <div class="number blue">0</div>
+      <div class="label">Pending</div>
+    </div>
+  </div>
+
+  <!-- Auth & Login -->
+  <div class="section-title">Resolved Issues</div>
+
+  <div class="category-header">
+    <span class="category-label">Login &amp; Authentication</span>
+    <span class="category-line"></span>
+  </div>
+  <div class="fixes-list">
+
+    <div class="fix-card">
+      <div class="fix-number">1</div>
+      <div class="fix-body">
+        <div class="fix-header">
+          <span class="fix-title">Office Login Redirecting to Home Page After Login</span>
+          <span class="badge bug">Bug</span>
+        </div>
+        <div class="fix-desc">After a successful office login, the user was being sent to the site's home page instead of the office dashboard. The root cause was a competing navigation triggered by a background data refetch that fired before navigation completed. Fixed so that every role is taken directly to its correct dashboard after login.</div>
+        <div class="area-tag">Office Login</div>
+      </div>
+    </div>
+
+    <div class="fix-card">
+      <div class="fix-number">2</div>
+      <div class="fix-body">
+        <div class="fix-header">
+          <span class="fix-title">Wrong Credentials Show Raw Error Code on Admin Login</span>
+          <span class="badge ux">UX</span>
+        </div>
+        <div class="fix-desc">Entering incorrect credentials on the Admin Login page was displaying raw server error codes such as INVALID_CREDENTIALS directly to the user. The error display now shows clear, human-readable messages for all error scenarios including wrong credentials, locked accounts, and deactivated accounts.</div>
+        <div class="area-tag">Admin Login</div>
+      </div>
+    </div>
+
+    <div class="fix-card">
+      <div class="fix-number">3</div>
+      <div class="fix-body">
+        <div class="fix-header">
+          <span class="fix-title">Office User Able to Log In via Customer Login Portal</span>
+          <span class="badge security">Security</span>
+        </div>
+        <div class="fix-desc">An office account could successfully authenticate through the Customer Login page, gaining unintended access. The Customer Login portal now strictly validates the role — only customer accounts are accepted. Any other role is rejected with a message directing the user to their correct login portal.</div>
+        <div class="area-tag">Customer Login · Role Enforcement</div>
+      </div>
+    </div>
+
+    <div class="fix-card">
+      <div class="fix-number">4</div>
+      <div class="fix-body">
+        <div class="fix-header">
+          <span class="fix-title">Customer User Able to Log In via Office Login Portal</span>
+          <span class="badge security">Security</span>
+        </div>
+        <div class="fix-desc">Similarly, a customer account could authenticate through the Office Login page. Role validation has been added to the Office Login portal — only office accounts are accepted, with a clear message for any mismatch.</div>
+        <div class="area-tag">Office Login · Role Enforcement</div>
+      </div>
+    </div>
+
+    <div class="fix-card">
+      <div class="fix-number">5</div>
+      <div class="fix-body">
+        <div class="fix-header">
+          <span class="fix-title">Logged-In Admin Could Access the Admin Login Page</span>
+          <span class="badge ux">UX</span>
+        </div>
+        <div class="fix-desc">An admin who was already logged in could still navigate directly to the Admin Login URL and see the login form. The page now detects an active admin session and automatically redirects to the dashboard, preventing the login form from appearing unnecessarily.</div>
+        <div class="area-tag">Admin Login · Session Guard</div>
+      </div>
+    </div>
+
+    <div class="fix-card">
+      <div class="fix-number">6</div>
+      <div class="fix-body">
+        <div class="fix-header">
+          <span class="fix-title">Admin Logout Redirecting to Wrong Page</span>
+          <span class="badge bug">Bug</span>
+        </div>
+        <div class="fix-desc">Logging out from the admin dashboard was redirecting to the public home page of the site. Admin logout now correctly redirects to the dedicated Admin Login page so the admin can sign back in without manual navigation.</div>
+        <div class="area-tag">Admin Logout</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Admin Dashboard -->
+  <div class="category-header">
+    <span class="category-label">Admin Dashboard</span>
+    <span class="category-line"></span>
+  </div>
+  <div class="fixes-list">
+
+    <div class="fix-card">
+      <div class="fix-number">7</div>
+      <div class="fix-body">
+        <div class="fix-header">
+          <span class="fix-title">Admin Dashboard Opening on Last-Visited Section Instead of Overview</span>
+          <span class="badge ux">UX</span>
+        </div>
+        <div class="fix-desc">After login, the admin dashboard was restoring whichever section was last visited — often Account Settings — instead of opening the main Command Center. Admins now always land on the Overview (Command Center) immediately after logging in.</div>
+        <div class="area-tag">Admin Dashboard</div>
+      </div>
+    </div>
+
+    <div class="fix-card">
+      <div class="fix-number">8</div>
+      <div class="fix-body">
+        <div class="fix-header">
+          <span class="fix-title">KPI Cards Not Navigating to Relevant Sections</span>
+          <span class="badge ux">UX</span>
+        </div>
+        <div class="fix-desc">Clicking on Key Performance Indicator cards in the Command Center was not navigating anywhere. All cards are now clickable and take the admin directly to the relevant section — Office Management, Customers, or Intelligence Hub. Cards showing zero are kept non-interactive since there is nothing to view.</div>
+        <div class="area-tag">Admin Command Center</div>
+      </div>
+    </div>
+
+    <div class="fix-card">
+      <div class="fix-number">9</div>
+      <div class="fix-body">
+        <div class="fix-header">
+          <span class="fix-title">KPI Cards Not Filtering by Status When Navigating</span>
+          <span class="badge ux">UX</span>
+        </div>
+        <div class="fix-desc">Clicking "Active Offices (10)" was navigating to Office Management but showing all 11 offices instead of only the active ones. Each KPI card now passes its corresponding status filter — clicking Active Offices shows only active offices, clicking Suspended shows only suspended ones, and so on.</div>
+        <div class="area-tag">Admin Command Center · Office Management</div>
+      </div>
+    </div>
+
+    <div class="fix-card">
+      <div class="fix-number">10</div>
+      <div class="fix-body">
+        <div class="fix-header">
+          <span class="fix-title">Verify Office Action Had No Feedback and Was Slow</span>
+          <span class="badge perf">Performance</span>
+        </div>
+        <div class="fix-desc">Clicking Verify Office or Unverify Office showed no confirmation and required a full list reload before the change was visible, making it feel unresponsive. The action now updates the verified badge instantly and shows a success toast message. If the server request fails, the change is automatically rolled back.</div>
+        <div class="area-tag">Office Management · Verify Office</div>
+      </div>
+    </div>
+
+    <div class="fix-card">
+      <div class="fix-number">11</div>
+      <div class="fix-body">
+        <div class="fix-header">
+          <span class="fix-title">Deactivate Account Dialog Had Broken Layout</span>
+          <span class="badge ux">UX</span>
+        </div>
+        <div class="fix-desc">The Deactivate Account confirmation dialog in Customer Management had a stretched and misaligned layout — large empty space, oversized Confirm button, and misaligned Cancel/Confirm pair. The dialog is now compact with a properly sized textarea, aligned buttons, and a loading indicator on the Confirm button while the action is processing.</div>
+        <div class="area-tag">Customer Management · Deactivate Dialog</div>
+      </div>
+    </div>
+
+    <div class="fix-card">
+      <div class="fix-number">12</div>
+      <div class="fix-body">
+        <div class="fix-header">
+          <span class="fix-title">Dropdown Menu Items Had No Pointer Cursor</span>
+          <span class="badge ux">UX</span>
+        </div>
+        <div class="fix-desc">Action menu items such as View Details, Open Public Profile, Verify Office, and Delete Permanently did not show a pointer cursor on hover, making them feel non-interactive. All dropdown menu items across the platform now correctly display a pointer cursor.</div>
+        <div class="area-tag">Office Management · Dropdown Menus</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Customer Account -->
+  <div class="category-header">
+    <span class="category-label">Customer Account</span>
+    <span class="category-line"></span>
+  </div>
+  <div class="fixes-list">
+
+    <div class="fix-card">
+      <div class="fix-number">13</div>
+      <div class="fix-body">
+        <div class="fix-header">
+          <span class="fix-title">No Option to Update Name or Phone Number</span>
+          <span class="badge feature">Feature</span>
+        </div>
+        <div class="fix-desc">Customer accounts had no way to update their profile information after registration. An Edit Profile section has been added to the customer account page where users can update their full name and phone number. Changes are saved immediately without requiring a logout.</div>
+        <div class="area-tag">Customer Account · Edit Profile</div>
+      </div>
+    </div>
+
+    <div class="fix-card">
+      <div class="fix-number">14</div>
+      <div class="fix-body">
+        <div class="fix-header">
+          <span class="fix-title">No Option to Change Password for Customers</span>
+          <span class="badge feature">Feature</span>
+        </div>
+        <div class="fix-desc">Customers had no way to change their account password. A Change Password section has been added with current password verification and a new password confirmation field, each with a show/hide toggle. On success, the session is securely terminated and the user is redirected to log in with their new password.</div>
+        <div class="area-tag">Customer Account · Change Password</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <p><span class="status-dot"></span><strong>All 14 issues resolved and live.</strong></p>
+    <div class="divider"></div>
+    <p>SkayOffice Platform &nbsp;·&nbsp; Bug Fix Session: 29 October 2026<br>
+    All fixes verified and deployed to production environment.</p>
+  </div>
+
+</div>
+</body>
+</html>
