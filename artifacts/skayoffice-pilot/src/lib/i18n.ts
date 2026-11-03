@@ -1232,6 +1232,7 @@ export const serviceRequestTranslations = {
   'srm.no_data':              { ar: 'لا توجد بيانات موثقة بعد', en: 'No verified data yet' },
   // Dashboard nav
   'dash.nav.service_requests': { ar: 'طلبات الخدمة', en: 'Service Requests' },
+  'dash.nav.zoom': { ar: 'تكامل Zoom', en: 'Zoom Integration' },
 } as const;
 
 // ── Office Report — Phase 1 translations ─────────────────────────────────────

@@ -1,18 +1,51 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useI18n, type TranslationKey } from '@/lib/i18n';
 import {
   useListMyOfficeVideoCallRequests, useUpdateMyOfficeVideoCallRequestStatus,
   getListMyOfficeVideoCallRequestsQueryKey,
 } from '@workspace/api-client-react';
 import { useQueryClient } from '@tanstack/react-query';
+import { authFetch } from '@/lib/sessionToken';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Video, Eye, CheckCircle2, XCircle, Phone } from 'lucide-react';
+import { Video, Eye, CheckCircle2, XCircle, Phone, ExternalLink } from 'lucide-react';
 import { format } from 'date-fns';
 
 type StatusFilter = 'all' | 'new' | 'viewed' | 'accepted' | 'declined' | 'completed';
+
+interface MeetingDetails {
+  hostStartUrl: string;
+  joinUrl: string;
+  externalMeetingId: string;
+}
+
+function ZoomMeetingButton({ requestId, isAr }: { requestId: number; isAr: boolean }) {
+  const [meeting, setMeeting] = useState<MeetingDetails | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    authFetch(`/api/offices/me/video-call-requests/${requestId}/meeting`)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (!cancelled && data) setMeeting(data); })
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [requestId]);
+
+  if (loading || !meeting) return null;
+
+  return (
+    <Button size="sm" variant="outline" className="gap-1.5 text-blue-700 border-blue-300 hover:bg-blue-50" asChild>
+      <a href={meeting.hostStartUrl} target="_blank" rel="noopener noreferrer">
+        <ExternalLink size={13} />
+        {isAr ? 'بدء اجتماع Zoom' : 'Start Zoom Meeting'}
+      </a>
+    </Button>
+  );
+}
 
 interface VideoRequestsProps {
   navigate?: (section: string) => void;
@@ -20,6 +53,7 @@ interface VideoRequestsProps {
 
 export function VideoRequestsSection({ navigate }: VideoRequestsProps) {
   const { t, language } = useI18n();
+  const isAr = language === 'ar';
   const queryClient = useQueryClient();
   const [filter, setFilter] = useState<StatusFilter>('all');
 
@@ -171,14 +205,17 @@ export function VideoRequestsSection({ navigate }: VideoRequestsProps) {
                       </>
                     )}
                     {req.status === 'accepted' && (
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        onClick={() => updateStatusMut.mutate({ requestId: req.id, data: { status: 'completed' } })}
-                        data-testid={`button-mark-completed-${req.id}`}
-                      >
-                        <CheckCircle2 size={14} className="me-1" />{t('dashboard.mark_completed')}
-                      </Button>
+                      <>
+                        <ZoomMeetingButton requestId={req.id} isAr={isAr} />
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          onClick={() => updateStatusMut.mutate({ requestId: req.id, data: { status: 'completed' } })}
+                          data-testid={`button-mark-completed-${req.id}`}
+                        >
+                          <CheckCircle2 size={14} className="me-1" />{t('dashboard.mark_completed')}
+                        </Button>
+                      </>
                     )}
                   </div>
                 </div>

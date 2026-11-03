@@ -19,6 +19,7 @@ import supplySlotRouter from "./supplySlots";
 import paymentsRouter, { webhookRawBodyMiddleware } from "./payments";
 import officeSlotsRouter from "./officeSlots";
 import providerVerificationRouter from "./providerVerification";
+import zoomRouter from "./zoom";
 
 const router: IRouter = Router();
 
@@ -41,6 +42,7 @@ router.use(commercialActivationRouter);
 router.use(supplySlotRouter);
 router.use(officeSlotsRouter);
 router.use(providerVerificationRouter);
+router.use(zoomRouter);
 // Webhook MUST be mounted before express.json() — raw-body middleware applied per-route.
 // Note: this router is mounted at /api in app.ts, so the path here is /payments/webhook
 // (not /api/payments/webhook).

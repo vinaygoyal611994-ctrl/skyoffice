@@ -26,6 +26,13 @@ import {
 import { requireRole, requireActiveCustomer } from "../middlewares/authMiddleware";
 import { recordAuditLog } from "../lib/auditLog";
 import { getOfficeIdForUser } from "../lib/auth";
+import { videoCallMeetingDetailsTable } from "@workspace/db";
+import {
+  createZoomMeeting,
+  getMeetingForRequest,
+  cancelZoomMeeting,
+  getZoomConnectionStatus,
+} from "../services/zoomService";
 
 const router: IRouter = Router();
 
@@ -398,6 +405,54 @@ router.patch(
       metadata: { status: body.data.status },
     });
 
+    // When office accepts the request, automatically create a Zoom meeting
+    // if Zoom is connected. Failure is non-fatal — booking is still accepted.
+    if (body.data.status === "accepted") {
+      try {
+        const zoomStatus = await getZoomConnectionStatus(officeId);
+        if (zoomStatus.status === "connected") {
+          const startTime = `${existing.preferredDate}T${existing.preferredTime}:00`;
+          const meeting = await createZoomMeeting(
+            officeId,
+            "SkayOffice Consultation",
+            startTime,
+            existing.timezone,
+          );
+          await db.insert(videoCallMeetingDetailsTable).values({
+            videoCallRequestId: existing.id,
+            officeId,
+            providerName: "zoom",
+            externalMeetingId: meeting.meetingId,
+            joinUrl: meeting.joinUrl,
+            hostStartUrl: meeting.startUrl,
+            meetingPassword: meeting.password,
+            providerStatus: "active",
+            scheduledAt: new Date(startTime),
+            durationMinutes: 25,
+          });
+          req.log?.info({ officeId, meetingId: meeting.meetingId }, "[zoom] Meeting created for accepted request");
+        }
+      } catch (zoomErr: any) {
+        req.log?.warn({ err: zoomErr.message, officeId }, "[zoom] Could not create meeting on accept — continuing without Zoom");
+      }
+    }
+
+    // When office declines, cancel any existing Zoom meeting
+    if (body.data.status === "declined") {
+      try {
+        const existingMeeting = await getMeetingForRequest(existing.id);
+        if (existingMeeting) {
+          await cancelZoomMeeting(officeId, existingMeeting.externalMeetingId);
+          await db
+            .update(videoCallMeetingDetailsTable)
+            .set({ providerStatus: "cancelled" })
+            .where(eq(videoCallMeetingDetailsTable.videoCallRequestId, existing.id));
+        }
+      } catch (zoomErr: any) {
+        req.log?.warn({ err: zoomErr.message }, "[zoom] Could not cancel meeting on decline");
+      }
+    }
+
     const [customer] = await db
       .select({ name: usersTable.name })
       .from(usersTable)
@@ -409,6 +464,99 @@ router.patch(
         customerName: customer?.name ?? "",
       }),
     );
+  },
+);
+
+// GET /offices/me/video-call-requests/:requestId/meeting
+// Returns Zoom meeting details for the office (includes start_url)
+router.get(
+  "/offices/me/video-call-requests/:requestId/meeting",
+  requireRole("office"),
+  async (req: Request, res: Response): Promise<void> => {
+    const requestId = Number(req.params.requestId);
+    if (isNaN(requestId)) {
+      res.status(400).json({ error: "Invalid request ID" });
+      return;
+    }
+
+    const officeId = await getOfficeIdForUser(req.session.user!.id);
+    if (!officeId) {
+      res.status(403).json({ error: "No office profile for this account" });
+      return;
+    }
+
+    const [vcr] = await db
+      .select({ id: videoCallRequestsTable.id })
+      .from(videoCallRequestsTable)
+      .where(
+        and(
+          eq(videoCallRequestsTable.id, requestId),
+          eq(videoCallRequestsTable.officeId, officeId),
+        ),
+      );
+    if (!vcr) {
+      res.status(404).json({ error: "Request not found" });
+      return;
+    }
+
+    const meeting = await getMeetingForRequest(requestId);
+    if (!meeting) {
+      res.status(404).json({ error: "No meeting found for this request" });
+      return;
+    }
+
+    // Office gets full details including host start URL
+    res.json({
+      externalMeetingId: meeting.externalMeetingId,
+      joinUrl: meeting.joinUrl,
+      hostStartUrl: meeting.hostStartUrl,
+      meetingPassword: meeting.meetingPassword,
+      scheduledAt: meeting.scheduledAt,
+      durationMinutes: meeting.durationMinutes,
+      providerStatus: meeting.providerStatus,
+    });
+  },
+);
+
+// GET /video-call-requests/:requestId/join
+// Customer gets only the join URL (never the host start URL)
+router.get(
+  "/video-call-requests/:requestId/join",
+  requireRole("customer"),
+  async (req: Request, res: Response): Promise<void> => {
+    const requestId = Number(req.params.requestId);
+    if (isNaN(requestId)) {
+      res.status(400).json({ error: "Invalid request ID" });
+      return;
+    }
+
+    const [vcr] = await db
+      .select({ id: videoCallRequestsTable.id, status: videoCallRequestsTable.status })
+      .from(videoCallRequestsTable)
+      .where(
+        and(
+          eq(videoCallRequestsTable.id, requestId),
+          eq(videoCallRequestsTable.customerUserId, req.session.user!.id),
+        ),
+      );
+    if (!vcr) {
+      res.status(404).json({ error: "Request not found" });
+      return;
+    }
+
+    const meeting = await getMeetingForRequest(requestId);
+    if (!meeting) {
+      res.status(404).json({ error: "No meeting scheduled yet" });
+      return;
+    }
+
+    // Customer NEVER gets hostStartUrl
+    res.json({
+      joinUrl: meeting.joinUrl,
+      meetingPassword: meeting.meetingPassword,
+      scheduledAt: meeting.scheduledAt,
+      durationMinutes: meeting.durationMinutes,
+    });
   },
 );
 

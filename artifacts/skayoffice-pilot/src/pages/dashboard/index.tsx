@@ -11,7 +11,7 @@ import {
   LayoutDashboard, Building2, Image, MessageSquare, Video,
   FileText, BarChart3, CreditCard, Bell, Settings, HelpCircle,
   CheckCircle2, Clock, AlertTriangle, XCircle, ShieldCheck,
-  Menu, ClipboardList, LogOut, QrCode,
+  Menu, ClipboardList, LogOut, QrCode, Link2,
 } from 'lucide-react';
 
 import { OverviewSection }        from './sections/Overview';
@@ -27,17 +27,18 @@ import { NotificationsSection }   from './sections/Notifications';
 import { SettingsSection }        from './sections/Settings';
 import { HelpSection }            from './sections/Help';
 import { OfficeToolsSection }     from './sections/OfficeTools';
+import { ZoomIntegrationSection } from './sections/ZoomIntegration';
 
 export type DashSection =
   | 'overview' | 'office_tools' | 'profile' | 'media' | 'contact' | 'requests'
   | 'service_requests' | 'documents' | 'performance' | 'subscription'
-  | 'notifications' | 'settings' | 'help';
+  | 'notifications' | 'settings' | 'help' | 'zoom';
 
 const SECTION_STORAGE_KEY = 'skayoffice-dash-section';
 const VALID_SECTIONS: ReadonlySet<string> = new Set<DashSection>([
   'overview','office_tools','profile','media','contact','requests',
   'service_requests','documents','performance','subscription',
-  'notifications','settings','help',
+  'notifications','settings','help','zoom',
 ]);
 
 function getStoredSection(): DashSection {
@@ -120,6 +121,7 @@ export function Dashboard() {
     { id: 'performance',      icon: <BarChart3 size={18} />,       labelKey: 'dash.nav.performance' },
     { id: 'subscription',     icon: <CreditCard size={18} />,      labelKey: 'dash.nav.subscription' },
     { id: 'notifications',    icon: <Bell size={18} />,            labelKey: 'dash.nav.notifications',    badge: notifCount || undefined },
+    { id: 'zoom',             icon: <Link2 size={18} />,           labelKey: 'dash.nav.zoom' },
     { id: 'settings',         icon: <Settings size={18} />,        labelKey: 'dash.nav.settings' },
     { id: 'help',             icon: <HelpCircle size={18} />,      labelKey: 'dash.nav.help' },
   ];
@@ -371,6 +373,7 @@ function SectionContent({ section, navigate }: { section: DashSection; navigate:
     case 'performance':      return <PerformanceSection onNavigate={navigate} />;
     case 'subscription':     return <SubscriptionSection />;
     case 'notifications':    return <NotificationsSection navigate={navigate} />;
+    case 'zoom':             return <ZoomIntegrationSection />;
     case 'settings':         return <SettingsSection />;
     case 'help':             return <HelpSection />;
     default:                 return <OverviewSection navigate={navigate} />;

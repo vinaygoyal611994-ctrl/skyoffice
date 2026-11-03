@@ -21,3 +21,4 @@ export * from "./providerVerificationTokens";
 export * from "./serviceRequestNotificationOutbox";
 export * from "./uploadClaims";
 export * from "./serviceRequestAttachments";
+export * from "./zoomIntegration";
