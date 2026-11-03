@@ -18,6 +18,11 @@ declare module "express-session" {
   }
 }
 
+function signState(payload: string): string {
+  const secret = process.env.SESSION_SECRET ?? "skayoffice-secret";
+  return crypto.createHmac("sha256", secret).update(payload).digest("hex");
+}
+
 /**
  * GET /zoom/oauth/start
  * Generates Zoom OAuth URL and redirects the office to Zoom's auth page.
@@ -27,9 +32,15 @@ router.get(
   requireRole("office"),
   async (req: Request, res: Response): Promise<void> => {
     try {
-      // Generate a random state for CSRF protection
-      const state = crypto.randomBytes(16).toString("hex");
-      req.session.zoomOAuthState = state;
+      const officeId = await getOfficeIdForUser(req.session.user!.id);
+      if (!officeId) {
+        res.status(403).json({ error: "No office profile for this account" });
+        return;
+      }
+      // Encode officeId in state so callback doesn't need session cookie
+      const random = crypto.randomBytes(16).toString("hex");
+      const payload = `${officeId}.${random}`;
+      const state = `${payload}.${signState(payload)}`;
 
       const authUrl = getZoomAuthUrl(state);
       res.json({ url: authUrl });
@@ -47,21 +58,38 @@ router.get(
  */
 router.get(
   "/zoom/oauth/callback",
-  requireRole("office"),
   async (req: Request, res: Response): Promise<void> => {
     const { code, state, error } = req.query as Record<string, string>;
 
-    // Office denied auth
     if (error) {
       req.log?.warn({ error }, "[zoom] OAuth denied by office");
-      res.redirect("/#/dashboard?zoom=denied");
+      const frontendUrl = process.env.FRONTEND_URL ?? "http://localhost:25700";
+      res.redirect(`${frontendUrl}/?zoom=denied`);
       return;
     }
 
-    // Validate state to prevent CSRF
-    if (!state || state !== req.session.zoomOAuthState) {
-      req.log?.warn("[zoom] OAuth state mismatch — possible CSRF");
+    if (!state) {
+      res.status(400).json({ error: "Missing state" });
+      return;
+    }
+
+    // Validate HMAC-signed state (officeId.random.sig)
+    const parts = state.split(".");
+    if (parts.length !== 3) {
+      res.status(400).json({ error: "Invalid state format" });
+      return;
+    }
+    const [officeIdStr, random, receivedSig] = parts;
+    const payload = `${officeIdStr}.${random}`;
+    if (signState(payload) !== receivedSig) {
+      req.log?.warn("[zoom] OAuth state signature invalid — possible CSRF");
       res.status(400).json({ error: "Invalid OAuth state" });
+      return;
+    }
+
+    const officeId = parseInt(officeIdStr, 10);
+    if (isNaN(officeId) || officeId <= 0) {
+      res.status(400).json({ error: "Invalid office in state" });
       return;
     }
 
@@ -70,22 +98,15 @@ router.get(
       return;
     }
 
-    delete req.session.zoomOAuthState;
-
-    const officeId = await getOfficeIdForUser(req.session.user!.id);
-    if (!officeId) {
-      res.status(403).json({ error: "No office profile for this account" });
-      return;
-    }
-
     try {
       await connectZoomWithCode(officeId, code);
       req.log?.info({ officeId }, "[zoom] Office connected Zoom account");
-      // Redirect to dashboard with success flag
-      res.redirect("/?zoom=connected");
+      const frontendUrl = process.env.FRONTEND_URL ?? "http://localhost:25700";
+      res.redirect(`${frontendUrl}/?zoom=connected`);
     } catch (err: any) {
       req.log?.error({ err: err.message, officeId }, "[zoom] Failed to connect Zoom");
-      res.redirect("/?zoom=error");
+      const frontendUrl = process.env.FRONTEND_URL ?? "http://localhost:25700";
+      res.redirect(`${frontendUrl}/?zoom=error`);
     }
   },
 );

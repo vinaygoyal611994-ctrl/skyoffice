@@ -81,6 +81,8 @@ export function ZoomIntegrationSection() {
       if (res.ok) {
         const data = await res.json();
         setStatusData(data);
+      } else {
+        setStatusData(prev => ({ ...prev, status: 'error' }));
       }
     } catch {
       setStatusData(prev => ({ ...prev, status: 'error' }));
