@@ -23,7 +23,7 @@ import { useToast } from '@/hooks/use-toast';
 import {
   Mail, Phone, LogOut, HeartCrack, Search, Video,
   ShieldCheck, ShieldAlert, MessageCircle, MapPin, Share2,
-  History, Heart, Clock, CalendarCheck, User, KeyRound, Eye, EyeOff,
+  History, Heart, Clock, CalendarCheck, User, KeyRound, Eye, EyeOff, ExternalLink, Loader2,
 } from 'lucide-react';
 import { MyServiceRequests } from '@/components/account/MyServiceRequests';
 import { format } from 'date-fns';
@@ -35,6 +35,29 @@ const VIDEO_STATUS_TONE: Record<string, string> = {
   declined:  'bg-red-100 text-red-700 border-red-200',
   completed: 'bg-purple-100 text-purple-700 border-purple-200',
 };
+
+function JoinMeetingButton({ requestId }: { requestId: number }) {
+  const [loading, setLoading] = useState(false);
+
+  const handleJoin = async () => {
+    setLoading(true);
+    try {
+      const res = await authFetch(`/api/video-call-requests/${requestId}/join`);
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data.joinUrl) window.open(data.joinUrl, '_blank', 'noopener,noreferrer');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Button size="sm" onClick={handleJoin} disabled={loading} className="gap-1.5 shrink-0">
+      {loading ? <Loader2 size={13} className="animate-spin" /> : <ExternalLink size={13} />}
+      Join Zoom Meeting
+    </Button>
+  );
+}
 
 function SectionHeader({ icon, title, description }: { icon: React.ReactNode; title: string; description?: string }) {
   return (
@@ -443,9 +466,12 @@ export function Account() {
                       <div className="text-xs text-muted-foreground">{format(new Date(req.createdAt), 'yyyy-MM-dd HH:mm')}</div>
                     </div>
                   </div>
-                  <Badge variant="outline" className={`shrink-0 ${VIDEO_STATUS_TONE[req.status] || ''}`}>
-                    {t(`videocall.status_${req.status}` as any)}
-                  </Badge>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Badge variant="outline" className={VIDEO_STATUS_TONE[req.status] || ''}>
+                      {t(`videocall.status_${req.status}` as any)}
+                    </Badge>
+                    {req.status === 'accepted' && <JoinMeetingButton requestId={req.id} />}
+                  </div>
                 </div>
               ))}
             </div>
