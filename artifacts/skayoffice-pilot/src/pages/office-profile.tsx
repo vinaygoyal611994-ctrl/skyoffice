@@ -30,6 +30,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { ChevronsUpDown } from 'lucide-react';
 import { stashPostLoginRedirect } from '@/lib/postLoginRedirect';
 import { getOfficePublicUrl } from '@/lib/publicUrl';
 import { useToast } from '@/hooks/use-toast';
@@ -512,6 +515,8 @@ export function OfficeProfile({
   const [videoForm, setVideoForm] = React.useState({
     preferredDate: '', preferredTime: '', timezone: 'Asia/Riyadh', contactNumber: '', note: '',
   });
+  const [tzOpen, setTzOpen] = React.useState(false);
+  const TIMEZONES = Intl.supportedValuesOf('timeZone');
   const [videoSuccess, setVideoSuccess] = React.useState(false);
   const videoCallMutation = useCreateVideoCallRequest({ mutation: { onSuccess: () => setVideoSuccess(true) } });
   const videoCallError = (videoCallMutation.error as any)?.data?.error as string | undefined;
@@ -998,7 +1003,43 @@ export function OfficeProfile({
                           </div>
                           <div className="space-y-1.5">
                             <Label className="text-xs">{t('videocall.timezone')}</Label>
-                            <Input name="timezone" value={videoForm.timezone} onChange={handleVideoFieldChange} dir="ltr" className="text-left" data-testid="input-video-timezone" />
+                            <Popover open={tzOpen} onOpenChange={setTzOpen}>
+                              <PopoverTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  role="combobox"
+                                  aria-expanded={tzOpen}
+                                  className="w-full justify-between font-normal text-left min-h-[40px]"
+                                  data-testid="input-video-timezone"
+                                >
+                                  <span className="truncate">{videoForm.timezone || 'Select timezone...'}</span>
+                                  <ChevronsUpDown size={14} className="ml-2 shrink-0 opacity-50" />
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-full p-0" align="start">
+                                <Command>
+                                  <CommandInput placeholder="Search timezone..." />
+                                  <CommandList>
+                                    <CommandEmpty>No timezone found.</CommandEmpty>
+                                    <CommandGroup>
+                                      {TIMEZONES.map((tz) => (
+                                        <CommandItem
+                                          key={tz}
+                                          value={tz}
+                                          onSelect={(val) => {
+                                            setVideoForm((prev) => ({ ...prev, timezone: val }));
+                                            setTzOpen(false);
+                                          }}
+                                        >
+                                          <Check size={13} className={`mr-2 ${videoForm.timezone === tz ? 'opacity-100' : 'opacity-0'}`} />
+                                          {tz}
+                                        </CommandItem>
+                                      ))}
+                                    </CommandGroup>
+                                  </CommandList>
+                                </Command>
+                              </PopoverContent>
+                            </Popover>
                           </div>
                           <div className="space-y-1.5">
                             <Label className="text-xs">{t('videocall.contact_number')}</Label>
