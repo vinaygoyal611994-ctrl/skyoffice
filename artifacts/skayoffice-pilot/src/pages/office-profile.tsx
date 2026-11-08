@@ -43,7 +43,7 @@ const RESUME_AFTER_INTERACTION_MS = 3000;
 
 // VIDEO_CALL PUBLIC GATE
 // Set to true ONLY when the Video Call feature is officially released.
-const VIDEO_CALL_FEATURE_RELEASED = false as const;
+const VIDEO_CALL_FEATURE_RELEASED = true as const;
 
 function MarketingScreen({
   items,
