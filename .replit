@@ -121,5 +121,5 @@ ZOOM_REDIRECT_URI = "https://skyoffice--jumpefymarketin.replit.app/api/zoom/oaut
 
 [userenv.production]
 CORS_ALLOWED_ORIGINS = "https://skayoffice.com"
-FRONTEND_URL = "https://skyoffice--goyalshweta0310.replit.app/office/dashboard"
+FRONTEND_URL = "https://skyoffice--jumpefymarketin.replit.app/office/dashboard"
 NODE_ENV = "production"
