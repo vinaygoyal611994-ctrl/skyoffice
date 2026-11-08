@@ -117,7 +117,7 @@ CLEANUP_TOKEN = ""
 CLEANUP_TOKEN_2 = ""
 SEED_OFFICE_USER17 = ""
 ZOOM_CLIENT_ID = "eYwYqPAwTF2UNUAAje2ODg"
-ZOOM_REDIRECT_URI = "https://skyoffice--goyalshweta0310.replit.app/api/zoom/oauth/callback"
+ZOOM_REDIRECT_URI = "https://skyoffice--jumpefymarketin.replit.app/api/zoom/oauth/callback"
 
 [userenv.production]
 CORS_ALLOWED_ORIGINS = "https://skayoffice.com"
