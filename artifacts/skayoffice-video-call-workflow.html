@@ -1,0 +1,1373 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SkayOffice — Video Call Feature: Complete Workflow Guide</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    font-size: 13.5px;
+    line-height: 1.65;
+    color: #1a1a2e;
+    background: #f8f9fb;
+  }
+
+  /* ── Cover Page ─────────────────────────────────────── */
+  .cover {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0f3460 0%, #16213e 60%, #1a1a2e 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 60px 40px;
+    page-break-after: always;
+    position: relative;
+    overflow: hidden;
+  }
+  .cover::before {
+    content: '';
+    position: absolute;
+    width: 600px; height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(79,195,247,0.08), transparent 70%);
+    top: -100px; right: -100px;
+  }
+  .cover-logo {
+    width: 72px; height: 72px;
+    background: linear-gradient(135deg, #4fc3f7, #0288d1);
+    border-radius: 20px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 36px;
+    margin-bottom: 32px;
+    box-shadow: 0 8px 32px rgba(79,195,247,0.3);
+  }
+  .cover h1 {
+    font-size: 38px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.5px;
+    margin-bottom: 12px;
+  }
+  .cover h2 {
+    font-size: 20px;
+    font-weight: 400;
+    color: rgba(255,255,255,0.7);
+    margin-bottom: 48px;
+  }
+  .cover-meta {
+    display: flex;
+    gap: 40px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .cover-meta-item {
+    text-align: center;
+  }
+  .cover-meta-item .label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: rgba(255,255,255,0.4);
+    margin-bottom: 4px;
+  }
+  .cover-meta-item .value {
+    font-size: 13px;
+    color: rgba(255,255,255,0.85);
+    font-weight: 600;
+  }
+  .cover-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(79,195,247,0.15);
+    border: 1px solid rgba(79,195,247,0.3);
+    color: #4fc3f7;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 6px 16px;
+    border-radius: 100px;
+    margin-bottom: 24px;
+  }
+
+  /* ── Page Layout ────────────────────────────────────── */
+  .page {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 60px 48px;
+  }
+
+  /* ── Section headers ────────────────────────────────── */
+  .section-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #0288d1;
+    margin-bottom: 10px;
+  }
+  .section-label::before {
+    content: '';
+    display: inline-block;
+    width: 20px; height: 2px;
+    background: #0288d1;
+    border-radius: 2px;
+  }
+
+  h1.page-title {
+    font-size: 30px;
+    font-weight: 800;
+    color: #0f3460;
+    margin-bottom: 8px;
+    letter-spacing: -0.3px;
+  }
+  h2.section-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #0f3460;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #e8f4fd;
+  }
+  h3 {
+    font-size: 15px;
+    font-weight: 700;
+    color: #16213e;
+    margin: 24px 0 10px;
+  }
+  h4 {
+    font-size: 13px;
+    font-weight: 700;
+    color: #0288d1;
+    margin: 16px 0 6px;
+  }
+  p { margin-bottom: 10px; color: #374151; }
+
+  /* ── TOC ────────────────────────────────────────────── */
+  .toc {
+    background: #fff;
+    border: 1px solid #e5e9f0;
+    border-radius: 16px;
+    padding: 32px 36px;
+    margin: 32px 0 48px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+  }
+  .toc-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #0f3460;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 20px;
+  }
+  .toc-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 32px;
+  }
+  .toc-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 0;
+    border-bottom: 1px dashed #e5e9f0;
+    color: #374151;
+    font-size: 13px;
+  }
+  .toc-num {
+    width: 22px; height: 22px;
+    background: #e8f4fd;
+    color: #0288d1;
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  /* ── Cards / Boxes ──────────────────────────────────── */
+  .card {
+    background: #fff;
+    border: 1px solid #e5e9f0;
+    border-radius: 14px;
+    padding: 24px 28px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+  }
+  .card-blue {
+    background: linear-gradient(135deg, #e8f4fd, #f0f9ff);
+    border-color: #bae0fb;
+  }
+  .card-green {
+    background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+    border-color: #a7f3d0;
+  }
+  .card-orange {
+    background: linear-gradient(135deg, #fff7ed, #fffbeb);
+    border-color: #fed7aa;
+  }
+  .card-red {
+    background: linear-gradient(135deg, #fef2f2, #fff5f5);
+    border-color: #fecaca;
+  }
+  .card-purple {
+    background: linear-gradient(135deg, #faf5ff, #f5f3ff);
+    border-color: #ddd6fe;
+  }
+
+  /* ── Info box ───────────────────────────────────────── */
+  .info-box {
+    display: flex;
+    gap: 14px;
+    background: #e8f4fd;
+    border-left: 4px solid #0288d1;
+    border-radius: 0 10px 10px 0;
+    padding: 14px 18px;
+    margin: 16px 0;
+    font-size: 13px;
+    color: #0f3460;
+  }
+  .info-box .icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .warn-box {
+    background: #fff7ed;
+    border-left-color: #f97316;
+    color: #7c2d12;
+  }
+  .success-box {
+    background: #f0fdf4;
+    border-left-color: #22c55e;
+    color: #14532d;
+  }
+
+  /* ── Steps ──────────────────────────────────────────── */
+  .steps {
+    list-style: none;
+    counter-reset: step;
+    margin: 16px 0;
+  }
+  .steps li {
+    counter-increment: step;
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+    align-items: flex-start;
+  }
+  .steps li::before {
+    content: counter(step);
+    min-width: 32px; height: 32px;
+    background: linear-gradient(135deg, #0288d1, #0f3460);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .steps li .step-body { flex: 1; }
+  .steps li .step-title {
+    font-weight: 700;
+    color: #0f3460;
+    font-size: 14px;
+    margin-bottom: 4px;
+  }
+  .steps li .step-desc {
+    color: #374151;
+    font-size: 13px;
+    margin: 0;
+  }
+
+  /* ── Status badges ──────────────────────────────────── */
+  .status-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 16px 0;
+  }
+  .status-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: 10px;
+    font-size: 12.5px;
+    font-weight: 600;
+    border: 1.5px solid;
+  }
+  .s-new    { background:#eff6ff; color:#1d4ed8; border-color:#bfdbfe; }
+  .s-view   { background:#fffbeb; color:#92400e; border-color:#fde68a; }
+  .s-accept { background:#f0fdf4; color:#15803d; border-color:#bbf7d0; }
+  .s-decline{ background:#fef2f2; color:#b91c1c; border-color:#fecaca; }
+  .s-cancel-pending { background:#fff7ed; color:#c2410c; border-color:#fed7aa; }
+  .s-cancelled { background:#f4f4f5; color:#71717a; border-color:#d4d4d8; }
+  .s-complete{ background:#f8fafc; color:#475569; border-color:#cbd5e1; }
+
+  /* ── Flow diagram ───────────────────────────────────── */
+  .flow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin: 16px 0;
+    font-size: 12px;
+  }
+  .flow-node {
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .flow-arrow { color: #94a3b8; font-size: 16px; font-weight: 300; }
+
+  /* ── Two-column layout ──────────────────────────────── */
+  .cols-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin: 16px 0;
+  }
+
+  /* ── Table ──────────────────────────────────────────── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 13px;
+  }
+  th {
+    background: #0f3460;
+    color: #fff;
+    text-align: left;
+    padding: 10px 14px;
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+  }
+  th:first-child { border-radius: 8px 0 0 0; }
+  th:last-child  { border-radius: 0 8px 0 0; }
+  td {
+    padding: 10px 14px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #374151;
+  }
+  tr:nth-child(even) td { background: #f8fafc; }
+  tr:last-child td { border-bottom: none; }
+  tr:last-child td:first-child { border-radius: 0 0 0 8px; }
+  tr:last-child td:last-child  { border-radius: 0 0 8px 0; }
+
+  /* ── Page break ─────────────────────────────────────── */
+  .page-break { page-break-before: always; }
+
+  /* ── Feature pill ───────────────────────────────────── */
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #e8f4fd;
+    color: #0288d1;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 100px;
+    margin: 2px;
+  }
+  .pill-green { background: #f0fdf4; color: #15803d; }
+  .pill-orange{ background: #fff7ed; color: #c2410c; }
+  .pill-red   { background: #fef2f2; color: #b91c1c; }
+
+  /* ── Checklist ──────────────────────────────────────── */
+  .checklist { list-style: none; margin: 10px 0; }
+  .checklist li {
+    display: flex;
+    gap: 10px;
+    padding: 5px 0;
+    font-size: 13px;
+    color: #374151;
+    align-items: flex-start;
+  }
+  .checklist li::before {
+    content: '✓';
+    color: #22c55e;
+    font-weight: 700;
+    font-size: 14px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* ── Print ──────────────────────────────────────────── */
+  @media print {
+    body { background: #fff; }
+    .cover { page-break-after: always; min-height: 100vh; }
+    .page { padding: 40px 48px; }
+    .page-break { page-break-before: always; }
+    .card { box-shadow: none; }
+    .toc { box-shadow: none; }
+  }
+
+  .divider {
+    border: none;
+    border-top: 2px solid #e8f4fd;
+    margin: 36px 0;
+  }
+
+  .highlight {
+    background: linear-gradient(135deg, #e8f4fd, #f0f9ff);
+    border-radius: 8px;
+    padding: 2px 8px;
+    font-weight: 600;
+    color: #0288d1;
+  }
+
+  .footer-note {
+    text-align: center;
+    color: #94a3b8;
+    font-size: 11.5px;
+    margin-top: 48px;
+    padding-top: 20px;
+    border-top: 1px solid #e5e9f0;
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════
+     COVER PAGE
+══════════════════════════════════════════════════════ -->
+<div class="cover">
+  <div class="cover-badge">📋 Official Documentation</div>
+  <div class="cover-logo">📹</div>
+  <h1>Video Call Booking System</h1>
+  <h2>Complete Workflow Guide — SkayOffice Platform</h2>
+  <div class="cover-meta">
+    <div class="cover-meta-item">
+      <div class="label">Document Type</div>
+      <div class="value">Feature Workflow Guide</div>
+    </div>
+    <div class="cover-meta-item">
+      <div class="label">Platform</div>
+      <div class="value">SkayOffice</div>
+    </div>
+    <div class="cover-meta-item">
+      <div class="label">Version</div>
+      <div class="value">1.0 — Pilot Release</div>
+    </div>
+    <div class="cover-meta-item">
+      <div class="label">Date</div>
+      <div class="value">November 2026</div>
+    </div>
+    <div class="cover-meta-item">
+      <div class="label">Audience</div>
+      <div class="value">Client / Stakeholders</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     PAGE 1 — OVERVIEW + TOC
+══════════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="section-label">Introduction</div>
+  <h1 class="page-title">What This Document Covers</h1>
+  <p>
+    This guide explains the complete lifecycle of the <strong>Video Call Booking</strong> feature on the SkayOffice platform — from the moment a customer discovers an office and submits a request, to how the office manages that request (accept, reschedule, cancel), and how both parties join the Zoom meeting.
+  </p>
+  <p>
+    Every step described here corresponds to a live, working feature in the system. The document is intended to give the client an exact understanding of how the platform behaves in each scenario.
+  </p>
+
+  <div class="toc">
+    <div class="toc-title">📑 Table of Contents</div>
+    <div class="toc-grid">
+      <div class="toc-item"><div class="toc-num">1</div> System Overview</div>
+      <div class="toc-item"><div class="toc-num">2</div> Prerequisites & Setup</div>
+      <div class="toc-item"><div class="toc-num">3</div> Customer Workflow — Step by Step</div>
+      <div class="toc-item"><div class="toc-num">4</div> Office Workflow — Receiving Requests</div>
+      <div class="toc-item"><div class="toc-num">5</div> Office Workflow — Accepting & Starting the Call</div>
+      <div class="toc-item"><div class="toc-num">6</div> Office Workflow — Rescheduling</div>
+      <div class="toc-item"><div class="toc-num">7</div> Office Workflow — Cancellation Flow</div>
+      <div class="toc-item"><div class="toc-num">8</div> Office Workflow — Declining a Request</div>
+      <div class="toc-item"><div class="toc-num">9</div> Customer — Joining the Call</div>
+      <div class="toc-item"><div class="toc-num">10</div> Status Lifecycle Reference</div>
+      <div class="toc-item"><div class="toc-num">11</div> Double-Booking Prevention</div>
+      <div class="toc-item"><div class="toc-num">12</div> Security & Technical Notes</div>
+    </div>
+  </div>
+
+  <!-- ── 1. System Overview ───────────────────────────── -->
+  <h2 class="section-title">1. System Overview</h2>
+  <p>
+    The Video Call Booking system allows customers to request a live video consultation with any office listed on SkayOffice. When an office accepts the request, the platform automatically creates a <strong>Zoom meeting</strong> and provides both parties with the correct link to join. The office gets the <em>host link</em> (to start the meeting) and the customer gets the <em>participant link</em> (to join).
+  </p>
+
+  <div class="cols-2">
+    <div class="card card-blue">
+      <h4>👤 Customer Side</h4>
+      <ul class="checklist">
+        <li>Browse offices and find one offering video calls</li>
+        <li>Fill in preferred date, time, timezone, and contact number</li>
+        <li>Track request status from their account page</li>
+        <li>Join the Zoom meeting with one click when accepted</li>
+      </ul>
+    </div>
+    <div class="card card-green">
+      <h4>🏢 Office Side</h4>
+      <ul class="checklist">
+        <li>Connect their Zoom account once (OAuth)</li>
+        <li>Receive incoming booking requests on the dashboard</li>
+        <li>Accept, decline, reschedule, or cancel bookings</li>
+        <li>Start Zoom meetings directly from the dashboard</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="info-box">
+    <div class="icon">🔗</div>
+    <div>
+      <strong>Zoom Integration:</strong> The platform uses <strong>Zoom OAuth 2.0</strong>. Each office connects its own Zoom account. When a request is accepted, a Zoom meeting is automatically created — no manual scheduling needed.
+    </div>
+  </div>
+
+  <!-- ── 2. Prerequisites ─────────────────────────────── -->
+  <h2 class="section-title">2. Prerequisites &amp; Setup</h2>
+
+  <div class="cols-2">
+    <div class="card">
+      <h4>For the Office (One-time setup)</h4>
+      <ol class="steps" style="margin:0">
+        <li>
+          <div class="step-body">
+            <div class="step-title">Log in to Office Dashboard</div>
+            <div class="step-desc">Use office email/password at the Office Portal.</div>
+          </div>
+        </li>
+        <li>
+          <div class="step-body">
+            <div class="step-title">Enable Video Call Feature</div>
+            <div class="step-desc">Go to <em>Contact Features</em> section → toggle on <em>Video Call Booking</em>.</div>
+          </div>
+        </li>
+        <li>
+          <div class="step-body">
+            <div class="step-title">Connect Zoom Account</div>
+            <div class="step-desc">Click <em>Connect Zoom</em> → authorise SkayOffice to manage meetings. Done once — tokens auto-refresh.</div>
+          </div>
+        </li>
+      </ol>
+    </div>
+    <div class="card">
+      <h4>For the Customer</h4>
+      <ol class="steps" style="margin:0">
+        <li>
+          <div class="step-body">
+            <div class="step-title">Register / Log In</div>
+            <div class="step-desc">Customer registers once at the Customer Portal with email and password.</div>
+          </div>
+        </li>
+        <li>
+          <div class="step-body">
+            <div class="step-title">No Zoom Account Needed</div>
+            <div class="step-desc">Customer joins via a standard browser or Zoom app — no Zoom account required.</div>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     PAGE 2 — CUSTOMER WORKFLOW
+══════════════════════════════════════════════════════ -->
+<div class="page page-break">
+  <div class="section-label">Section 3</div>
+  <h1 class="page-title">Customer Workflow — Step by Step</h1>
+  <p>Everything a customer does from discovering an office to submitting their video call request.</p>
+
+  <ol class="steps">
+    <li>
+      <div class="step-body">
+        <div class="step-title">Discover an Office</div>
+        <div class="step-desc">
+          The customer opens the SkayOffice platform and browses offices using the search/filter tools (by specialty, city, language, etc.). Offices that have <strong>video call enabled</strong> show a video call option on their profile page.
+        </div>
+      </div>
+    </li>
+    <li>
+      <div class="step-body">
+        <div class="step-title">Open the Request Form</div>
+        <div class="step-desc">
+          On the office profile page the customer clicks <strong>"Request a Video Call"</strong>. This button only appears if the office has the feature enabled and their Zoom is connected. If the customer is not logged in, they are redirected to login first, then returned to the same page.
+        </div>
+      </div>
+    </li>
+    <li>
+      <div class="step-body">
+        <div class="step-title">Fill in the Booking Form</div>
+        <div class="step-desc">The form has the following fields:</div>
+      </div>
+    </li>
+  </ol>
+
+  <div class="card" style="margin-left:48px; margin-top:-8px;">
+    <table>
+      <thead>
+        <tr>
+          <th>Field</th>
+          <th>Description</th>
+          <th>Required?</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Preferred Date</strong></td>
+          <td>The date the customer wants the call (date picker)</td>
+          <td>✅ Yes</td>
+        </tr>
+        <tr>
+          <td><strong>Preferred Time</strong></td>
+          <td>Time of the call (time picker, 24-hour format)</td>
+          <td>✅ Yes</td>
+        </tr>
+        <tr>
+          <td><strong>Timezone</strong></td>
+          <td>Searchable dropdown with all IANA timezones (e.g., Asia/Riyadh, Asia/Kolkata, Europe/London)</td>
+          <td>✅ Yes</td>
+        </tr>
+        <tr>
+          <td><strong>Contact Number</strong></td>
+          <td>Phone number the office can reach the customer on</td>
+          <td>✅ Yes</td>
+        </tr>
+        <tr>
+          <td><strong>Note</strong></td>
+          <td>Free text — the customer describes what they need help with</td>
+          <td>❌ Optional</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <ol class="steps" start="4">
+    <li>
+      <div class="step-body">
+        <div class="step-title">Submit the Request</div>
+        <div class="step-desc">
+          Customer clicks <strong>"Send Request"</strong>. The system immediately shows a success message: <em>"Your request was sent — the office will contact you to confirm the appointment."</em>
+          <br/><br/>
+          The request is logged as a <strong>contact event</strong> and counted toward the office's verified commercial contact metrics.
+        </div>
+      </div>
+    </li>
+    <li>
+      <div class="step-body">
+        <div class="step-title">Track the Request Status</div>
+        <div class="step-desc">
+          The customer opens their <strong>Account page → My Video Call Requests</strong>. Each request shows the current status (New, Viewed, Accepted, Declined, etc.) and updates in real time as the office responds.
+        </div>
+      </div>
+    </li>
+    <li>
+      <div class="step-body">
+        <div class="step-title">Wait for Acceptance</div>
+        <div class="step-desc">
+          When the office <em>accepts</em> the request, the status changes to <strong>Accepted</strong> and a <strong>"Join Zoom Meeting"</strong> button appears on the customer's account page. The customer can click it at any time to open the Zoom meeting link.
+        </div>
+      </div>
+    </li>
+  </ol>
+
+  <div class="info-box success-box">
+    <div class="icon">✅</div>
+    <div>
+      <strong>No duplicate bookings:</strong> If a customer accidentally submits the same request twice within 60 seconds, the system detects the duplicate and returns the existing record — no extra records are created. Additionally, if the office has already accepted a request for the exact same date and time, new submissions for that slot are automatically rejected with a clear message.
+    </div>
+  </div>
+
+  <hr class="divider" />
+
+  <h2 class="section-title">What the Customer Sees at Each Stage</h2>
+
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th>Status on Account Page</th>
+          <th>Meaning</th>
+          <th>Action Available</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="status-badge s-new">🔵 New</span></td>
+          <td>Request sent, office hasn't seen it yet</td>
+          <td>None — waiting</td>
+        </tr>
+        <tr>
+          <td><span class="status-badge s-view">👁 Viewed</span></td>
+          <td>Office has seen the request</td>
+          <td>None — waiting</td>
+        </tr>
+        <tr>
+          <td><span class="status-badge s-accept">✅ Accepted</span></td>
+          <td>Office accepted — Zoom meeting created</td>
+          <td><strong>Join Zoom Meeting</strong> button appears</td>
+        </tr>
+        <tr>
+          <td><span class="status-badge s-decline">❌ Declined</span></td>
+          <td>Office could not accommodate this request</td>
+          <td>Customer can submit a new request</td>
+        </tr>
+        <tr>
+          <td><span class="status-badge s-cancel-pending">⏳ Cancelling</span></td>
+          <td>Office is processing the cancellation</td>
+          <td>None — brief transitional state</td>
+        </tr>
+        <tr>
+          <td><span class="status-badge s-cancelled">🚫 Cancelled</span></td>
+          <td>Booking was cancelled after acceptance</td>
+          <td>Customer can submit a new request</td>
+        </tr>
+        <tr>
+          <td><span class="status-badge s-complete">🏁 Completed</span></td>
+          <td>Call took place, office marked as done</td>
+          <td>None — archived</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     PAGE 3 — OFFICE WORKFLOW: RECEIVING
+══════════════════════════════════════════════════════ -->
+<div class="page page-break">
+  <div class="section-label">Section 4 &amp; 5</div>
+  <h1 class="page-title">Office Workflow — Managing Requests</h1>
+  <p>Everything the office does from receiving a new request to completing the call.</p>
+
+  <!-- 4. Receiving -->
+  <h2 class="section-title">4. Receiving Incoming Requests</h2>
+
+  <ol class="steps">
+    <li>
+      <div class="step-body">
+        <div class="step-title">Log in to the Office Dashboard</div>
+        <div class="step-desc">
+          The office user logs into the SkayOffice Office Portal. The dashboard shows all sections: Overview, Video Call Requests, Contact Events, etc.
+        </div>
+      </div>
+    </li>
+    <li>
+      <div class="step-body">
+        <div class="step-title">Navigate to "Video Call Requests"</div>
+        <div class="step-desc">
+          A blue notification badge on the section header shows how many <strong>New</strong> requests are waiting. Requests are listed in reverse chronological order (newest first).
+        </div>
+      </div>
+    </li>
+    <li>
+      <div class="step-body">
+        <div class="step-title">Review the Request</div>
+        <div class="step-desc">
+          Each request card shows:
+          <br/>• <strong>Customer name</strong> and contact number
+          <br/>• <strong>Preferred date, time, and timezone</strong>
+          <br/>• <strong>Note</strong> (if the customer left one)
+          <br/>• <strong>Date received</strong>
+          <br/>• Current <strong>status badge</strong>
+        </div>
+      </div>
+    </li>
+    <li>
+      <div class="step-body">
+        <div class="step-title">Mark as Viewed (Optional)</div>
+        <div class="step-desc">
+          Clicking <strong>"Mark Viewed"</strong> changes the status to <em>Viewed</em>. This is a confirmation to the customer that the office has seen their request. It does not accept or reject it — it just acknowledges receipt.
+        </div>
+      </div>
+    </li>
+  </ol>
+
+  <!-- 5. Accepting -->
+  <h2 class="section-title">5. Accepting a Request &amp; Starting the Call</h2>
+
+  <div class="info-box">
+    <div class="icon">⚡</div>
+    <div>
+      <strong>What happens automatically when you click Accept:</strong> The system immediately creates a Zoom meeting using the office's connected Zoom account. No manual scheduling in Zoom needed.
+    </div>
+  </div>
+
+  <ol class="steps">
+    <li>
+      <div class="step-body">
+        <div class="step-title">Click "Accept"</div>
+        <div class="step-desc">
+          The office clicks the <strong>Accept</strong> button on the request card. The system:
+          <br/>— Checks the slot is not already booked (double-booking guard)
+          <br/>— Creates a Zoom meeting at the requested date/time/timezone
+          <br/>— Saves both the host-start URL and participant join URL
+          <br/>— Changes request status to <strong>Accepted</strong>
+        </div>
+      </div>
+    </li>
+    <li>
+      <div class="step-body">
+        <div class="step-title">The "Start Zoom Meeting" Button Appears</div>
+        <div class="step-desc">
+          After acceptance, the request card shows a <strong>"Start Zoom Meeting"</strong> button. This link uses the <em>host-start URL</em> which opens Zoom in <strong>host mode</strong> — meaning the office can start the session, manage participants, record, etc.
+        </div>
+      </div>
+    </li>
+    <li>
+      <div class="step-body">
+        <div class="step-title">At Meeting Time — Click "Start Zoom Meeting"</div>
+        <div class="step-desc">
+          When the scheduled time arrives, the office user clicks the button. Zoom opens (in browser or Zoom app). The office is the host and waits in the meeting. The customer joins from their participant link.
+        </div>
+      </div>
+    </li>
+    <li>
+      <div class="step-body">
+        <div class="step-title">After the Call — Mark as Completed</div>
+        <div class="step-desc">
+          Once the call ends, the office clicks <strong>"Mark Completed"</strong>. The request is archived with a <em>Completed</em> status. This keeps the dashboard clean.
+        </div>
+      </div>
+    </li>
+  </ol>
+
+  <div class="card card-green">
+    <h4>🔐 Security: Separate Links for Host and Participant</h4>
+    <p style="margin:0; font-size:13px;">
+      The <em>host-start URL</em> (which gives host control over the Zoom meeting) is <strong>never shared with the customer</strong>. The API endpoint that returns the customer's join link is structurally designed to omit the host URL — this is enforced at the server level, not just in the UI.
+    </p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     PAGE 4 — RESCHEDULE + CANCELLATION
+══════════════════════════════════════════════════════ -->
+<div class="page page-break">
+  <div class="section-label">Section 6 &amp; 7</div>
+  <h1 class="page-title">Rescheduling &amp; Cancellation</h1>
+
+  <!-- 6. Rescheduling -->
+  <h2 class="section-title">6. Rescheduling an Accepted Booking</h2>
+  <p>
+    After a booking is <strong>accepted</strong>, if the office or the customer needs to change the date or time, the office can reschedule. This updates both the SkayOffice database <em>and</em> the existing Zoom meeting in one operation — no need to delete and recreate anything.
+  </p>
+
+  <div class="info-box">
+    <div class="icon">📅</div>
+    <div>
+      <strong>FR-07 — Rescheduling is a contracted requirement.</strong> The Zoom meeting is updated via the Zoom API (PATCH request), so existing join links remain valid — the meeting time simply changes. This avoids sending new links to the customer.
+    </div>
+  </div>
+
+  <ol class="steps">
+    <li>
+      <div class="step-body">
+        <div class="step-title">Click "Reschedule" on an Accepted Request</div>
+        <div class="step-desc">
+          The office clicks the <strong>Reschedule</strong> button (calendar icon) on any <em>Accepted</em> request card. A dialog box opens.
+        </div>
+      </div>
+    </li>
+    <li>
+      <div class="step-body">
+        <div class="step-title">Choose New Date and Time</div>
+        <div class="step-desc">
+          The dialog pre-fills with the current date and time. The office selects the new preferred date and time. The timezone remains the same (as originally specified by the customer).
+        </div>
+      </div>
+    </li>
+    <li>
+      <div class="step-body">
+        <div class="step-title">Click "Confirm Reschedule"</div>
+        <div class="step-desc">
+          The system:
+          <br/>— Checks the new slot is not already booked (double-booking guard)
+          <br/>— Updates the request record (preferredDate, preferredTime)
+          <br/>— Sends a PATCH request to Zoom API to update the meeting time
+          <br/>— Updates the meeting record in the SkayOffice database
+          <br/>— The dialog closes; the request card refreshes with the new time
+        </div>
+      </div>
+    </li>
+  </ol>
+
+  <div class="info-box warn-box">
+    <div class="icon">⚠️</div>
+    <div>
+      <strong>Important:</strong> Currently, rescheduling is initiated by the office only. If the customer wants to reschedule, they should contact the office directly (via WhatsApp or phone number on file), and the office performs the reschedule on the dashboard.
+    </div>
+  </div>
+
+  <hr class="divider" />
+
+  <!-- 7. Cancellation -->
+  <h2 class="section-title">7. Cancellation Flow (After Acceptance)</h2>
+  <p>
+    When an already-accepted booking needs to be cancelled (e.g., the customer called to cancel, or the office has an emergency), the system follows a <strong>safe multi-step cancellation flow</strong> to ensure the Zoom meeting is properly deleted before the booking is marked cancelled.
+  </p>
+
+  <div class="info-box">
+    <div class="icon">🔄</div>
+    <div>
+      <strong>FR-06 — Cancellation Pending Flow</strong> is a contracted requirement. It ensures data consistency: if Zoom cancellation fails partway, the booking stays in a visible <em>Cancelling</em> state rather than being silently dropped.
+    </div>
+  </div>
+
+  <div class="card" style="margin: 20px 0;">
+    <h4>Automatic steps when "Cancel Booking" is clicked:</h4>
+    <div class="flow">
+      <div class="flow-node s-accept status-badge">✅ Accepted</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node s-cancel-pending status-badge">⏳ Cancellation Pending</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node" style="padding:6px 12px; background:#f9fafb; border-radius:8px; font-size:12px; color:#374151;">Zoom meeting deleted via API</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node s-cancelled status-badge">🚫 Cancelled</div>
+    </div>
+    <p style="font-size:12.5px; color:#6b7280; margin:12px 0 0;">
+      The entire flow happens automatically on the server in one request. The office does not need to take any additional steps.
+    </p>
+  </div>
+
+  <ol class="steps">
+    <li>
+      <div class="step-body">
+        <div class="step-title">Click "Cancel Booking" on an Accepted Request</div>
+        <div class="step-desc">
+          A confirmation dialog appears: <em>"Are you sure you want to cancel this booking? The Zoom meeting will be deleted."</em>
+        </div>
+      </div>
+    </li>
+    <li>
+      <div class="step-body">
+        <div class="step-title">Confirm the Cancellation</div>
+        <div class="step-desc">
+          The office clicks <strong>OK</strong>. The system transitions the booking through <em>Cancellation Pending</em>, cancels the Zoom meeting, then sets the final status to <em>Cancelled</em>.
+        </div>
+      </div>
+    </li>
+    <li>
+      <div class="step-body">
+        <div class="step-title">Result</div>
+        <div class="step-desc">
+          The request card shows <strong>Cancelled</strong> (grey badge). The customer's account page also updates to show <em>Cancelled</em>. The Zoom meeting is deleted from the office's Zoom account.
+        </div>
+      </div>
+    </li>
+  </ol>
+
+  <!-- 8. Declining -->
+  <h2 class="section-title">8. Declining a New or Viewed Request</h2>
+  <p>
+    Declining applies to requests that are still in <strong>New</strong> or <strong>Viewed</strong> status — before any Zoom meeting has been created. This is different from cancellation (which applies after acceptance).
+  </p>
+
+  <div class="cols-2">
+    <div class="card card-orange">
+      <h4>When to use "Decline"</h4>
+      <ul class="checklist">
+        <li>Office is fully booked for that period</li>
+        <li>Customer's requirements don't match the office's specialty</li>
+        <li>Request was submitted in error</li>
+      </ul>
+    </div>
+    <div class="card card-red">
+      <h4>When to use "Cancel Booking"</h4>
+      <ul class="checklist">
+        <li>Booking was already accepted (Zoom created)</li>
+        <li>Last-minute emergency on either side</li>
+        <li>Customer called to cancel after confirmation</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     PAGE 5 — CUSTOMER JOINING + STATUS LIFECYCLE
+══════════════════════════════════════════════════════ -->
+<div class="page page-break">
+  <div class="section-label">Section 9</div>
+  <h1 class="page-title">Customer — Joining the Zoom Call</h1>
+
+  <ol class="steps">
+    <li>
+      <div class="step-body">
+        <div class="step-title">Wait for the "Accepted" Status</div>
+        <div class="step-desc">
+          The customer monitors their <strong>Account page → My Video Call Requests</strong>. When the office accepts, the status changes to <em>Accepted</em> and the join button appears.
+        </div>
+      </div>
+    </li>
+    <li>
+      <div class="step-body">
+        <div class="step-title">Click "Join Zoom Meeting"</div>
+        <div class="step-desc">
+          The customer clicks the <strong>Join Zoom Meeting</strong> button on their account page. The system fetches a secure join link from the server and opens it in a new browser tab. The customer can join via browser or the Zoom app.
+        </div>
+      </div>
+    </li>
+    <li>
+      <div class="step-body">
+        <div class="step-title">Wait in the Waiting Room</div>
+        <div class="step-desc">
+          The meeting has a <strong>Waiting Room</strong> enabled. The customer waits until the office (host) admits them. This prevents any participant from entering before the host is ready.
+        </div>
+      </div>
+    </li>
+    <li>
+      <div class="step-body">
+        <div class="step-title">The Call Takes Place</div>
+        <div class="step-desc">
+          The office and customer conduct their consultation over Zoom video. Meeting duration is set to <strong>25 minutes</strong> by default.
+        </div>
+      </div>
+    </li>
+  </ol>
+
+  <div class="info-box success-box">
+    <div class="icon">🔐</div>
+    <div>
+      <strong>Meeting Password:</strong> All Zoom meetings are created with password protection. The join link the customer receives already contains the password embedded, so they don't need to enter it manually. The raw password is never shown to the customer separately.
+    </div>
+  </div>
+
+  <hr class="divider" />
+
+  <!-- 10. Status Lifecycle -->
+  <div class="section-label">Section 10</div>
+  <h1 class="page-title">Complete Status Lifecycle</h1>
+
+  <div class="card">
+    <h4>All Possible Status Values</h4>
+    <div class="status-grid">
+      <div class="status-badge s-new">🔵 new</div>
+      <div class="status-badge s-view">👁 viewed</div>
+      <div class="status-badge s-accept">✅ accepted</div>
+      <div class="status-badge s-decline">❌ declined</div>
+      <div class="status-badge s-cancel-pending">⏳ cancellation_pending</div>
+      <div class="status-badge s-cancelled">🚫 cancelled</div>
+      <div class="status-badge s-complete">🏁 completed</div>
+    </div>
+  </div>
+
+  <div class="card" style="overflow-x:auto;">
+    <h4>Allowed Transitions</h4>
+    <table>
+      <thead>
+        <tr>
+          <th>From Status</th>
+          <th>→ Can Move To</th>
+          <th>Who Triggers</th>
+          <th>What Happens Automatically</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="status-badge s-new" style="font-size:11px;padding:4px 8px;">new</span></td>
+          <td>viewed, accepted, declined</td>
+          <td>Office</td>
+          <td>On accept: Zoom meeting created</td>
+        </tr>
+        <tr>
+          <td><span class="status-badge s-view" style="font-size:11px;padding:4px 8px;">viewed</span></td>
+          <td>accepted, declined</td>
+          <td>Office</td>
+          <td>On accept: Zoom meeting created</td>
+        </tr>
+        <tr>
+          <td><span class="status-badge s-accept" style="font-size:11px;padding:4px 8px;">accepted</span></td>
+          <td>completed, cancelled, rescheduled*</td>
+          <td>Office</td>
+          <td>On cancel: Zoom deleted; On reschedule: Zoom updated</td>
+        </tr>
+        <tr>
+          <td><span class="status-badge s-cancel-pending" style="font-size:11px;padding:4px 8px;">cancellation_pending</span></td>
+          <td>cancelled</td>
+          <td>System (auto)</td>
+          <td>Zoom meeting deletion completes</td>
+        </tr>
+        <tr>
+          <td><span class="status-badge s-decline" style="font-size:11px;padding:4px 8px;">declined</span></td>
+          <td>—</td>
+          <td>Terminal state</td>
+          <td>None</td>
+        </tr>
+        <tr>
+          <td><span class="status-badge s-cancelled" style="font-size:11px;padding:4px 8px;">cancelled</span></td>
+          <td>—</td>
+          <td>Terminal state</td>
+          <td>None</td>
+        </tr>
+        <tr>
+          <td><span class="status-badge s-complete" style="font-size:11px;padding:4px 8px;">completed</span></td>
+          <td>—</td>
+          <td>Terminal state</td>
+          <td>None</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="font-size:11.5px; color:#94a3b8; margin:8px 0 0;">* Reschedule is a separate operation (PATCH /reschedule), not a status change.</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     PAGE 6 — DOUBLE-BOOKING + SECURITY + TECHNICAL
+══════════════════════════════════════════════════════ -->
+<div class="page page-break">
+  <div class="section-label">Section 11</div>
+  <h1 class="page-title">Double-Booking Prevention</h1>
+  <p>
+    The platform implements <strong>FR-05 — Double-Booking Prevention</strong> as a contracted requirement. It operates at two levels:
+  </p>
+
+  <div class="cols-2">
+    <div class="card card-blue">
+      <h4>Level 1 — Submission Guard</h4>
+      <p style="font-size:13px;">
+        When a customer submits a request, the backend checks whether the same office already has an <em>accepted</em> or <em>cancellation_pending</em> booking for the exact same date and time. If yes, the request is rejected with:
+      </p>
+      <div class="info-box" style="margin-top:10px; padding:10px 14px;">
+        <div class="icon">🚫</div>
+        <div style="font-size:12.5px;"><em>"This time slot is already booked. Please choose a different date or time."</em></div>
+      </div>
+    </div>
+    <div class="card card-purple">
+      <h4>Level 2 — Accept Race-Condition Guard</h4>
+      <p style="font-size:13px;">
+        When the office clicks Accept, the backend runs the slot conflict check inside a <strong>database transaction</strong>. This prevents the following race condition:
+        <br/><br/>
+        Two different customers submit for the same slot simultaneously → both pass Level 1 → office accidentally accepts both → system now detects conflict and blocks the second acceptance.
+      </p>
+    </div>
+  </div>
+
+  <hr class="divider" />
+
+  <div class="section-label">Section 12</div>
+  <h1 class="page-title">Security &amp; Technical Notes</h1>
+
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th>Feature</th>
+          <th>Implementation</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>OAuth Tokens Encrypted</strong></td>
+          <td>Zoom access &amp; refresh tokens stored encrypted (AES-256-GCM) in the database. Never stored in plaintext.</td>
+        </tr>
+        <tr>
+          <td><strong>Token Auto-Refresh</strong></td>
+          <td>Tokens refresh automatically when they expire (5-minute window). Concurrent refresh requests are handled safely via a conditional database lock — only one refresh runs at a time.</td>
+        </tr>
+        <tr>
+          <td><strong>Meeting Password</strong></td>
+          <td>Every Zoom meeting is created with <code>password_required: true</code>. The password is embedded in the join link; customers never enter it manually.</td>
+        </tr>
+        <tr>
+          <td><strong>Waiting Room</strong></td>
+          <td>All meetings have Zoom Waiting Room enabled. The host (office) must admit the customer — no auto-join.</td>
+        </tr>
+        <tr>
+          <td><strong>Host Link Protection</strong></td>
+          <td>The host-start URL is returned only on the office-authenticated endpoint. The customer's join endpoint structurally omits it — enforced server-side.</td>
+        </tr>
+        <tr>
+          <td><strong>Webhook Verification</strong></td>
+          <td>Zoom webhook events (meeting.deleted, meeting.ended) are verified using HMAC-SHA256 signatures before being processed.</td>
+        </tr>
+        <tr>
+          <td><strong>Rate Limiting</strong></td>
+          <td>Submission endpoints are rate-limited: max 20 requests per minute per user, preventing abuse.</td>
+        </tr>
+        <tr>
+          <td><strong>OAuth CSRF Protection</strong></td>
+          <td>Zoom OAuth flow uses an HMAC-signed state parameter to prevent cross-site request forgery attacks.</td>
+        </tr>
+        <tr>
+          <td><strong>Zoom Disconnect Blocking</strong></td>
+          <td>If an office disconnects Zoom, customers cannot submit new video call requests for that office until Zoom is reconnected.</td>
+        </tr>
+        <tr>
+          <td><strong>Audit Log</strong></td>
+          <td>Every status change and reschedule is recorded in the audit log with actor, timestamp, and metadata.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <hr class="divider" />
+
+  <h2 class="section-title">Complete Feature Requirements — Implementation Status</h2>
+
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th>Req. ID</th>
+          <th>Requirement</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>FR-01</td>
+          <td>Office connects Zoom via OAuth 2.0</td>
+          <td><span class="pill pill-green">✅ Implemented</span></td>
+        </tr>
+        <tr>
+          <td>FR-02</td>
+          <td>Zoom meeting auto-created on request acceptance</td>
+          <td><span class="pill pill-green">✅ Implemented</span></td>
+        </tr>
+        <tr>
+          <td>FR-03</td>
+          <td>Office starts call via host-start URL; customer joins via join URL</td>
+          <td><span class="pill pill-green">✅ Implemented</span></td>
+        </tr>
+        <tr>
+          <td>FR-04</td>
+          <td>Zoom tokens auto-refresh; disconnect blocks new requests</td>
+          <td><span class="pill pill-green">✅ Implemented</span></td>
+        </tr>
+        <tr>
+          <td>FR-05</td>
+          <td>Double-booking prevention (submission + accept-time race guard)</td>
+          <td><span class="pill pill-green">✅ Implemented</span></td>
+        </tr>
+        <tr>
+          <td>FR-06</td>
+          <td>Cancellation pending flow: cancellation_pending → cancel Zoom → cancelled</td>
+          <td><span class="pill pill-green">✅ Implemented</span></td>
+        </tr>
+        <tr>
+          <td>FR-07</td>
+          <td>Rescheduling: update DB + update Zoom meeting via PATCH API</td>
+          <td><span class="pill pill-green">✅ Implemented</span></td>
+        </tr>
+        <tr>
+          <td>FR-08</td>
+          <td>Meeting password required; waiting room enabled</td>
+          <td><span class="pill pill-green">✅ Implemented</span></td>
+        </tr>
+        <tr>
+          <td>FR-09</td>
+          <td>Webhook handling: meeting.deleted / meeting.ended updates provider status</td>
+          <td><span class="pill pill-green">✅ Implemented</span></td>
+        </tr>
+        <tr>
+          <td>FR-10</td>
+          <td>Timezone support — full IANA timezone list in searchable dropdown</td>
+          <td><span class="pill pill-green">✅ Implemented</span></td>
+        </tr>
+        <tr>
+          <td>FR-11</td>
+          <td>Token refresh race condition prevention (conditional DB update)</td>
+          <td><span class="pill pill-green">✅ Implemented</span></td>
+        </tr>
+        <tr>
+          <td>FR-12</td>
+          <td>Host-start URL never exposed to customer (server-enforced)</td>
+          <td><span class="pill pill-green">✅ Implemented</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <hr class="divider" />
+
+  <h2 class="section-title">Quick Reference — API Endpoints</h2>
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th>Endpoint</th>
+          <th>Who Uses It</th>
+          <th>Purpose</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>POST /api/video-call-requests</code></td>
+          <td>Customer</td>
+          <td>Submit a new video call request</td>
+        </tr>
+        <tr>
+          <td><code>GET /api/video-call-requests/me</code></td>
+          <td>Customer</td>
+          <td>List own requests and their statuses</td>
+        </tr>
+        <tr>
+          <td><code>GET /api/video-call-requests/:id/join</code></td>
+          <td>Customer</td>
+          <td>Fetch secure Zoom join link (never host URL)</td>
+        </tr>
+        <tr>
+          <td><code>GET /api/offices/me/video-call-requests</code></td>
+          <td>Office</td>
+          <td>List all incoming requests</td>
+        </tr>
+        <tr>
+          <td><code>PATCH /api/offices/me/video-call-requests/:id/status</code></td>
+          <td>Office</td>
+          <td>Accept / view / decline / complete / cancel a request</td>
+        </tr>
+        <tr>
+          <td><code>PATCH /api/offices/me/video-call-requests/:id/reschedule</code></td>
+          <td>Office</td>
+          <td>Reschedule — updates DB and Zoom meeting</td>
+        </tr>
+        <tr>
+          <td><code>GET /api/offices/me/video-call-requests/:id/meeting</code></td>
+          <td>Office</td>
+          <td>Fetch full meeting details including host-start URL</td>
+        </tr>
+        <tr>
+          <td><code>GET /api/zoom/oauth/start</code></td>
+          <td>Office</td>
+          <td>Begin Zoom OAuth connection flow</td>
+        </tr>
+        <tr>
+          <td><code>GET /api/zoom/status</code></td>
+          <td>Office</td>
+          <td>Check Zoom connection status</td>
+        </tr>
+        <tr>
+          <td><code>DELETE /api/zoom/disconnect</code></td>
+          <td>Office</td>
+          <td>Disconnect Zoom account</td>
+        </tr>
+        <tr>
+          <td><code>POST /api/zoom/webhooks</code></td>
+          <td>Zoom Platform</td>
+          <td>Receive meeting.deleted / meeting.ended events</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="footer-note">
+    <strong>SkayOffice — Video Call Workflow Guide v1.0</strong><br/>
+    Confidential — Prepared for client stakeholders. All features described are live and tested in the pilot build. November 2026.
+  </div>
+</div>
+
+</body>
+</html>
