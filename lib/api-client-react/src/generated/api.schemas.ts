@@ -750,6 +750,8 @@ export const VideoCallRequestStatus = {
   accepted: 'accepted',
   declined: 'declined',
   completed: 'completed',
+  cancellation_pending: 'cancellation_pending',
+  cancelled: 'cancelled',
 } as const;
 
 export interface VideoCallRequest {

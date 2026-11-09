@@ -267,6 +267,36 @@ export async function createZoomMeeting(
   };
 }
 
+// ── Update Zoom meeting (reschedule) ─────────────────────────────────────────
+
+export async function updateZoomMeeting(
+  officeId: number,
+  externalMeetingId: string,
+  startTime: string,
+  timezone: string,
+): Promise<void> {
+  const accessToken = await getValidAccessToken(officeId);
+
+  const resp = await fetch(`${ZOOM_BASE}/meetings/${externalMeetingId}`, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      start_time: startTime,
+      timezone,
+      duration: 25,
+    }),
+  });
+
+  // 204 = success, no body
+  if (!resp.ok && resp.status !== 204) {
+    const body = await resp.text();
+    throw new Error(`Zoom meeting update failed: ${resp.status} ${body}`);
+  }
+}
+
 // ── Cancel Zoom meeting ──────────────────────────────────────────────────────
 
 export async function cancelZoomMeeting(

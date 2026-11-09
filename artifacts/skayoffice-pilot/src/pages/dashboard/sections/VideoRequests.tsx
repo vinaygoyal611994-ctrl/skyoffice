@@ -10,10 +10,13 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Video, Eye, CheckCircle2, XCircle, Phone, ExternalLink } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Video, Eye, CheckCircle2, XCircle, Phone, ExternalLink, CalendarClock, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 
-type StatusFilter = 'all' | 'new' | 'viewed' | 'accepted' | 'declined' | 'completed';
+type StatusFilter = 'all' | 'new' | 'viewed' | 'accepted' | 'declined' | 'completed' | 'cancellation_pending' | 'cancelled';
 
 interface MeetingDetails {
   hostStartUrl: string;
@@ -47,6 +50,78 @@ function ZoomMeetingButton({ requestId, isAr }: { requestId: number; isAr: boole
   );
 }
 
+interface RescheduleDialogProps {
+  requestId: number;
+  currentDate: string;
+  currentTime: string;
+  currentTimezone: string;
+  open: boolean;
+  onClose: () => void;
+  onSuccess: () => void;
+  isAr: boolean;
+}
+
+function RescheduleDialog({ requestId, currentDate, currentTime, currentTimezone, open, onClose, onSuccess, isAr }: RescheduleDialogProps) {
+  const { t } = useI18n();
+  const [date, setDate] = useState(currentDate);
+  const [time, setTime] = useState(currentTime);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSubmit = async () => {
+    if (!date || !time) return;
+    setSubmitting(true);
+    setError('');
+    try {
+      const res = await authFetch(`/api/offices/me/video-call-requests/${requestId}/reschedule`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ preferredDate: date, preferredTime: time, timezone: currentTimezone }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setError(data.error ?? (isAr ? 'حدث خطأ ما' : 'An error occurred'));
+        return;
+      }
+      onSuccess();
+      onClose();
+    } catch {
+      setError(isAr ? 'حدث خطأ ما' : 'An error occurred');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={v => { if (!v) onClose(); }}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{t('videocall.reschedule_title')}</DialogTitle>
+          <DialogDescription>{t('videocall.reschedule_desc')}</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4 py-2">
+          <div className="space-y-1.5">
+            <Label>{t('videocall.reschedule_new_date')}</Label>
+            <Input type="date" value={date} onChange={e => setDate(e.target.value)} min={new Date().toISOString().slice(0, 10)} />
+          </div>
+          <div className="space-y-1.5">
+            <Label>{t('videocall.reschedule_new_time')}</Label>
+            <Input type="time" value={time} onChange={e => setTime(e.target.value)} />
+          </div>
+          {error && <p className="text-sm text-destructive">{error}</p>}
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose} disabled={submitting}>{t('common.cancel')}</Button>
+          <Button onClick={handleSubmit} disabled={submitting || !date || !time}>
+            {submitting && <Loader2 size={14} className="me-1.5 animate-spin" />}
+            {t('videocall.reschedule_submit')}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 interface VideoRequestsProps {
   navigate?: (section: string) => void;
 }
@@ -56,6 +131,7 @@ export function VideoRequestsSection({ navigate }: VideoRequestsProps) {
   const isAr = language === 'ar';
   const queryClient = useQueryClient();
   const [filter, setFilter] = useState<StatusFilter>('all');
+  const [rescheduleTarget, setRescheduleTarget] = useState<{ id: number; date: string; time: string; timezone: string } | null>(null);
 
   const { data: requests, isLoading } = useListMyOfficeVideoCallRequests();
   const updateStatusMut = useUpdateMyOfficeVideoCallRequestStatus({
@@ -71,6 +147,8 @@ export function VideoRequestsSection({ navigate }: VideoRequestsProps) {
     { key: 'accepted', label: 'dash.video.filter_accepted' },
     { key: 'declined', label: 'dash.video.filter_declined' },
     { key: 'completed', label: 'dash.video.filter_completed' },
+    { key: 'cancellation_pending', label: 'dash.video.filter_cancellation_pending' },
+    { key: 'cancelled', label: 'dash.video.filter_cancelled' },
   ];
 
   const filtered = (requests || []).filter(r => filter === 'all' || r.status === filter);
@@ -83,7 +161,17 @@ export function VideoRequestsSection({ navigate }: VideoRequestsProps) {
       case 'accepted': return 'bg-emerald-50 text-emerald-700 border-emerald-200';
       case 'declined': return 'bg-red-50 text-red-700 border-red-200';
       case 'completed': return 'bg-slate-100 text-slate-600 border-slate-200';
+      case 'cancellation_pending': return 'bg-orange-50 text-orange-700 border-orange-200';
+      case 'cancelled': return 'bg-zinc-100 text-zinc-500 border-zinc-200';
       default: return 'bg-slate-100 text-slate-600 border-slate-200';
+    }
+  };
+
+  const handleCancelBooking = (req: { id: number }) => {
+    if (window.confirm(isAr
+      ? 'هل أنت متأكد من إلغاء هذا الحجز؟ سيتم حذف اجتماع Zoom.'
+      : 'Are you sure you want to cancel this booking? The Zoom meeting will be deleted.')) {
+      updateStatusMut.mutate({ requestId: req.id, data: { status: 'cancelled' } });
     }
   };
 
@@ -209,11 +297,29 @@ export function VideoRequestsSection({ navigate }: VideoRequestsProps) {
                         <ZoomMeetingButton requestId={req.id} isAr={isAr} />
                         <Button
                           size="sm"
+                          variant="outline"
+                          className="gap-1.5"
+                          onClick={() => setRescheduleTarget({ id: req.id, date: req.preferredDate, time: req.preferredTime, timezone: req.timezone })}
+                          data-testid={`button-reschedule-${req.id}`}
+                        >
+                          <CalendarClock size={14} />
+                          {t('dash.video.reschedule')}
+                        </Button>
+                        <Button
+                          size="sm"
                           variant="secondary"
                           onClick={() => updateStatusMut.mutate({ requestId: req.id, data: { status: 'completed' } })}
                           data-testid={`button-mark-completed-${req.id}`}
                         >
                           <CheckCircle2 size={14} className="me-1" />{t('dashboard.mark_completed')}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => handleCancelBooking(req)}
+                          data-testid={`button-cancel-booking-${req.id}`}
+                        >
+                          <XCircle size={14} className="me-1" />{t('videocall.cancel_booking')}
                         </Button>
                       </>
                     )}
@@ -224,6 +330,19 @@ export function VideoRequestsSection({ navigate }: VideoRequestsProps) {
           )}
         </CardContent>
       </Card>
+
+      {rescheduleTarget && (
+        <RescheduleDialog
+          requestId={rescheduleTarget.id}
+          currentDate={rescheduleTarget.date}
+          currentTime={rescheduleTarget.time}
+          currentTimezone={rescheduleTarget.timezone}
+          open={true}
+          onClose={() => setRescheduleTarget(null)}
+          onSuccess={() => queryClient.invalidateQueries({ queryKey: getListMyOfficeVideoCallRequestsQueryKey() })}
+          isAr={isAr}
+        />
+      )}
     </div>
   );
 }

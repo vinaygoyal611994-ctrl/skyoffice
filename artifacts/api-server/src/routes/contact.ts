@@ -7,7 +7,7 @@ import {
   contactEventsTable,
   videoCallRequestsTable,
 } from "@workspace/db";
-import { and, desc, eq, gt } from "drizzle-orm";
+import { and, desc, eq, gt, inArray } from "drizzle-orm";
 import {
   CreateContactEventBody,
   CreateContactEventResponse,
@@ -22,6 +22,9 @@ import {
   UpdateMyOfficeVideoCallRequestStatusParams,
   UpdateMyOfficeVideoCallRequestStatusBody,
   UpdateMyOfficeVideoCallRequestStatusResponse,
+  RescheduleMyOfficeVideoCallRequestParams,
+  RescheduleMyOfficeVideoCallRequestBody,
+  RescheduleMyOfficeVideoCallRequestResponse,
 } from "@workspace/api-zod";
 import { requireRole, requireActiveCustomer } from "../middlewares/authMiddleware";
 import { recordAuditLog } from "../lib/auditLog";
@@ -31,6 +34,7 @@ import {
   createZoomMeeting,
   getMeetingForRequest,
   cancelZoomMeeting,
+  updateZoomMeeting,
   getZoomConnectionStatus,
 } from "../services/zoomService";
 
@@ -181,6 +185,24 @@ router.post(
     const zoomActive = zoomStatus.status === "connected" || zoomStatus.status === "token_refreshing";
     if (!zoomActive) {
       res.status(422).json({ error: "This office's video call service is temporarily unavailable. Please try again later." });
+      return;
+    }
+
+    // FR-05: Prevent double-booking — reject if the slot is already accepted
+    const [slotConflict] = await db
+      .select({ id: videoCallRequestsTable.id })
+      .from(videoCallRequestsTable)
+      .where(
+        and(
+          eq(videoCallRequestsTable.officeId, parsed.data.officeId),
+          eq(videoCallRequestsTable.preferredDate, parsed.data.preferredDate),
+          eq(videoCallRequestsTable.preferredTime, parsed.data.preferredTime),
+          inArray(videoCallRequestsTable.status, ["accepted", "cancellation_pending"]),
+        ),
+      )
+      .limit(1);
+    if (slotConflict) {
+      res.status(409).json({ error: "This time slot is already booked. Please choose a different date or time." });
       return;
     }
 
@@ -395,10 +417,33 @@ router.patch(
       return;
     }
 
+    // FR-06: Cancelled accepted bookings go through cancellation_pending → cancelled.
+    // The backend handles both transitions atomically so the client just sends "cancelled".
+    let finalStatus = body.data.status;
+    if (body.data.status === "cancelled" && existing.status === "accepted") {
+      await db
+        .update(videoCallRequestsTable)
+        .set({ status: "cancellation_pending", respondedAt: new Date(), respondedBy: req.session.user!.id })
+        .where(eq(videoCallRequestsTable.id, existing.id));
+
+      try {
+        const existingMeeting = await getMeetingForRequest(existing.id);
+        if (existingMeeting && existingMeeting.providerStatus === "active") {
+          await cancelZoomMeeting(officeId, existingMeeting.externalMeetingId);
+          await db
+            .update(videoCallMeetingDetailsTable)
+            .set({ providerStatus: "cancelled" })
+            .where(eq(videoCallMeetingDetailsTable.videoCallRequestId, existing.id));
+        }
+      } catch (zoomErr: any) {
+        req.log?.warn({ err: zoomErr.message }, "[zoom] Could not cancel meeting during cancellation flow");
+      }
+    }
+
     const [updated] = await db
       .update(videoCallRequestsTable)
       .set({
-        status: body.data.status,
+        status: finalStatus,
         respondedAt: new Date(),
         respondedBy: req.session.user!.id,
       })
@@ -410,15 +455,33 @@ router.patch(
       action: "contact.video_call_request.status_change",
       targetType: "video_call_request",
       targetId: existing.id,
-      metadata: { status: body.data.status },
+      metadata: { status: finalStatus },
     });
 
-    // When office accepts the request, automatically create a Zoom meeting
-    // if Zoom is connected. Failure is non-fatal — booking is still accepted.
+    // FR-05 (accept path): run inside a transaction to prevent double-booking race condition.
+    // Re-check slot availability before creating the Zoom meeting.
     if (body.data.status === "accepted") {
       try {
+        await db.transaction(async (tx) => {
+          const [conflict] = await tx
+            .select({ id: videoCallRequestsTable.id })
+            .from(videoCallRequestsTable)
+            .where(
+              and(
+                eq(videoCallRequestsTable.officeId, officeId),
+                eq(videoCallRequestsTable.preferredDate, existing.preferredDate),
+                eq(videoCallRequestsTable.preferredTime, existing.preferredTime),
+                inArray(videoCallRequestsTable.status, ["accepted", "cancellation_pending"]),
+              ),
+            )
+            .limit(1);
+          if (conflict && conflict.id !== existing.id) {
+            throw new Error("SLOT_CONFLICT");
+          }
+        });
+
         const zoomStatus = await getZoomConnectionStatus(officeId);
-        if (zoomStatus.status === "connected") {
+        if (zoomStatus.status === "connected" || zoomStatus.status === "token_refreshing") {
           const startTime = `${existing.preferredDate}T${existing.preferredTime}:00`;
           const meeting = await createZoomMeeting(
             officeId,
@@ -440,16 +503,20 @@ router.patch(
           });
           req.log?.info({ officeId, meetingId: meeting.meetingId }, "[zoom] Meeting created for accepted request");
         }
-      } catch (zoomErr: any) {
-        req.log?.warn({ err: zoomErr.message, officeId }, "[zoom] Could not create meeting on accept — continuing without Zoom");
+      } catch (err: any) {
+        if (err.message === "SLOT_CONFLICT") {
+          res.status(409).json({ error: "This time slot was just accepted for another booking. Please choose a different slot." });
+          return;
+        }
+        req.log?.warn({ err: err.message, officeId }, "[zoom] Could not create meeting on accept — continuing without Zoom");
       }
     }
 
-    // When office declines, cancel any existing Zoom meeting
+    // When office declines a new/viewed request, cancel any unexpected Zoom meeting (safety net)
     if (body.data.status === "declined") {
       try {
         const existingMeeting = await getMeetingForRequest(existing.id);
-        if (existingMeeting) {
+        if (existingMeeting && existingMeeting.providerStatus === "active") {
           await cancelZoomMeeting(officeId, existingMeeting.externalMeetingId);
           await db
             .update(videoCallMeetingDetailsTable)
@@ -565,6 +632,114 @@ router.get(
       scheduledAt: meeting.scheduledAt,
       durationMinutes: meeting.durationMinutes,
     });
+  },
+);
+
+// PATCH /offices/me/video-call-requests/:requestId/reschedule
+// FR-07: Office reschedules an accepted booking — updates DB and Zoom meeting
+router.patch(
+  "/offices/me/video-call-requests/:requestId/reschedule",
+  requireRole("office"),
+  async (req: Request, res: Response): Promise<void> => {
+    const params = RescheduleMyOfficeVideoCallRequestParams.safeParse(req.params);
+    const body = RescheduleMyOfficeVideoCallRequestBody.safeParse(req.body);
+    if (!params.success || !body.success) {
+      res.status(400).json({ error: params.error?.message ?? body.error?.message });
+      return;
+    }
+
+    const officeId = await getOfficeIdForUser(req.session.user!.id);
+    if (!officeId) {
+      res.status(403).json({ error: "No office profile for this account" });
+      return;
+    }
+
+    const [existing] = await db
+      .select()
+      .from(videoCallRequestsTable)
+      .where(
+        and(
+          eq(videoCallRequestsTable.id, params.data.requestId),
+          eq(videoCallRequestsTable.officeId, officeId),
+        ),
+      );
+    if (!existing) {
+      res.status(404).json({ error: "Request not found" });
+      return;
+    }
+
+    if (existing.status !== "accepted") {
+      res.status(422).json({ error: "Only accepted bookings can be rescheduled" });
+      return;
+    }
+
+    // FR-05: check the new slot isn't already taken
+    const [slotConflict] = await db
+      .select({ id: videoCallRequestsTable.id })
+      .from(videoCallRequestsTable)
+      .where(
+        and(
+          eq(videoCallRequestsTable.officeId, officeId),
+          eq(videoCallRequestsTable.preferredDate, body.data.preferredDate),
+          eq(videoCallRequestsTable.preferredTime, body.data.preferredTime),
+          inArray(videoCallRequestsTable.status, ["accepted", "cancellation_pending"]),
+        ),
+      )
+      .limit(1);
+    if (slotConflict && slotConflict.id !== existing.id) {
+      res.status(409).json({ error: "The new time slot is already booked. Please choose a different date or time." });
+      return;
+    }
+
+    const [updated] = await db
+      .update(videoCallRequestsTable)
+      .set({
+        preferredDate: body.data.preferredDate,
+        preferredTime: body.data.preferredTime,
+        timezone: body.data.timezone,
+      })
+      .where(eq(videoCallRequestsTable.id, existing.id))
+      .returning();
+
+    // Update Zoom meeting if one exists
+    const existingMeeting = await getMeetingForRequest(existing.id);
+    if (existingMeeting && existingMeeting.providerStatus === "active") {
+      try {
+        const newStartTime = `${body.data.preferredDate}T${body.data.preferredTime}:00`;
+        await updateZoomMeeting(officeId, existingMeeting.externalMeetingId, newStartTime, body.data.timezone);
+        await db
+          .update(videoCallMeetingDetailsTable)
+          .set({ scheduledAt: new Date(newStartTime) })
+          .where(eq(videoCallMeetingDetailsTable.videoCallRequestId, existing.id));
+        req.log?.info({ officeId, meetingId: existingMeeting.externalMeetingId }, "[zoom] Meeting rescheduled");
+      } catch (zoomErr: any) {
+        req.log?.warn({ err: zoomErr.message }, "[zoom] Could not update Zoom meeting on reschedule — DB updated, Zoom not");
+      }
+    }
+
+    await recordAuditLog({
+      actor: req.session.user,
+      action: "contact.video_call_request.reschedule",
+      targetType: "video_call_request",
+      targetId: existing.id,
+      metadata: {
+        preferredDate: body.data.preferredDate,
+        preferredTime: body.data.preferredTime,
+        timezone: body.data.timezone,
+      },
+    });
+
+    const [customer] = await db
+      .select({ name: usersTable.name })
+      .from(usersTable)
+      .where(eq(usersTable.id, updated.customerUserId));
+
+    res.json(
+      RescheduleMyOfficeVideoCallRequestResponse.parse({
+        ...updated,
+        customerName: customer?.name ?? "",
+      }),
+    );
   },
 );
 

@@ -1399,7 +1399,7 @@ export const UpdateMyOfficeVideoCallRequestStatusParams = zod.object({
 })
 
 export const UpdateMyOfficeVideoCallRequestStatusBody = zod.object({
-  "status": zod.enum(['new', 'viewed', 'accepted', 'declined', 'completed'])
+  "status": zod.enum(['new', 'viewed', 'accepted', 'declined', 'completed', 'cancellation_pending', 'cancelled'])
 })
 
 export const UpdateMyOfficeVideoCallRequestStatusResponse = zod.object({
@@ -1410,7 +1410,36 @@ export const UpdateMyOfficeVideoCallRequestStatusResponse = zod.object({
   "timezone": zod.string(),
   "contactNumber": zod.string(),
   "note": zod.string().nullish(),
-  "status": zod.enum(['new', 'viewed', 'accepted', 'declined', 'completed']),
+  "status": zod.enum(['new', 'viewed', 'accepted', 'declined', 'completed', 'cancellation_pending', 'cancelled']),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+}).and(zod.object({
+  "customerName": zod.string()
+}))
+
+
+/**
+ * @summary Reschedule one of the office's own video-call requests and update the Zoom meeting
+ */
+export const RescheduleMyOfficeVideoCallRequestParams = zod.object({
+  "requestId": zod.coerce.number()
+})
+
+export const RescheduleMyOfficeVideoCallRequestBody = zod.object({
+  "preferredDate": zod.string(),
+  "preferredTime": zod.string(),
+  "timezone": zod.string()
+})
+
+export const RescheduleMyOfficeVideoCallRequestResponse = zod.object({
+  "id": zod.number(),
+  "officeId": zod.number(),
+  "preferredDate": zod.string(),
+  "preferredTime": zod.string(),
+  "timezone": zod.string(),
+  "contactNumber": zod.string(),
+  "note": zod.string().nullish(),
+  "status": zod.enum(['new', 'viewed', 'accepted', 'declined', 'completed', 'cancellation_pending', 'cancelled']),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 }).and(zod.object({
