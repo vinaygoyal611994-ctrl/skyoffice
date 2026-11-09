@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import { db, officeZoomConnectionsTable, videoCallMeetingDetailsTable } from "@workspace/db";
-import { eq } from "drizzle-orm";
+import { and, eq, ne } from "drizzle-orm";
 import { encrypt, decrypt } from "../lib/encryption";
 
 const ZOOM_BASE = "https://api.zoom.us/v2";
@@ -162,11 +162,22 @@ export async function getValidAccessToken(officeId: number): Promise<string> {
 
   if (!needsRefresh) return decrypt(conn.encryptedAccessToken);
 
-  // Mark as refreshing (prevents parallel refresh attempts)
-  await db
+  // Conditional update: only proceed if not already refreshing (prevents race condition)
+  const claimed = await db
     .update(officeZoomConnectionsTable)
     .set({ status: "token_refreshing" })
-    .where(eq(officeZoomConnectionsTable.officeId, officeId));
+    .where(
+      and(
+        eq(officeZoomConnectionsTable.officeId, officeId),
+        ne(officeZoomConnectionsTable.status, "token_refreshing"),
+      ),
+    )
+    .returning({ id: officeZoomConnectionsTable.id });
+
+  if (claimed.length === 0) {
+    // Another concurrent request is already refreshing — return current token as-is
+    return decrypt(conn.encryptedAccessToken);
+  }
 
   try {
     const newTokens = await doRefreshToken(conn.encryptedRefreshToken);
@@ -231,6 +242,7 @@ export async function createZoomMeeting(
         host_video: true,
         mute_upon_entry: false,
         approval_type: 2, // No registration required
+        password_required: true,
       },
     }),
   });

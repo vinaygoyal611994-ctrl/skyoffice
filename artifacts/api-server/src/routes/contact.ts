@@ -176,6 +176,14 @@ router.post(
       return;
     }
 
+    // Reject new video call requests if the office's Zoom is not connected
+    const zoomStatus = await getZoomConnectionStatus(office.id);
+    const zoomActive = zoomStatus.status === "connected" || zoomStatus.status === "token_refreshing";
+    if (!zoomActive) {
+      res.status(422).json({ error: "This office's video call service is temporarily unavailable. Please try again later." });
+      return;
+    }
+
     // Internal/seed accounts cannot generate contact events — skip the
     // contact_events row but still allow the video-call request itself
     // so QA can test the form flow without inflating office metrics.

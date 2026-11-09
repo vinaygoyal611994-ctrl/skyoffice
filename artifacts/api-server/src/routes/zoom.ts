@@ -2,6 +2,8 @@ import { Router, type IRouter, type Request, type Response } from "express";
 import crypto from "crypto";
 import { requireRole } from "../middlewares/authMiddleware";
 import { getOfficeIdForUser } from "../lib/auth";
+import { db, videoCallMeetingDetailsTable } from "@workspace/db";
+import { eq } from "drizzle-orm";
 import {
   getZoomAuthUrl,
   connectZoomWithCode,
@@ -190,10 +192,17 @@ router.post(
     const event = req.body?.event as string;
     req.log?.info({ event }, "[zoom-webhook] Received event");
 
-    // Handle meeting deleted event from Zoom side
+    // Handle meeting deleted/ended event from Zoom side — update providerStatus
     if (event === "meeting.deleted" || event === "meeting.ended") {
-      // Future: update provider_status in video_call_meeting_details
-      // Currently logged only — booking lifecycle is managed by SkayOffice
+      const externalMeetingId = String(req.body?.payload?.object?.id ?? "");
+      if (externalMeetingId) {
+        const newStatus = event === "meeting.ended" ? "ended" : "deleted";
+        await db
+          .update(videoCallMeetingDetailsTable)
+          .set({ providerStatus: newStatus })
+          .where(eq(videoCallMeetingDetailsTable.externalMeetingId, externalMeetingId));
+        req.log?.info({ externalMeetingId, newStatus }, "[zoom-webhook] Updated meeting providerStatus");
+      }
     }
 
     res.json({ received: true });
