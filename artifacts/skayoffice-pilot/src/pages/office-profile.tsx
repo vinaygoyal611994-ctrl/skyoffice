@@ -934,7 +934,7 @@ export function OfficeProfile({
 
             {/* 2. WhatsApp CTA — full-width, dominant green */}
             {hasAnyContact && (
-              <div className="flex flex-col gap-1.5" data-testid="primary-actions">
+              <div className="flex flex-col gap-2.5" data-testid="primary-actions">
                 {hasValidWhatsapp && (
                   <Button
                     asChild
@@ -961,7 +961,7 @@ export function OfficeProfile({
                   <Dialog open={videoDialogOpen} onOpenChange={resetVideoDialog}>
                     <Button
                       variant="secondary"
-                      className="h-11 min-w-0 flex-1 gap-1 whitespace-normal rounded-xl bg-primary px-2 text-center text-xs font-bold leading-tight text-primary-foreground hover:bg-primary/90 sm:text-sm"
+                      className="h-11 w-full gap-2 whitespace-normal rounded-xl bg-primary text-sm font-bold text-primary-foreground hover:bg-primary/90"
                       data-testid="button-schedule-call"
                       onClick={handleOpenVideoDialog}
                     >
