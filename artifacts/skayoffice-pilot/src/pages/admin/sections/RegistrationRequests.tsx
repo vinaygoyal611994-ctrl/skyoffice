@@ -6,7 +6,7 @@
  * reactivate, document review, pending changes, media moderation, admin notes)
  * are handled exclusively by OfficeDetailDialog — zero duplicated action code.
  */
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useI18n, categoriesMap, localizedCity } from '@/lib/i18n';
 import {
   useListAdminApplications,
@@ -15,9 +15,10 @@ import {
 import { useQueryClient } from '@tanstack/react-query';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { format } from 'date-fns';
-import { ClipboardList, Eye, FileEdit, Images } from 'lucide-react';
+import { ClipboardList, Eye, FileEdit, Images, Search } from 'lucide-react';
 import { OfficeDetailDialog } from './OfficeDetailDialog';
 
 const STATUS_META: Record<string, { tone: string; labelAr: string; labelEn: string }> = {
@@ -48,6 +49,7 @@ export function RegistrationRequestsSection() {
 
   const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined);
   const [selectedId, setSelectedId]     = useState<number | null>(null);
+  const [search, setSearch]             = useState('');
 
   // 'pending_edits' is a synthetic client-side filter — no matching API status.
   const isPendingEditsFilter = statusFilter === 'pending_edits';
@@ -55,11 +57,25 @@ export function RegistrationRequestsSection() {
   const { data: rawApplications = [], isLoading } = useListAdminApplications(
     (!statusFilter || isPendingEditsFilter || isPendingWorksFilter) ? undefined : { status: statusFilter as any },
   );
-  const applications = isPendingEditsFilter
-    ? rawApplications.filter(a => !!(a as any).pendingChangesSubmittedAt)
-    : isPendingWorksFilter
-      ? rawApplications.filter(a => ((a as any).pendingWorksCount ?? 0) > 0)
-      : rawApplications;
+  const applications = useMemo(() => {
+    let list = isPendingEditsFilter
+      ? rawApplications.filter(a => !!(a as any).pendingChangesSubmittedAt)
+      : isPendingWorksFilter
+        ? rawApplications.filter(a => ((a as any).pendingWorksCount ?? 0) > 0)
+        : rawApplications;
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      list = list.filter(a =>
+        a.name?.toLowerCase().includes(q) ||
+        (a as any).email?.toLowerCase().includes(q) ||
+        (a as any).phone?.toLowerCase().includes(q) ||
+        a.city?.toLowerCase().includes(q) ||
+        a.category?.toLowerCase().includes(q) ||
+        String(a.id).includes(q),
+      );
+    }
+    return list;
+  }, [rawApplications, isPendingEditsFilter, isPendingWorksFilter, search]);
 
   const statusLabel   = (s: string) => { const m = STATUS_META[s]; return m ? (language === 'ar' ? m.labelAr : m.labelEn) : s; };
   const categoryLabel = (c: string) => { const m = categoriesMap[c]; return m ? (language === 'ar' ? m.ar : m.en) : c; };
@@ -78,6 +94,18 @@ export function RegistrationRequestsSection() {
         </p>
       </div>
 
+      {/* Search */}
+      <div className="relative">
+        <Search size={16} className="absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          className="ps-9"
+          placeholder={language === 'ar' ? 'ابحث بالاسم، البريد، الهاتف، المدينة، التصنيف، رقم المكتب...' : 'Search by name, email, phone, city, category, ID...'}
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          data-testid="input-intake-search"
+        />
+      </div>
+
       {/* Status filters */}
       <div className="flex items-center gap-2 flex-wrap">
         {FILTER_OPTIONS.map(opt => (
@@ -92,6 +120,13 @@ export function RegistrationRequestsSection() {
           </Button>
         ))}
       </div>
+
+      {/* Results count */}
+      {!isLoading && (
+        <p className="text-sm text-muted-foreground">
+          {applications.length} {language === 'ar' ? 'نتيجة' : 'results'}
+        </p>
+      )}
 
       {/* Table */}
       <div className="rounded-lg border overflow-hidden">
