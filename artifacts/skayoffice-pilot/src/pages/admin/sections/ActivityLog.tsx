@@ -153,10 +153,18 @@ export function ActivityLogSection() {
 
       {/* Log */}
       <Card>
-        <CardHeader className="pb-3 border-b">
-          <CardTitle className="text-base">
-            {isLoading ? '…' : total} {language === 'ar' ? 'حدث' : 'events'}
-          </CardTitle>
+        <CardHeader className="pb-0 border-b">
+          <div className="flex items-center justify-between pb-3">
+            <CardTitle className="text-base">
+              {isLoading ? '…' : total} {language === 'ar' ? 'حدث' : 'events'}
+            </CardTitle>
+          </div>
+          {/* Column headers */}
+          <div className="grid grid-cols-[9rem_1fr_1fr] gap-4 px-4 pb-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground/60">
+            <span>{language === 'ar' ? 'الوقت' : 'Time'}</span>
+            <span>{language === 'ar' ? 'الحدث / المنفذ' : 'Event / Actor'}</span>
+            <span>{language === 'ar' ? 'الهدف / التفاصيل' : 'Target / Details'}</span>
+          </div>
         </CardHeader>
         <CardContent className="p-0">
           {isLoading ? (
@@ -174,40 +182,45 @@ export function ActivityLogSection() {
                 let meta: Record<string, unknown> = {};
                 try { if (log.metadata) meta = JSON.parse(log.metadata); } catch {}
 
+                const actorLabel = log.actorId != null
+                  ? `${log.actorRole === 'admin' ? (language === 'ar' ? 'مدير' : 'Admin') : log.actorRole} #${log.actorId}`
+                  : (language === 'ar' ? 'النظام' : 'System');
+
                 return (
-                  <div key={log.id} className="flex items-start gap-4 px-4 py-3 hover:bg-muted/20 transition-colors">
-                    {/* Time */}
-                    <div className="text-xs text-muted-foreground whitespace-nowrap pt-0.5 w-32 shrink-0" dir="ltr">
+                  <div key={log.id} className="grid grid-cols-[9rem_1fr_1fr] items-start gap-4 px-4 py-3 hover:bg-muted/20 transition-colors">
+
+                    {/* Col 1 — Time */}
+                    <div className="text-xs text-muted-foreground whitespace-nowrap pt-0.5" dir="ltr">
                       {format(new Date(log.createdAt), 'MMM dd, HH:mm')}
                     </div>
 
-                    {/* Action */}
-                    <div className="flex-1 min-w-0 space-y-1">
+                    {/* Col 2 — Action + Actor */}
+                    <div className="min-w-0 space-y-1">
                       <div className="flex items-center gap-2 flex-wrap">
                         <Badge variant="outline" className={`text-xs ${tone}`}>{label}</Badge>
-                        {log.targetId != null && (
-                          <span className="text-[10px] text-muted-foreground font-mono">#{log.targetId}</span>
-                        )}
                       </div>
-                      {/* Actor */}
-                      <p className="text-xs text-muted-foreground">
-                        {log.actorId != null
-                          ? `${log.actorRole === 'admin' ? (language === 'ar' ? 'مدير' : 'Admin') : log.actorRole} #${log.actorId}`
-                          : (language === 'ar' ? 'النظام' : 'System')}
-                      </p>
-                      {/* Metadata preview */}
+                      <p className="text-xs text-muted-foreground">{actorLabel}</p>
+                    </div>
+
+                    {/* Col 3 — Target + Metadata */}
+                    <div className="min-w-0 space-y-0.5 text-xs text-muted-foreground">
+                      {log.targetType != null && log.targetId != null && (
+                        <p className="font-mono text-[11px]">
+                          {log.targetType} <span className="text-foreground/60">#{log.targetId}</span>
+                        </p>
+                      )}
+                      {!!meta.officeName && (
+                        <p className="truncate">{String(meta.officeName)}</p>
+                      )}
                       {!!meta.reason && (
-                        <p className="text-xs text-muted-foreground/70 truncate">
+                        <p className="truncate text-muted-foreground/70">
                           {language === 'ar' ? 'السبب: ' : 'Reason: '}{String(meta.reason)}
                         </p>
                       )}
                       {!!meta.status && !meta.reason && (
-                        <p className="text-xs text-muted-foreground/70">
+                        <p className="text-muted-foreground/70">
                           {language === 'ar' ? 'الحالة: ' : 'Status: '}{String(meta.status)}
                         </p>
-                      )}
-                      {!!meta.officeName && (
-                        <p className="text-xs text-muted-foreground/70 truncate">{String(meta.officeName)}</p>
                       )}
                     </div>
                   </div>
