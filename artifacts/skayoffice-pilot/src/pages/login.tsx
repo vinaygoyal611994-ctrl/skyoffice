@@ -1,7 +1,7 @@
 import z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { useLogin, getGetCurrentUserQueryKey } from '@workspace/api-client-react';
+import { useLogin, useGetCurrentUser, getGetCurrentUserQueryKey } from '@workspace/api-client-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useI18n } from '@/lib/i18n';
 import { Link, useLocation } from 'wouter';
@@ -41,6 +41,14 @@ export function LoginCustomer() {
   const [wrongRoleError, setWrongRoleError] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  const { data: currentUser, isLoading: userLoading } = useGetCurrentUser({ query: { retry: false, queryKey: getGetCurrentUserQueryKey() } });
+
+  useEffect(() => {
+    if (!userLoading && currentUser?.role === 'customer') {
+      setLocation('/account');
+    }
+  }, [currentUser, userLoading, setLocation]);
 
   const loginMutation = useLogin({
     mutation: {
@@ -196,6 +204,14 @@ export function LoginOffice() {
   const [wrongRoleError, setWrongRoleError] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  const { data: currentUser, isLoading: userLoading } = useGetCurrentUser({ query: { retry: false, queryKey: getGetCurrentUserQueryKey() } });
+
+  useEffect(() => {
+    if (!userLoading && currentUser?.role === 'office') {
+      setLocation('/office/dashboard');
+    }
+  }, [currentUser, userLoading, setLocation]);
 
   const loginMutation = useLogin({
     mutation: {

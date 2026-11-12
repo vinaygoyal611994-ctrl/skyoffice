@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { authFetch } from '@/lib/sessionToken';
 import { clearSessionToken } from '@/lib/sessionToken';
-import { KeyRound, Eye, EyeOff, ShieldCheck } from 'lucide-react';
+import { KeyRound, Eye, EyeOff, ShieldCheck, Lock, AlertTriangle, CheckCircle2, Info } from 'lucide-react';
 
 /** Minimum password strength matching the server-side Zod schema. */
 function isStrongEnough(pw: string): string | null {
@@ -145,8 +145,12 @@ export function AccountSettingsSection() {
     }
   };
 
+  const isAr = language === 'ar';
+
   return (
-    <div className="space-y-5 max-w-lg">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+
+      {/* Left — Change Password */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base">
@@ -199,6 +203,56 @@ export function AccountSettingsSection() {
           </form>
         </CardContent>
       </Card>
+
+      {/* Right — Security Info */}
+      <div className="space-y-4">
+
+        {/* Password requirements */}
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2 text-sm">
+              <Lock size={15} className="text-primary" />
+              {isAr ? 'متطلبات كلمة المرور' : 'Password Requirements'}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2 pb-4">
+            {[
+              { icon: CheckCircle2, text: isAr ? 'على الأقل 8 أحرف' : 'At least 8 characters' },
+              { icon: CheckCircle2, text: isAr ? 'حرف واحد على الأقل (a–z أو A–Z)' : 'At least one letter (a–z or A–Z)' },
+              { icon: CheckCircle2, text: isAr ? 'رقم واحد على الأقل (0–9)' : 'At least one number (0–9)' },
+            ].map(({ icon: Icon, text }) => (
+              <div key={text} className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Icon size={14} className="text-emerald-500 shrink-0" />
+                {text}
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+
+        {/* Security tips */}
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2 text-sm">
+              <Info size={15} className="text-primary" />
+              {isAr ? 'نصائح الأمان' : 'Security Tips'}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2.5 pb-4">
+            {[
+              isAr ? 'لا تشارك كلمة المرور مع أي شخص آخر.' : 'Never share your password with anyone.',
+              isAr ? 'استخدم كلمة مرور فريدة لا تستخدمها في أي موقع آخر.' : 'Use a unique password not used on other sites.',
+              isAr ? 'تغيير كلمة المرور بشكل دوري يعزز الأمان.' : 'Change your password periodically for better security.',
+              isAr ? 'عند تغيير كلمة المرور ستُسجَّل خارجاً تلقائياً.' : 'Changing your password will sign you out immediately.',
+            ].map(tip => (
+              <div key={tip} className="flex items-start gap-2 text-sm text-muted-foreground">
+                <AlertTriangle size={13} className="text-amber-500 shrink-0 mt-0.5" />
+                {tip}
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+
+      </div>
     </div>
   );
 }

@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SkayOffice — Development Report · 12 November 2026</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 15px; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    color: #1a1a2e;
+    background: #f4f6fb;
+    padding: 2rem;
+    line-height: 1.7;
+  }
+
+  .page {
+    max-width: 860px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 32px rgba(30,40,100,.10);
+    overflow: hidden;
+  }
+
+  /* Cover */
+  .cover {
+    background: linear-gradient(135deg, #1a237e 0%, #283593 50%, #1565c0 100%);
+    color: #fff;
+    padding: 3rem 3.5rem 2.5rem;
+  }
+  .cover-logo { font-size: 1rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; opacity: .72; margin-bottom: 1.8rem; }
+  .cover h1 { font-size: 2.2rem; font-weight: 800; line-height: 1.2; margin-bottom: .5rem; }
+  .cover-sub { font-size: 1rem; opacity: .82; margin-bottom: 2rem; }
+  .cover-meta {
+    display: flex; gap: 2.5rem; flex-wrap: wrap;
+    border-top: 1px solid rgba(255,255,255,.25);
+    padding-top: 1.3rem; font-size: .87rem; opacity: .88;
+  }
+  .cover-meta div { display: flex; flex-direction: column; gap: .2rem; }
+  .cover-meta span:first-child { font-weight: 600; font-size: .75rem; letter-spacing: .06em; text-transform: uppercase; opacity: .7; }
+
+  /* Summary strip */
+  .summary-strip {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    background: #e8eaf6; border-bottom: 1px solid #c5cae9;
+  }
+  .summary-cell { padding: 1.1rem 1.4rem; text-align: center; border-right: 1px solid #c5cae9; }
+  .summary-cell:last-child { border-right: none; }
+  .summary-cell .num { font-size: 2rem; font-weight: 800; color: #1a237e; display: block; }
+  .summary-cell .lbl { font-size: .77rem; color: #5c6bc0; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }
+
+  /* Body */
+  .body { padding: 2.8rem 3.5rem; }
+
+  .section-title {
+    font-size: 1.3rem; font-weight: 800; color: #1a237e;
+    margin-bottom: 1.6rem; padding-bottom: .5rem;
+    border-bottom: 3px solid #3f51b5;
+    display: flex; align-items: center; gap: .6rem;
+  }
+
+  /* Issue card */
+  .issue-card {
+    border: 1px solid #e0e0e0; border-radius: 10px;
+    overflow: hidden; margin-bottom: 2rem;
+    box-shadow: 0 1px 6px rgba(0,0,0,.05);
+  }
+  .issue-header {
+    display: flex; align-items: flex-start; gap: 1rem;
+    padding: 1.1rem 1.4rem; background: #f5f5f5;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  .issue-num {
+    min-width: 36px; height: 36px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: .88rem; color: #fff; flex-shrink: 0;
+    background: #bf360c;
+  }
+  .issue-title-block { flex: 1; }
+  .issue-title { font-size: 1.03rem; font-weight: 700; color: #1a1a2e; margin-bottom: .15rem; }
+  .issue-tags { display: flex; gap: .4rem; flex-wrap: wrap; }
+  .tag { font-size: .72rem; font-weight: 600; padding: .15rem .55rem; border-radius: 20px; letter-spacing: .03em; }
+  .tag-fe { background: #e1bee7; color: #4a148c; }
+  .tag-ui { background: #ffe0b2; color: #bf360c; }
+  .tag-ux { background: #b3e5fc; color: #01579b; }
+
+  .issue-status {
+    font-size: .78rem; font-weight: 700; padding: .25rem .75rem;
+    border-radius: 20px; white-space: nowrap; align-self: flex-start;
+    background: #c8e6c9; color: #1b5e20;
+  }
+
+  .issue-body { padding: 1.4rem 1.6rem; }
+  .block { margin-bottom: 1.2rem; }
+  .block:last-child { margin-bottom: 0; }
+  .block-label {
+    font-size: .78rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .08em; margin-bottom: .5rem;
+    display: flex; align-items: center; gap: .4rem;
+  }
+  .block-label.prob  { color: #c62828; }
+  .block-label.sol   { color: #2e7d32; }
+  .block-label.files { color: #0277bd; }
+
+  .block p  { font-size: .93rem; color: #37474f; }
+  .block ul { padding-left: 1.3rem; }
+  .block li { font-size: .93rem; color: #37474f; margin-bottom: .3rem; }
+
+  .divider { height: 1px; background: #eeeeee; margin: 1.1rem 0; }
+
+  .file-list { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .4rem; }
+  .file-pill {
+    font-size: .75rem; font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+    background: #e3f2fd; color: #0d47a1;
+    padding: .2rem .6rem; border-radius: 4px; border: 1px solid #90caf9;
+  }
+
+  /* Footer */
+  .footer {
+    background: #1a237e; color: rgba(255,255,255,.75);
+    text-align: center; padding: 1.4rem 2rem; font-size: .8rem;
+  }
+  .footer strong { color: #fff; }
+
+  @media print {
+    body { background: #fff; padding: 0; }
+    .page { box-shadow: none; border-radius: 0; }
+    .issue-card { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Cover -->
+  <div class="cover">
+    <div class="cover-logo">SkayOffice Platform</div>
+    <h1>Development Report</h1>
+    <div class="cover-sub">UI Fixes &amp; Feature Improvements — Session 2</div>
+    <div class="cover-meta">
+      <div><span>Date</span><span>12 November 2026</span></div>
+      <div><span>Project</span><span>SkayOffice Pilot — skayoffice-main</span></div>
+      <div><span>Scope</span><span>Dashboard · Admin · Login Flow</span></div>
+      <div><span>Status</span><span>✅ All Items Resolved</span></div>
+    </div>
+  </div>
+
+  <!-- Summary strip -->
+  <div class="summary-strip">
+    <div class="summary-cell"><span class="num">5</span><span class="lbl">Issues Fixed</span></div>
+    <div class="summary-cell"><span class="num">5</span><span class="lbl">Files Modified</span></div>
+    <div class="summary-cell"><span class="num">0</span><span class="lbl">Build Errors</span></div>
+  </div>
+
+  <!-- Body -->
+  <div class="body">
+
+    <div class="section-title">🛠️ Fixes &amp; Improvements</div>
+
+    <!-- P1 -->
+    <div class="issue-card">
+      <div class="issue-header">
+        <div class="issue-num">01</div>
+        <div class="issue-title-block">
+          <div class="issue-title">Admin Account Settings — Right Side Blank</div>
+          <div class="issue-tags">
+            <span class="tag tag-fe">Frontend</span>
+            <span class="tag tag-ui">UI / Layout</span>
+          </div>
+        </div>
+        <span class="issue-status">✅ Fixed</span>
+      </div>
+      <div class="issue-body">
+
+        <div class="block">
+          <div class="block-label prob">🔴 Problem</div>
+          <p>
+            When an admin logged in and navigated to the Account Settings page, only a narrow
+            "Change Password" card appeared on the left side of the screen. The entire right half
+            of the page was completely empty with no content, making the page look unfinished and
+            wasting large amounts of screen real estate.
+          </p>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="block">
+          <div class="block-label sol">🟢 Solution</div>
+          <ul>
+            <li>
+              Changed the layout from a single narrow card to a <strong>2-column grid</strong>
+              that fills the full page width.
+            </li>
+            <li>
+              Left column retains the existing Change Password form unchanged.
+            </li>
+            <li>
+              Right column now shows two informational cards:
+              <strong>Password Requirements</strong> (minimum 8 characters, one letter, one number)
+              and <strong>Security Tips</strong> (don't share password, use unique passwords,
+              rotate regularly, automatic sign-out on change).
+            </li>
+            <li>
+              Fully bilingual — both cards display correctly in Arabic and English.
+            </li>
+          </ul>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="block">
+          <div class="block-label files">📁 File Changed</div>
+          <div class="file-list">
+            <span class="file-pill">artifacts/skayoffice-pilot/src/pages/admin/sections/AccountSettings.tsx</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- P2 -->
+    <div class="issue-card">
+      <div class="issue-header">
+        <div class="issue-num">02</div>
+        <div class="issue-title-block">
+          <div class="issue-title">Media Section — No Image Format Guidance for Upload</div>
+          <div class="issue-tags">
+            <span class="tag tag-fe">Frontend</span>
+            <span class="tag tag-ux">UX</span>
+          </div>
+        </div>
+        <span class="issue-status">✅ Fixed</span>
+      </div>
+      <div class="issue-body">
+
+        <div class="block">
+          <div class="block-label prob">🔴 Problem</div>
+          <p>
+            In the Media section of the Office Dashboard, the Quick Card Cover Image upload area
+            gave the user no information about what file types or size limits were accepted.
+            Users had no way to know in advance whether their file would be accepted or rejected,
+            leading to failed uploads and confusion.
+          </p>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="block">
+          <div class="block-label sol">🟢 Solution</div>
+          <ul>
+            <li>
+              Added a small <strong>ⓘ info icon</strong> next to the "Quick Card Cover Image"
+              section title.
+            </li>
+            <li>
+              Hovering over the icon shows a <strong>tooltip</strong> with the allowed file
+              formats (<strong>JPG, PNG, WebP</strong>) and the maximum file size
+              (<strong>8 MB</strong>).
+            </li>
+            <li>
+              The tooltip is fully bilingual — displays in Arabic when the UI language is Arabic.
+            </li>
+            <li>
+              No clutter is added to the UI — the information is hidden until the user needs it.
+            </li>
+          </ul>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="block">
+          <div class="block-label files">📁 File Changed</div>
+          <div class="file-list">
+            <span class="file-pill">artifacts/skayoffice-pilot/src/pages/dashboard/sections/Media.tsx</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- P3 -->
+    <div class="issue-card">
+      <div class="issue-header">
+        <div class="issue-num">03</div>
+        <div class="issue-title-block">
+          <div class="issue-title">Contact Features — Video Call Booking Stuck on "Coming Soon"</div>
+          <div class="issue-tags">
+            <span class="tag tag-fe">Frontend</span>
+            <span class="tag tag-ui">UI</span>
+          </div>
+        </div>
+        <span class="issue-status">✅ Fixed</span>
+      </div>
+      <div class="issue-body">
+
+        <div class="block">
+          <div class="block-label prob">🔴 Problem</div>
+          <p>
+            The Video Call Booking row in the Contact Features section of the Office Dashboard
+            was showing a <strong>"Coming Soon — Optional Feature"</strong> badge and the toggle
+            was permanently disabled. However, the full video call booking system (with Zoom
+            integration, meeting creation, reschedule, and cancel flows) had already been
+            completely implemented. The UI was not updated to reflect this, so office owners
+            had no way to enable or disable this feature from their settings.
+          </p>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="block">
+          <div class="block-label sol">🟢 Solution</div>
+          <ul>
+            <li>
+              Removed the <strong>"Coming Soon"</strong> badge entirely from the Video Call
+              Booking row.
+            </li>
+            <li>
+              Removed the <strong>dimmed / faded</strong> appearance (opacity reduction) from
+              the row so it looks equal to the other contact feature rows.
+            </li>
+            <li>
+              Enabled the <strong>toggle switch</strong> — office owners can now turn Video
+              Call Booking on or off from their Contact settings like any other feature.
+            </li>
+            <li>
+              When the toggle is turned ON, a small reminder hint appears below the description
+              prompting the office to ensure their Zoom account is connected in Integration
+              settings.
+            </li>
+          </ul>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="block">
+          <div class="block-label files">📁 File Changed</div>
+          <div class="file-list">
+            <span class="file-pill">artifacts/skayoffice-pilot/src/pages/dashboard/sections/ContactFeatures.tsx</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- P4 -->
+    <div class="issue-card">
+      <div class="issue-header">
+        <div class="issue-num">04</div>
+        <div class="issue-title-block">
+          <div class="issue-title">Reschedule Call Dialog — Oversized Unprofessional Buttons</div>
+          <div class="issue-tags">
+            <span class="tag tag-fe">Frontend</span>
+            <span class="tag tag-ui">UI / Layout</span>
+          </div>
+        </div>
+        <span class="issue-status">✅ Fixed</span>
+      </div>
+      <div class="issue-body">
+
+        <div class="block">
+          <div class="block-label prob">🔴 Problem</div>
+          <p>
+            The "Reschedule Call" dialog displayed two action buttons — <strong>Cancel</strong>
+            and <strong>Confirm Reschedule</strong> — that were oversized and appeared as large
+            square blocks at the bottom of the dialog. The button size was disproportionate
+            compared to the rest of the dialog content, making the interface look unprofessional
+            and visually unbalanced.
+          </p>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="block">
+          <div class="block-label sol">🟢 Solution</div>
+          <ul>
+            <li>
+              Reduced both buttons to the standard <strong>small size</strong> used throughout
+              the rest of the platform, so they match the visual style of other dialogs.
+            </li>
+            <li>
+              Added consistent horizontal padding to both buttons so they have a compact,
+              pill-like appearance rather than stretching to fill the full footer width.
+            </li>
+            <li>
+              The loading spinner on the Confirm button remains visible during submission — no
+              functional change, only visual improvement.
+            </li>
+          </ul>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="block">
+          <div class="block-label files">📁 File Changed</div>
+          <div class="file-list">
+            <span class="file-pill">artifacts/skayoffice-pilot/src/pages/dashboard/sections/VideoRequests.tsx</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- P5 -->
+    <div class="issue-card">
+      <div class="issue-header">
+        <div class="issue-num">05</div>
+        <div class="issue-title-block">
+          <div class="issue-title">Login Page — No Redirect for Already Logged-In Users</div>
+          <div class="issue-tags">
+            <span class="tag tag-fe">Frontend</span>
+            <span class="tag tag-ux">UX / Auth</span>
+          </div>
+        </div>
+        <span class="issue-status">✅ Fixed</span>
+      </div>
+      <div class="issue-body">
+
+        <div class="block">
+          <div class="block-label prob">🔴 Problem</div>
+          <p>
+            If an office user was already logged in and navigated to the login page
+            (<strong>/login/office</strong>), the login form was shown again instead of
+            sending them directly to the dashboard. The same problem existed for customer
+            users on the <strong>/login/customer</strong> page. This forced users to either
+            fill in the login form a second time or manually navigate to their dashboard —
+            a poor and confusing user experience.
+          </p>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="block">
+          <div class="block-label sol">🟢 Solution</div>
+          <ul>
+            <li>
+              Added an <strong>authentication check</strong> to both the Office and Customer
+              login pages that runs as soon as the page loads.
+            </li>
+            <li>
+              If the user's session is already valid and their role matches, they are
+              <strong>automatically redirected</strong> before the login form ever renders:
+              office users go to <strong>/office/dashboard</strong>, customer users go to
+              <strong>/account</strong>.
+            </li>
+            <li>
+              If the user is not logged in, the page behaves exactly as before — the login
+              form is shown normally with no change to the login flow.
+            </li>
+          </ul>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="block">
+          <div class="block-label files">📁 File Changed</div>
+          <div class="file-list">
+            <span class="file-pill">artifacts/skayoffice-pilot/src/pages/login.tsx</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div><!-- /body -->
+
+  <!-- Footer -->
+  <div class="footer">
+    <strong>SkayOffice Platform</strong> · Development Report ·
+    12 November 2026 ·
+    All changes committed &amp; pushed to <strong>origin/main</strong>
+  </div>
+
+</div>
+</body>
+</html>

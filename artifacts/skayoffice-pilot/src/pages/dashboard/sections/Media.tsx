@@ -20,8 +20,9 @@ import {
 } from '@/components/ui/alert-dialog';
 import {
   ImagePlus, Plus, Trash2, Video, FileImage, Star, Film, Loader2,
-  AlertTriangle, Clock, CheckCircle2, XCircle, ArrowUp, ArrowDown,
+  AlertTriangle, Clock, CheckCircle2, XCircle, ArrowUp, ArrowDown, Info,
 } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { authFetch } from '@/lib/sessionToken';
 import { safeApiError } from '@/lib/apiError';
 import { buildStoragePutParameters } from '@/lib/uploadParameters';
@@ -628,7 +629,21 @@ export function MediaSection() {
       <TabsContent value="quick-card" className="space-y-4">
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">{t('dashboard.media.qc_title')}</CardTitle>
+            <div className="flex items-center gap-2">
+              <CardTitle className="text-base">{t('dashboard.media.qc_title')}</CardTitle>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Info size={15} className="text-muted-foreground cursor-help shrink-0" />
+                  </TooltipTrigger>
+                  <TooltipContent side="right" className="max-w-[200px] text-xs space-y-1">
+                    <p className="font-semibold">{language === 'ar' ? 'أنواع الملفات المسموح بها' : 'Allowed file types'}</p>
+                    <p>JPG, PNG, WebP</p>
+                    <p className="text-muted-foreground">{language === 'ar' ? 'الحد الأقصى للحجم: 8 ميغابايت' : 'Max size: 8 MB'}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
             <CardDescription>{t('dashboard.media.qc_desc')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">

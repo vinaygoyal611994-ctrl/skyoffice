@@ -110,10 +110,12 @@ function RescheduleDialog({ requestId, currentDate, currentTime, currentTimezone
           </div>
           {error && <p className="text-sm text-destructive">{error}</p>}
         </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={submitting}>{t('common.cancel')}</Button>
-          <Button onClick={handleSubmit} disabled={submitting || !date || !time}>
-            {submitting && <Loader2 size={14} className="me-1.5 animate-spin" />}
+        <DialogFooter className="gap-2 sm:gap-2 pt-2">
+          <Button variant="outline" size="sm" onClick={onClose} disabled={submitting} className="px-5">
+            {t('common.cancel')}
+          </Button>
+          <Button size="sm" onClick={handleSubmit} disabled={submitting || !date || !time} className="px-5 gap-1.5">
+            {submitting && <Loader2 size={13} className="animate-spin" />}
             {t('videocall.reschedule_submit')}
           </Button>
         </DialogFooter>

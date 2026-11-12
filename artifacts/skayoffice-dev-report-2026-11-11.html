@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SkayOffice — UI Fixes Report · 11 November 2026</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 15px; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    color: #1a1a2e;
+    background: #f4f6fb;
+    padding: 2rem;
+    line-height: 1.7;
+  }
+
+  .page {
+    max-width: 860px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 32px rgba(30,40,100,.10);
+    overflow: hidden;
+  }
+
+  /* Cover */
+  .cover {
+    background: linear-gradient(135deg, #1a237e 0%, #283593 50%, #1565c0 100%);
+    color: #fff;
+    padding: 3rem 3.5rem 2.5rem;
+  }
+  .cover-logo {
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    opacity: .72;
+    margin-bottom: 1.8rem;
+  }
+  .cover h1 { font-size: 2.2rem; font-weight: 800; line-height: 1.2; margin-bottom: .5rem; }
+  .cover-sub { font-size: 1rem; opacity: .82; margin-bottom: 2rem; }
+  .cover-meta {
+    display: flex;
+    gap: 2.5rem;
+    flex-wrap: wrap;
+    border-top: 1px solid rgba(255,255,255,.25);
+    padding-top: 1.3rem;
+    font-size: .87rem;
+    opacity: .88;
+  }
+  .cover-meta div { display: flex; flex-direction: column; gap: .2rem; }
+  .cover-meta span:first-child {
+    font-weight: 600;
+    font-size: .75rem;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    opacity: .7;
+  }
+
+  /* Summary strip */
+  .summary-strip {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    background: #e8eaf6;
+    border-bottom: 1px solid #c5cae9;
+  }
+  .summary-cell {
+    padding: 1.1rem 1.4rem;
+    text-align: center;
+    border-right: 1px solid #c5cae9;
+  }
+  .summary-cell:last-child { border-right: none; }
+  .summary-cell .num { font-size: 2rem; font-weight: 800; color: #1a237e; display: block; }
+  .summary-cell .lbl { font-size: .77rem; color: #5c6bc0; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }
+
+  /* Body */
+  .body { padding: 2.8rem 3.5rem; }
+
+  .section-title {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #1a237e;
+    margin-bottom: 1.6rem;
+    padding-bottom: .5rem;
+    border-bottom: 3px solid #3f51b5;
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+  }
+
+  /* Issue card */
+  .issue-card {
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 2rem;
+    box-shadow: 0 1px 6px rgba(0,0,0,.05);
+  }
+  .issue-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.1rem 1.4rem;
+    background: #f5f5f5;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  .issue-num {
+    min-width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: .88rem;
+    color: #fff;
+    flex-shrink: 0;
+    background: #bf360c;
+  }
+  .issue-title-block { flex: 1; }
+  .issue-title { font-size: 1.03rem; font-weight: 700; color: #1a1a2e; margin-bottom: .15rem; }
+  .issue-tags { display: flex; gap: .4rem; flex-wrap: wrap; }
+  .tag {
+    font-size: .72rem;
+    font-weight: 600;
+    padding: .15rem .55rem;
+    border-radius: 20px;
+    letter-spacing: .03em;
+  }
+  .tag-fe { background: #e1bee7; color: #4a148c; }
+  .tag-ui { background: #ffe0b2; color: #bf360c; }
+
+  .issue-status {
+    font-size: .78rem;
+    font-weight: 700;
+    padding: .25rem .75rem;
+    border-radius: 20px;
+    white-space: nowrap;
+    align-self: flex-start;
+    background: #c8e6c9;
+    color: #1b5e20;
+  }
+
+  .issue-body { padding: 1.4rem 1.6rem; }
+
+  .block { margin-bottom: 1.2rem; }
+  .block:last-child { margin-bottom: 0; }
+
+  .block-label {
+    font-size: .78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    margin-bottom: .5rem;
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+  }
+  .block-label.prob  { color: #c62828; }
+  .block-label.sol   { color: #2e7d32; }
+  .block-label.files { color: #0277bd; }
+
+  .block p { font-size: .93rem; color: #37474f; }
+  .block ul { padding-left: 1.3rem; }
+  .block li { font-size: .93rem; color: #37474f; margin-bottom: .3rem; }
+
+  .divider { height: 1px; background: #eeeeee; margin: 1.1rem 0; }
+
+  .file-list { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .4rem; }
+  .file-pill {
+    font-size: .75rem;
+    font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+    background: #e3f2fd;
+    color: #0d47a1;
+    padding: .2rem .6rem;
+    border-radius: 4px;
+    border: 1px solid #90caf9;
+  }
+
+  /* Footer */
+  .footer {
+    background: #1a237e;
+    color: rgba(255,255,255,.75);
+    text-align: center;
+    padding: 1.4rem 2rem;
+    font-size: .8rem;
+  }
+  .footer strong { color: #fff; }
+
+  @media print {
+    body { background: #fff; padding: 0; }
+    .page { box-shadow: none; border-radius: 0; }
+    .issue-card { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Cover -->
+  <div class="cover">
+    <div class="cover-logo">SkayOffice Platform</div>
+    <h1>UI Fixes — Development Report</h1>
+    <div class="cover-sub">Admin Panel &amp; Office Profile Improvements</div>
+    <div class="cover-meta">
+      <div><span>Date</span><span>11 November 2026</span></div>
+      <div><span>Project</span><span>SkayOffice Pilot — skayoffice-main</span></div>
+      <div><span>Scope</span><span>Admin UI · Office Profile</span></div>
+      <div><span>Status</span><span>✅ All Items Resolved &amp; Pushed</span></div>
+    </div>
+  </div>
+
+  <!-- Summary strip -->
+  <div class="summary-strip">
+    <div class="summary-cell"><span class="num">3</span><span class="lbl">UI Fixes</span></div>
+    <div class="summary-cell"><span class="num">3</span><span class="lbl">Files Modified</span></div>
+    <div class="summary-cell"><span class="num">0</span><span class="lbl">Build Errors</span></div>
+  </div>
+
+  <!-- Body -->
+  <div class="body">
+
+    <div class="section-title">🎨 UI Fixes</div>
+
+    <!-- U1 -->
+    <div class="issue-card">
+      <div class="issue-header">
+        <div class="issue-num">U1</div>
+        <div class="issue-title-block">
+          <div class="issue-title">Admin Activity Log — Excessive Right-Side Whitespace</div>
+          <div class="issue-tags">
+            <span class="tag tag-fe">Frontend</span>
+            <span class="tag tag-ui">UI / Layout</span>
+          </div>
+        </div>
+        <span class="issue-status">✅ Fixed</span>
+      </div>
+      <div class="issue-body">
+
+        <div class="block">
+          <div class="block-label prob">🔴 Problem</div>
+          <p>
+            The Activity Log section in the Admin panel was displaying all log data squeezed into
+            the left portion of the card, leaving the entire right side completely empty. There were
+            no defined column widths, so the action labels and metadata were wrapping unpredictably.
+            There were also no column headers to help the reader understand what each piece of
+            information represented, making the log difficult to read at a glance.
+          </p>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="block">
+          <div class="block-label sol">🟢 Solution</div>
+          <ul>
+            <li>
+              Replaced the unstructured flex row layout with a proper <strong>3-column grid</strong>
+              that spans the full width of the card — a fixed-width timestamp column on the left,
+              followed by two equal-width columns that fill the remaining space.
+            </li>
+            <li>
+              Added a <strong>column header row</strong> at the top of the log listing the three
+              columns: <em>Time</em>, <em>Event / Actor</em>, and <em>Target / Details</em> — so
+              the admin can immediately understand what each column contains.
+            </li>
+            <li>
+              The timestamp column is set to always display left-to-right (even in Arabic mode)
+              to ensure dates are always readable in a consistent format.
+            </li>
+          </ul>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="block">
+          <div class="block-label files">📁 File Changed</div>
+          <div class="file-list">
+            <span class="file-pill">artifacts/skayoffice-pilot/src/pages/admin/sections/ActivityLog.tsx</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- U2 -->
+    <div class="issue-card">
+      <div class="issue-header">
+        <div class="issue-num">U2</div>
+        <div class="issue-title-block">
+          <div class="issue-title">Admin Intake Queue — Missing Search Bar</div>
+          <div class="issue-tags">
+            <span class="tag tag-fe">Frontend</span>
+            <span class="tag tag-ui">UI / UX</span>
+          </div>
+        </div>
+        <span class="issue-status">✅ Fixed</span>
+      </div>
+      <div class="issue-body">
+
+        <div class="block">
+          <div class="block-label prob">🔴 Problem</div>
+          <p>
+            The <strong>All Offices</strong> section in the Admin panel had a search bar allowing
+            admins to quickly filter offices by name, email, phone, city, and more. However, the
+            <strong>Intake Queue (Registration Requests)</strong> section — which shows all incoming
+            office applications — had no search functionality at all. With a large volume of
+            applications, the admin had to manually scroll through the entire list to find a specific
+            office. This inconsistency between two adjacent sections was also confusing for users.
+          </p>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="block">
+          <div class="block-label sol">🟢 Solution</div>
+          <ul>
+            <li>
+              Added a <strong>search bar</strong> above the application list, following the exact
+              same visual design as the All Offices section — a search icon inside the left edge of
+              the input for a consistent look across the Admin panel.
+            </li>
+            <li>
+              Search works instantly across six fields: <strong>office name</strong>,
+              <strong>email</strong>, <strong>phone</strong>, <strong>city</strong>,
+              <strong>category</strong>, and <strong>office ID</strong> — all case-insensitive,
+              with no additional API calls needed.
+            </li>
+            <li>
+              A <strong>results count</strong> line appears below the status filter chips (e.g.
+              "12 results") so the admin always knows how many applications match the current search.
+            </li>
+          </ul>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="block">
+          <div class="block-label files">📁 File Changed</div>
+          <div class="file-list">
+            <span class="file-pill">artifacts/skayoffice-pilot/src/pages/admin/sections/RegistrationRequests.tsx</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- U3 -->
+    <div class="issue-card">
+      <div class="issue-header">
+        <div class="issue-num">U3</div>
+        <div class="issue-title-block">
+          <div class="issue-title">Office Profile Card — Button Group Spacing</div>
+          <div class="issue-tags">
+            <span class="tag tag-fe">Frontend</span>
+            <span class="tag tag-ui">UI / Layout</span>
+          </div>
+        </div>
+        <span class="issue-status">✅ Fixed</span>
+      </div>
+      <div class="issue-body">
+
+        <div class="block">
+          <div class="block-label prob">🔴 Problem</div>
+          <p>
+            The office profile page displayed three action buttons — <strong>WhatsApp</strong>,
+            <strong>Book Video Call</strong>, and <strong>Request a Service</strong> — with cramped
+            and inconsistent spacing. The buttons were too close together and the
+            "Book Video Call" button used a smaller text size with no icon-label gap, making it look
+            visually different from the other two buttons on the same card. The overall appearance
+            felt unpolished and unbalanced.
+          </p>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="block">
+          <div class="block-label sol">🟢 Solution</div>
+          <ul>
+            <li>
+              Increased the spacing between the three buttons to give them comfortable breathing
+              room, making the button group easier to tap and more visually balanced.
+            </li>
+            <li>
+              Restyled the "Book Video Call" button to match the other buttons: full width,
+              standard text size, and a consistent gap between the icon and the label — so all
+              three action buttons now look like they belong to the same design family.
+            </li>
+          </ul>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="block">
+          <div class="block-label files">📁 File Changed</div>
+          <div class="file-list">
+            <span class="file-pill">artifacts/skayoffice-pilot/src/pages/office-profile.tsx</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div><!-- /body -->
+
+  <!-- Footer -->
+  <div class="footer">
+    <strong>SkayOffice Platform</strong> · UI Fixes Report ·
+    11 November 2026 ·
+    All changes committed &amp; pushed to <strong>origin/main</strong>
+  </div>
+
+</div>
+</body>
+</html>

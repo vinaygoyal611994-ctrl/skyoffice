@@ -9,7 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { MessageCircle, Phone, Video, MapPin, Info } from 'lucide-react';
 
 export function ContactFeaturesSection({ navigate }: { navigate?: (s: string) => void }) {
-  const { t } = useI18n();
+  const { t, language } = useI18n();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -93,19 +93,26 @@ export function ContactFeaturesSection({ navigate }: { navigate?: (s: string) =>
             />
           </div>
 
-          {/* Video call booking — disabled until feature is officially released publicly */}
-          <div className="py-4 flex items-start gap-4 opacity-60">
+          {/* Video call booking */}
+          <div className="py-4 flex items-start gap-4">
             <Video size={20} className="text-rose-500 shrink-0 mt-0.5" />
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <p className="font-medium text-sm">{t('dash.contact.video_call_feature')}</p>
-                <span className="inline-flex items-center text-[10px] font-semibold uppercase tracking-wide text-amber-700 bg-amber-50 border border-amber-200 rounded-full px-2 py-0.5">
-                  {t('dash.contact.video_call_coming_soon')}
-                </span>
-              </div>
+              <p className="font-medium text-sm">{t('dash.contact.video_call_feature')}</p>
               <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{t('dash.contact.video_call_desc')}</p>
+              {switches.video && (
+                <p className="text-xs text-blue-600 mt-1 flex items-center gap-1">
+                  <Info size={12} className="shrink-0" />
+                  {language === 'ar'
+                    ? 'تأكد من ربط حساب Zoom في إعدادات التكامل'
+                    : 'Make sure your Zoom account is connected in Integration settings'}
+                </p>
+              )}
             </div>
-            <Switch checked={false} disabled />
+            <Switch
+              checked={switches.video}
+              disabled={updateMut.isPending}
+              onCheckedChange={v => handleToggle('videoCallEnabled', v)}
+            />
           </div>
 
           {/* Location — derived from googleMapsUrl */}
