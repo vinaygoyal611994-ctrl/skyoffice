@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { useI18n } from '@/lib/i18n';
 import {
   LayoutDashboard, Building2, Users,
-  Activity, Menu, Shield, LogOut, Settings, TrendingUp, HeartPulse,
+  Activity, Menu, Shield, LogOut, Settings, TrendingUp, HeartPulse, Video,
 } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
@@ -18,6 +18,7 @@ import { AccountSettingsSection }    from './sections/AccountSettings';
 import { PlatformHealthSection }     from './sections/PlatformHealth';
 import { OfficeManagementSection }   from './sections/OfficeManagement';
 import { IntelligenceHubSection }    from './sections/IntelligenceHub';
+import { VideoCallLogSection }       from './sections/VideoCallLog';
 
 // ── Section type ─────────────────────────────────────────────────────────────
 export type AdminSection =
@@ -27,11 +28,12 @@ export type AdminSection =
   | 'intelligence'
   | 'activity'
   | 'health'
-  | 'settings';
+  | 'settings'
+  | 'video-calls';
 
 const VALID_SECTIONS: AdminSection[] = [
   'overview', 'office-management', 'customers',
-  'intelligence', 'activity', 'health', 'settings',
+  'intelligence', 'activity', 'health', 'settings', 'video-calls',
 ];
 
 const SECTION_STORAGE_KEY = 'skayoffice-admin-section';
@@ -61,6 +63,7 @@ const navItems: NavItem[] = [
   { id: 'intelligence',      icon: <TrendingUp size={18} />,      labelKey: 'admin.nav.intelligence' },
   { id: 'activity',          icon: <Activity size={18} />,        labelKey: 'admin.nav.activity' },
   { id: 'health',            icon: <HeartPulse size={18} />,      labelKey: 'admin.nav.health' },
+  { id: 'video-calls',       icon: <Video size={18} />,           labelKey: 'admin.nav.videoCalls' },
   { id: 'settings',          icon: <Settings size={18} />,        labelKey: 'admin.nav.settings' },
 ];
 
@@ -89,6 +92,7 @@ function SectionContent({ section, navigate, filter }: { section: AdminSection; 
     case 'activity':          return <ActivityLogSection />;
     case 'health':            return <PlatformHealthSection />;
     case 'settings':          return <AccountSettingsSection />;
+    case 'video-calls':       return <VideoCallLogSection />;
     default:                  return <OverviewSection navigate={navigate} />;
   }
 }

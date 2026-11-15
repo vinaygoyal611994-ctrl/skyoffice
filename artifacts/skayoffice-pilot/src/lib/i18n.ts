@@ -718,6 +718,7 @@ export const translations = {
   'admin.nav.more':              { ar: 'المزيد',              en: 'More' },
   'admin.nav.settings':          { ar: 'إعدادات الحساب',     en: 'Account Settings' },
   'admin.nav.health':            { ar: 'صحة المنصة',          en: 'Platform Health' },
+  'admin.nav.videoCalls':        { ar: 'سجل مكالمات الفيديو', en: 'Video Call Log' },
   // Legacy keys — kept for backwards compat
   'admin.nav.requests':          { ar: 'طلبات التسجيل',       en: 'Registration Requests' },
   'admin.nav.offices':           { ar: 'المكاتب',              en: 'Offices' },
