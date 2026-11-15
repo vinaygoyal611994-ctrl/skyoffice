@@ -117,6 +117,7 @@ export function ProfileSection() {
     },
   });
 
+  const [formErrors, setFormErrors] = useState<{ whatsapp?: string; email?: string }>({});
   const [missingFields, setMissingFields] = useState<string[]>([]);
   const submitMut = useSubmitMyOfficeApplication({
     mutation: {
@@ -177,10 +178,32 @@ export function ProfileSection() {
   }, [office]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    if (name === 'whatsapp' || name === 'email') {
+      setFormErrors(prev => ({ ...prev, [name]: undefined }));
+    }
   };
 
   const handleSave = () => {
+    const isAr = language === 'ar';
+    const errors: { whatsapp?: string; email?: string } = {};
+
+    if (!formData.whatsapp.trim()) {
+      errors.whatsapp = isAr ? 'رقم واتساب مطلوب' : 'WhatsApp number is required';
+    } else if (!/^\+?[0-9]{7,15}$/.test(formData.whatsapp.trim())) {
+      errors.whatsapp = isAr ? 'أدخل رقماً صحيحاً (أرقام فقط)' : 'Enter a valid number (digits only)';
+    }
+
+    if (!formData.email.trim()) {
+      errors.email = isAr ? 'البريد الإلكتروني مطلوب' : 'Email is required';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
+      errors.email = isAr ? 'أدخل بريداً إلكترونياً صحيحاً' : 'Enter a valid email address';
+    }
+
+    setFormErrors(errors);
+    if (Object.keys(errors).length > 0) return;
+
     const lat = formData.latitude !== '' ? parseFloat(formData.latitude) : null;
     const lon = formData.longitude !== '' ? parseFloat(formData.longitude) : null;
     const { category, ...profileFields } = formData;
@@ -381,7 +404,20 @@ export function ProfileSection() {
         <CardContent className={`grid grid-cols-1 md:grid-cols-2 gap-5 pt-5 px-5 ${fieldsReadOnly ? 'opacity-60' : ''}`}>
           <div className="space-y-1.5">
             <Label>{t('dashboard.whatsapp')} <span className="text-red-500 ms-0.5">*</span></Label>
-            <Input name="whatsapp" value={formData.whatsapp} onChange={handleChange} dir="ltr" className="text-start" placeholder={t('dashboard.whatsapp_placeholder')} disabled={fieldsReadOnly} data-testid="input-whatsapp" />
+            <Input
+              name="whatsapp"
+              value={formData.whatsapp}
+              onChange={handleChange}
+              dir="ltr"
+              className={`text-start ${formErrors.whatsapp ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+              placeholder={t('dashboard.whatsapp_placeholder')}
+              disabled={fieldsReadOnly}
+              data-testid="input-whatsapp"
+              inputMode="tel"
+            />
+            {formErrors.whatsapp && (
+              <p className="text-xs text-red-500 mt-0.5">{formErrors.whatsapp}</p>
+            )}
           </div>
           <div className="flex items-center gap-3 md:pt-6">
             <Checkbox
@@ -396,8 +432,20 @@ export function ProfileSection() {
             </Label>
           </div>
           <div className="space-y-1.5">
-            <Label>{t('auth.email')}</Label>
-            <Input name="email" value={formData.email} onChange={handleChange} dir="ltr" className="text-start" disabled={fieldsReadOnly} />
+            <Label>{t('auth.email')} <span className="text-red-500 ms-0.5">*</span></Label>
+            <Input
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              dir="ltr"
+              className={`text-start ${formErrors.email ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+              disabled={fieldsReadOnly}
+              inputMode="email"
+              autoComplete="email"
+            />
+            {formErrors.email && (
+              <p className="text-xs text-red-500 mt-0.5">{formErrors.email}</p>
+            )}
           </div>
           <div className="space-y-1.5">
             <Label>{t('dashboard.website')} <span className="text-muted-foreground font-normal">{t('common.optional')}</span></Label>
