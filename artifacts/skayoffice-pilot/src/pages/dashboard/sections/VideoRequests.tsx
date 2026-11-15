@@ -94,31 +94,31 @@ function RescheduleDialog({ requestId, currentDate, currentTime, currentTimezone
 
   return (
     <Dialog open={open} onOpenChange={v => { if (!v) onClose(); }}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-sm">
         <DialogHeader>
-          <DialogTitle>{t('videocall.reschedule_title')}</DialogTitle>
-          <DialogDescription>{t('videocall.reschedule_desc')}</DialogDescription>
+          <DialogTitle className="text-base">{t('videocall.reschedule_title')}</DialogTitle>
+          <DialogDescription className="text-xs">{t('videocall.reschedule_desc')}</DialogDescription>
         </DialogHeader>
-        <div className="space-y-4 py-2">
+        <div className="space-y-3 py-1">
           <div className="space-y-1.5">
-            <Label>{t('videocall.reschedule_new_date')}</Label>
-            <Input type="date" value={date} onChange={e => setDate(e.target.value)} min={new Date().toISOString().slice(0, 10)} />
+            <Label className="text-sm">{t('videocall.reschedule_new_date')}</Label>
+            <Input type="date" value={date} onChange={e => setDate(e.target.value)} min={new Date().toISOString().slice(0, 10)} className="h-9 text-sm" />
           </div>
           <div className="space-y-1.5">
-            <Label>{t('videocall.reschedule_new_time')}</Label>
-            <Input type="time" value={time} onChange={e => setTime(e.target.value)} />
+            <Label className="text-sm">{t('videocall.reschedule_new_time')}</Label>
+            <Input type="time" value={time} onChange={e => setTime(e.target.value)} className="h-9 text-sm" />
           </div>
-          {error && <p className="text-sm text-destructive">{error}</p>}
+          {error && <p className="text-xs text-destructive">{error}</p>}
         </div>
-        <DialogFooter className="gap-2 sm:gap-2 pt-2">
-          <Button variant="outline" size="sm" onClick={onClose} disabled={submitting} className="px-5">
+        <div className="flex justify-end gap-2 pt-2 border-t mt-2">
+          <Button variant="outline" size="sm" onClick={onClose} disabled={submitting} className="h-8 px-4 text-xs">
             {t('common.cancel')}
           </Button>
-          <Button size="sm" onClick={handleSubmit} disabled={submitting || !date || !time} className="px-5 gap-1.5">
-            {submitting && <Loader2 size={13} className="animate-spin" />}
+          <Button size="sm" onClick={handleSubmit} disabled={submitting || !date || !time} className="h-8 px-4 text-xs gap-1.5">
+            {submitting && <Loader2 size={12} className="animate-spin" />}
             {t('videocall.reschedule_submit')}
           </Button>
-        </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   );
