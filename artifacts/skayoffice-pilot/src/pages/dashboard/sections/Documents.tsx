@@ -12,7 +12,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Plus, Trash2, FileText, CheckCircle2, XCircle, Clock } from 'lucide-react';
+import { Plus, Trash2, FileText, CheckCircle2, XCircle, Clock, Info } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { authFetch } from '@/lib/sessionToken';
 import { safeApiError } from '@/lib/apiError';
 import { buildStoragePutParameters } from '@/lib/uploadParameters';
@@ -77,6 +78,18 @@ export function DocumentsSection() {
           <CardTitle className="flex items-center gap-2">
             <FileText size={18} className="text-primary" />
             {t('dashboard.documents_tab')}
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Info size={15} className="text-muted-foreground cursor-help shrink-0" />
+                </TooltipTrigger>
+                <TooltipContent side="right" className="max-w-[210px] text-xs space-y-1">
+                  <p className="font-semibold">{language === 'ar' ? 'أنواع الملفات المسموح بها' : 'Allowed file types'}</p>
+                  <p>PDF, JPG, PNG</p>
+                  <p className="text-muted-foreground">{language === 'ar' ? 'الحد الأقصى للحجم: 15 ميغابايت' : 'Max size: 15 MB'}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </CardTitle>
           <CardDescription>{t('dashboard.documents_description')}</CardDescription>
         </CardHeader>
