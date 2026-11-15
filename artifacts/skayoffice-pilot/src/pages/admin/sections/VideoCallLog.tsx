@@ -186,6 +186,7 @@ export function VideoCallLogSection() {
                   <div className="text-xs text-muted-foreground space-y-0.5" dir="ltr">
                     <p className="font-medium text-foreground">{item.preferredDate}</p>
                     <p>{item.preferredTime}</p>
+                    <p className="text-[10px] text-muted-foreground/70">{item.timezone}</p>
                     {item.meetingId && (
                       <p className="text-[10px] text-emerald-600 font-mono">Zoom ✓</p>
                     )}
