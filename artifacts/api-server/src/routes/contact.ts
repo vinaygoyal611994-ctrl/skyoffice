@@ -483,9 +483,17 @@ router.patch(
         const zoomStatus = await getZoomConnectionStatus(officeId);
         if (zoomStatus.status === "connected" || zoomStatus.status === "token_refreshing") {
           const startTime = `${existing.preferredDate}T${existing.preferredTime}:00`;
+          const [officeRow] = await db
+            .select({ name: officesTable.name })
+            .from(officesTable)
+            .where(eq(officesTable.id, officeId))
+            .limit(1);
+          const meetingTopic = officeRow?.name
+            ? `${officeRow.name} — Video Consultation via SkayOffice`
+            : "SkayOffice Video Consultation";
           const meeting = await createZoomMeeting(
             officeId,
-            "SkayOffice Consultation",
+            meetingTopic,
             startTime,
             existing.timezone,
           );
