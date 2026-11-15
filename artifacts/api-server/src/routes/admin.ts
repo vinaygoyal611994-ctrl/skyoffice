@@ -69,8 +69,6 @@ import {
   SetAdminCustomerStatusResponse,
   ListAdminContactEventsQueryParams,
   ListAdminContactEventsResponse,
-  ListAdminVideoCallRequestsQueryParams,
-  ListAdminVideoCallRequestsResponse,
   RemoveAdminOfficeMarketingVideoParams,
   RemoveAdminOfficeMarketingVideoResponse,
   UpdateMyOfficeBody,
@@ -1793,38 +1791,50 @@ router.get(
   "/admin/video-call-requests",
   requireRole("admin"),
   async (req: Request, res: Response): Promise<void> => {
-    const parsed = ListAdminVideoCallRequestsQueryParams.safeParse(req.query);
-    if (!parsed.success) {
-      res.status(400).json({ error: parsed.error.message });
-      return;
-    }
-    const limit = Math.min(parsed.data.limit ?? 50, 200);
+    const page   = Math.max(1, Number(req.query.page)  || 1);
+    const limit  = Math.min(50, Math.max(1, Number(req.query.limit) || 25));
+    const status = req.query.status as string | undefined;
+    const offset = (page - 1) * limit;
 
-    const rows = await db
-      .select({
-        id: videoCallRequestsTable.id,
-        officeId: videoCallRequestsTable.officeId,
-        preferredDate: videoCallRequestsTable.preferredDate,
-        preferredTime: videoCallRequestsTable.preferredTime,
-        timezone: videoCallRequestsTable.timezone,
-        contactNumber: videoCallRequestsTable.contactNumber,
-        note: videoCallRequestsTable.note,
-        status: videoCallRequestsTable.status,
-        createdAt: videoCallRequestsTable.createdAt,
-        updatedAt: videoCallRequestsTable.updatedAt,
-        customerName: usersTable.name,
-        officeName: officesTable.name,
-      })
-      .from(videoCallRequestsTable)
-      .innerJoin(
-        usersTable,
-        eq(usersTable.id, videoCallRequestsTable.customerUserId),
-      )
-      .innerJoin(officesTable, eq(officesTable.id, videoCallRequestsTable.officeId))
-      .orderBy(desc(videoCallRequestsTable.createdAt))
-      .limit(limit);
+    const baseWhere = status && status !== "all"
+      ? eq(videoCallRequestsTable.status, status as any)
+      : undefined;
 
-    res.json(ListAdminVideoCallRequestsResponse.parse(rows));
+    const [rows, [countRow]] = await Promise.all([
+      db
+        .select({
+          id:            videoCallRequestsTable.id,
+          status:        videoCallRequestsTable.status,
+          preferredDate: videoCallRequestsTable.preferredDate,
+          preferredTime: videoCallRequestsTable.preferredTime,
+          timezone:      videoCallRequestsTable.timezone,
+          contactNumber: videoCallRequestsTable.contactNumber,
+          note:          videoCallRequestsTable.note,
+          createdAt:     videoCallRequestsTable.createdAt,
+          customerName:  usersTable.name,
+          customerId:    usersTable.id,
+          officeName:    officesTable.name,
+          officeId:      officesTable.id,
+          meetingId:     videoCallMeetingDetailsTable.externalMeetingId,
+          scheduledAt:   videoCallMeetingDetailsTable.scheduledAt,
+        })
+        .from(videoCallRequestsTable)
+        .innerJoin(usersTable,   eq(videoCallRequestsTable.customerUserId, usersTable.id))
+        .innerJoin(officesTable, eq(videoCallRequestsTable.officeId, officesTable.id))
+        .leftJoin(videoCallMeetingDetailsTable, eq(videoCallMeetingDetailsTable.videoCallRequestId, videoCallRequestsTable.id))
+        .where(baseWhere)
+        .orderBy(desc(videoCallRequestsTable.createdAt))
+        .limit(limit)
+        .offset(offset),
+      db
+        .select({ total: count() })
+        .from(videoCallRequestsTable)
+        .where(baseWhere),
+    ]);
+
+    const total      = countRow?.total ?? 0;
+    const totalPages = Math.max(1, Math.ceil(total / limit));
+    res.json({ items: rows, total, page, limit, totalPages });
   },
 );
 
@@ -2648,60 +2658,6 @@ router.post(
     });
 
     res.json(updated);
-  },
-);
-
-// ── GET /admin/video-call-requests ───────────────────────────────────────────
-// Admin view of all video call bookings — customer name, office name, status, meeting info
-router.get(
-  "/admin/video-call-requests",
-  requireRole("admin"),
-  async (req: Request, res: Response): Promise<void> => {
-    const page  = Math.max(1, Number(req.query.page)  || 1);
-    const limit = Math.min(50, Math.max(1, Number(req.query.limit) || 25));
-    const status = req.query.status as string | undefined;
-    const offset = (page - 1) * limit;
-
-    const baseWhere = status && status !== "all"
-      ? eq(videoCallRequestsTable.status, status as any)
-      : undefined;
-
-    const [rows, [countRow]] = await Promise.all([
-      db
-        .select({
-          id:            videoCallRequestsTable.id,
-          status:        videoCallRequestsTable.status,
-          preferredDate: videoCallRequestsTable.preferredDate,
-          preferredTime: videoCallRequestsTable.preferredTime,
-          timezone:      videoCallRequestsTable.timezone,
-          contactNumber: videoCallRequestsTable.contactNumber,
-          note:          videoCallRequestsTable.note,
-          createdAt:     videoCallRequestsTable.createdAt,
-          updatedAt:     videoCallRequestsTable.updatedAt,
-          customerName:  usersTable.name,
-          customerId:    usersTable.id,
-          officeName:    officesTable.name,
-          officeId:      officesTable.id,
-          meetingId:     videoCallMeetingDetailsTable.externalMeetingId,
-          scheduledAt:   videoCallMeetingDetailsTable.scheduledAt,
-        })
-        .from(videoCallRequestsTable)
-        .innerJoin(usersTable,   eq(videoCallRequestsTable.customerUserId, usersTable.id))
-        .innerJoin(officesTable, eq(videoCallRequestsTable.officeId, officesTable.id))
-        .leftJoin(videoCallMeetingDetailsTable, eq(videoCallMeetingDetailsTable.videoCallRequestId, videoCallRequestsTable.id))
-        .where(baseWhere)
-        .orderBy(desc(videoCallRequestsTable.createdAt))
-        .limit(limit)
-        .offset(offset),
-      db
-        .select({ total: count() })
-        .from(videoCallRequestsTable)
-        .where(baseWhere),
-    ]);
-
-    const total      = countRow?.total ?? 0;
-    const totalPages = Math.max(1, Math.ceil(total / limit));
-    res.json({ items: rows, total, page, limit, totalPages });
   },
 );
 
