@@ -766,7 +766,23 @@ export function MediaSection() {
         <Card>
           <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0">
-              <CardTitle className="text-base">{t('dashboard.media.works_title')}</CardTitle>
+              <div className="flex items-center gap-2">
+                <CardTitle className="text-base">{t('dashboard.media.works_title')}</CardTitle>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info size={15} className="text-muted-foreground cursor-help shrink-0" />
+                    </TooltipTrigger>
+                    <TooltipContent side="right" className="max-w-[210px] text-xs space-y-1">
+                      <p className="font-semibold">{language === 'ar' ? 'أنواع الملفات المسموح بها' : 'Allowed file types'}</p>
+                      <p>JPG, PNG, WebP</p>
+                      <p className="text-muted-foreground">{language === 'ar' ? 'الحد الأقصى للحجم: 8 ميغابايت' : 'Max size: 8 MB'}</p>
+                      <p className="text-muted-foreground">{language === 'ar' ? 'النسبة المثلى: 4:3' : 'Recommended ratio: 4:3'}</p>
+                      <p className="text-muted-foreground">{language === 'ar' ? 'الحد الأقصى: 4 صور' : 'Max: 4 images'}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
               <CardDescription>{t('dashboard.media.works_desc')}</CardDescription>
             </div>
             {!isWorksFull && (
@@ -840,7 +856,22 @@ export function MediaSection() {
         {/* Decision Card Hero Image sub-section */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">{t('dashboard.media.dc_cover_title')}</CardTitle>
+            <div className="flex items-center gap-2">
+              <CardTitle className="text-base">{t('dashboard.media.dc_cover_title')}</CardTitle>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Info size={15} className="text-muted-foreground cursor-help shrink-0" />
+                  </TooltipTrigger>
+                  <TooltipContent side="right" className="max-w-[210px] text-xs space-y-1">
+                    <p className="font-semibold">{language === 'ar' ? 'أنواع الملفات المسموح بها' : 'Allowed file types'}</p>
+                    <p>JPG, PNG, WebP</p>
+                    <p className="text-muted-foreground">{language === 'ar' ? 'الحد الأقصى للحجم: 8 ميغابايت' : 'Max size: 8 MB'}</p>
+                    <p className="text-muted-foreground">{language === 'ar' ? 'النسبة المثلى: 7:3' : 'Recommended ratio: 7:3'}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
             <CardDescription>{t('dashboard.media.dc_cover_desc')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -927,7 +958,22 @@ export function MediaSection() {
         <Card data-testid="card-marketing-video">
           <CardHeader className="flex flex-row items-center justify-between border-b pb-4 flex-wrap gap-2">
             <div>
-              <CardTitle className="text-base">{t('dashboard.marketing_video')}</CardTitle>
+              <div className="flex items-center gap-2">
+                <CardTitle className="text-base">{t('dashboard.marketing_video')}</CardTitle>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info size={15} className="text-muted-foreground cursor-help shrink-0" />
+                    </TooltipTrigger>
+                    <TooltipContent side="right" className="max-w-[210px] text-xs space-y-1">
+                      <p className="font-semibold">{language === 'ar' ? 'متطلبات الفيديو' : 'Video requirements'}</p>
+                      <p>{language === 'ar' ? 'الصيغة: MP4 فقط' : 'Format: MP4 only'}</p>
+                      <p className="text-muted-foreground">{language === 'ar' ? 'الحد الأقصى للحجم: 80 ميغابايت' : 'Max size: 80 MB'}</p>
+                      <p className="text-muted-foreground">{language === 'ar' ? 'الحد الأقصى للمدة: 75 ثانية' : 'Max duration: 75 seconds'}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
               <CardDescription>{t('dashboard.marketing_video_desc')}</CardDescription>
             </div>
             {!office.marketingVideoUrl && (
@@ -1030,7 +1076,23 @@ export function MediaSection() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between border-b pb-4 flex-wrap gap-2">
             <div>
-              <CardTitle className="text-base">{t('dashboard.media.gallery_title')}</CardTitle>
+              <div className="flex items-center gap-2">
+                <CardTitle className="text-base">{t('dashboard.media.gallery_title')}</CardTitle>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info size={15} className="text-muted-foreground cursor-help shrink-0" />
+                    </TooltipTrigger>
+                    <TooltipContent side="right" className="max-w-[210px] text-xs space-y-1">
+                      <p className="font-semibold">{language === 'ar' ? 'أنواع الملفات المسموح بها' : 'Allowed file types'}</p>
+                      <p>JPG, PNG, WebP</p>
+                      <p className="text-muted-foreground">{language === 'ar' ? 'الحد الأقصى للحجم: 8 ميغابايت' : 'Max size: 8 MB'}</p>
+                      <p className="text-muted-foreground">{language === 'ar' ? 'النسبة المثلى: 7:3' : 'Recommended ratio: 7:3'}</p>
+                      <p className="text-muted-foreground">{language === 'ar' ? 'الحد الأقصى: 3 صور' : 'Max: 3 images'}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
               <CardDescription>{t('dashboard.media.gallery_desc')}</CardDescription>
             </div>
             {isGalleryFull ? (

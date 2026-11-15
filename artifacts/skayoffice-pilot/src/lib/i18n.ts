@@ -421,7 +421,7 @@ export const translations = {
   'dashboard.media.tab_identity': { ar: 'الهوية', en: 'Identity' },
   'dashboard.media.works_title': { ar: 'معرض الأعمال', en: 'Works Gallery' },
   'dashboard.media.works_desc': { ar: 'اعرض حتى 4 صور من أعمالك. تخضع الصور للمراجعة قبل ظهورها للعملاء.', en: 'Show up to 4 images of your work. Images are reviewed before customers can see them.' },
-  'dashboard.media.works_upload': { ar: '+ إضافة عمل', en: '+ Add work' },
+  'dashboard.media.works_upload': { ar: 'إضافة عمل', en: 'Add work' },
   'dashboard.media.works_empty': { ar: 'لم تتم إضافة أعمال بعد.', en: 'No works added yet.' },
   'dashboard.media.works_empty_cta': { ar: 'أضف أول عمل إلى معرضك', en: 'Add your first work to your gallery' },
   'dashboard.media.works_pending': { ar: 'صور قيد المراجعة', en: 'Images pending review' },
