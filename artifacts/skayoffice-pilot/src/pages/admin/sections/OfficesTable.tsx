@@ -42,7 +42,7 @@ import {
 } from 'lucide-react';
 import { OfficeDetailDialog } from './OfficeDetailDialog';
 import { safeApiError } from '@/lib/apiError';
-import { storageUrl } from '@/lib/sessionToken';
+import { storageUrl, authFetch } from '@/lib/sessionToken';
 
 const STATUS_META: Record<string, { tone: string; labelAr: string; labelEn: string }> = {
   draft:             { tone: 'bg-slate-100 text-slate-700 border-slate-200',       labelAr: 'مسودة',          labelEn: 'Draft' },
@@ -176,9 +176,8 @@ export function OfficesTableSection({ initialStatus = 'all' }: { initialStatus?:
   }});
   const reactivateOverrideMut = useMutation({
     mutationFn: async (officeId: number) => {
-      const res = await fetch(`/api/admin/applications/${officeId}/reactivate-override`, {
+      const res = await authFetch(`/api/admin/applications/${officeId}/reactivate-override`, {
         method: 'POST',
-        credentials: 'include',
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
