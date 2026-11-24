@@ -312,6 +312,8 @@ export function RegisterOffice() {
     registerMutation.mutate({ data });
   };
 
+  const providerType = form.watch('providerType');
+
   useEffect(() => { form.clearErrors(); }, [language]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
@@ -387,7 +389,9 @@ export function RegisterOffice() {
                   name="officeName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t('auth.office_name')} <RequiredMark /></FormLabel>
+                      <FormLabel>
+                        {providerType === 'freelancer' ? t('auth.freelancer_name') : t('auth.office_name')} <RequiredMark />
+                      </FormLabel>
                       <FormControl>
                         <Input autoComplete="organization" {...field} />
                       </FormControl>

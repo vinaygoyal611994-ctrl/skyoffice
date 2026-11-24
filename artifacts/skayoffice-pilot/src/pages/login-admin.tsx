@@ -1,7 +1,7 @@
 import z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { useLogin, useGetCurrentUser } from '@workspace/api-client-react';
+import { useLogin, useGetCurrentUser, getGetCurrentUserQueryKey } from '@workspace/api-client-react';
 import { useI18n } from '@/lib/i18n';
 import { Link, useLocation } from 'wouter';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -34,7 +34,7 @@ export function LoginAdmin() {
   const [, setLocation] = useLocation();
   const [showPassword, setShowPassword] = useState(false);
   const [wrongRoleError, setWrongRoleError] = useState(false);
-  const { data: currentUser } = useGetCurrentUser({ query: { retry: false } });
+  const { data: currentUser } = useGetCurrentUser({ query: { retry: false, queryKey: getGetCurrentUserQueryKey() } });
 
   // Already logged in as admin → go straight to dashboard
   useEffect(() => {

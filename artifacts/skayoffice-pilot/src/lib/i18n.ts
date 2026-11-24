@@ -213,6 +213,7 @@ export const translations = {
   'auth.password': { ar: 'كلمة المرور', en: 'Password' },
   'auth.name': { ar: 'الاسم الكامل', en: 'Full Name' },
   'auth.office_name': { ar: 'اسم المكتب', en: 'Office Name' },
+  'auth.freelancer_name': { ar: 'اسم المستقل', en: 'Freelancer Name' },
   'auth.phone': { ar: 'رقم الهاتف', en: 'Phone Number' },
   'auth.city': { ar: 'المدينة', en: 'City' },
   'auth.category': { ar: 'التخصص الرئيسي', en: 'Primary Category' },

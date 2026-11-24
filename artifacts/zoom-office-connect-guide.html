@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Zoom Integration — Office User Guide</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      font-size: 13.5px;
+      color: #1a1a2e;
+      background: #fff;
+      padding: 48px 60px;
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    .doc-header {
+      border-bottom: 3px solid #2563eb;
+      padding-bottom: 18px;
+      margin-bottom: 32px;
+    }
+    .doc-header .logo {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #2563eb;
+      margin-bottom: 8px;
+    }
+    .doc-header h1 {
+      font-size: 26px;
+      font-weight: 800;
+      color: #0f172a;
+      line-height: 1.2;
+    }
+    .doc-header .subtitle {
+      font-size: 13px;
+      color: #64748b;
+      margin-top: 6px;
+    }
+    .meta-row {
+      display: flex;
+      gap: 24px;
+      margin-top: 14px;
+      font-size: 12px;
+      color: #64748b;
+    }
+    .meta-row span strong { color: #334155; }
+
+    /* Section headings */
+    h2 {
+      font-size: 16px;
+      font-weight: 700;
+      color: #0f172a;
+      margin: 32px 0 12px;
+      padding-bottom: 6px;
+      border-bottom: 1.5px solid #e2e8f0;
+    }
+    h3 {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #1e40af;
+      margin: 18px 0 8px;
+    }
+
+    p { line-height: 1.7; color: #334155; margin-bottom: 10px; }
+
+    /* Steps */
+    .steps { counter-reset: step; list-style: none; margin: 0; padding: 0; }
+    .steps li {
+      counter-increment: step;
+      display: flex;
+      gap: 14px;
+      margin-bottom: 16px;
+      align-items: flex-start;
+    }
+    .steps li::before {
+      content: counter(step);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 28px;
+      height: 28px;
+      background: #2563eb;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .steps li .step-body { flex: 1; }
+    .steps li .step-body strong { display: block; font-size: 13.5px; color: #0f172a; margin-bottom: 3px; }
+    .steps li .step-body span { font-size: 12.5px; color: #475569; line-height: 1.6; }
+
+    /* Info box */
+    .info-box {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-left: 4px solid #2563eb;
+      border-radius: 6px;
+      padding: 14px 18px;
+      margin: 16px 0;
+    }
+    .info-box p { margin: 0; color: #1e40af; font-size: 12.5px; line-height: 1.65; }
+    .info-box .info-title { font-weight: 700; margin-bottom: 4px; color: #1d4ed8; }
+
+    /* Warning box */
+    .warn-box {
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-left: 4px solid #f59e0b;
+      border-radius: 6px;
+      padding: 14px 18px;
+      margin: 16px 0;
+    }
+    .warn-box p { margin: 0; color: #92400e; font-size: 12.5px; line-height: 1.65; }
+    .warn-box .warn-title { font-weight: 700; margin-bottom: 4px; color: #b45309; }
+
+    /* Success box */
+    .success-box {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-left: 4px solid #16a34a;
+      border-radius: 6px;
+      padding: 14px 18px;
+      margin: 16px 0;
+    }
+    .success-box p { margin: 0; color: #14532d; font-size: 12.5px; line-height: 1.65; }
+    .success-box .success-title { font-weight: 700; margin-bottom: 4px; color: #15803d; }
+
+    /* Status badges */
+    .badge-row { display: flex; flex-wrap: wrap; gap: 10px; margin: 12px 0; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 11.5px;
+      font-weight: 600;
+      border: 1px solid;
+    }
+    .badge-green  { background: #dcfce7; color: #15803d; border-color: #86efac; }
+    .badge-slate  { background: #f1f5f9; color: #475569; border-color: #cbd5e1; }
+    .badge-amber  { background: #fef3c7; color: #92400e; border-color: #fcd34d; }
+    .badge-blue   { background: #dbeafe; color: #1d4ed8; border-color: #93c5fd; }
+    .badge-red    { background: #fee2e2; color: #b91c1c; border-color: #fca5a5; }
+
+    /* Table */
+    table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 12.5px; }
+    th {
+      background: #f8fafc;
+      text-align: left;
+      padding: 9px 12px;
+      font-weight: 700;
+      color: #334155;
+      border: 1px solid #e2e8f0;
+    }
+    td {
+      padding: 9px 12px;
+      color: #475569;
+      border: 1px solid #e2e8f0;
+      vertical-align: top;
+      line-height: 1.55;
+    }
+    tr:nth-child(even) td { background: #f8fafc; }
+
+    /* Permission list */
+    .perm-list { list-style: none; padding: 0; margin: 10px 0; }
+    .perm-list li {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 0;
+      font-size: 12.5px;
+      color: #334155;
+      border-bottom: 1px dashed #e2e8f0;
+    }
+    .perm-list li:last-child { border-bottom: none; }
+    .perm-list li .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #22c55e;
+      flex-shrink: 0;
+    }
+
+    /* Footer */
+    .doc-footer {
+      margin-top: 48px;
+      padding-top: 16px;
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: #94a3b8;
+    }
+
+    @media print {
+      body { padding: 32px 40px; }
+      .steps li { page-break-inside: avoid; }
+      h2 { page-break-after: avoid; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <div class="doc-header">
+    <div class="logo">SkayOffice &nbsp;·&nbsp; Feature Documentation</div>
+    <h1>Zoom Integration — Office Account Connection</h1>
+    <p class="subtitle">How an office connects its own Zoom account to enable automatic video call meetings</p>
+    <div class="meta-row">
+      <span><strong>Date:</strong> November 2025</span>
+      <span><strong>Scope:</strong> Office dashboard → Zoom Integration section</span>
+      <span><strong>Role:</strong> Office user only</span>
+    </div>
+  </div>
+
+  <!-- Overview -->
+  <h2>Overview</h2>
+  <p>
+    Each office on SkayOffice can connect its own Zoom account using OAuth 2.0. Once connected,
+    whenever the office <strong>accepts a video call booking request</strong> from a customer,
+    a Zoom meeting is automatically created. The customer receives the join link and the office
+    receives the host link — no manual scheduling needed.
+  </p>
+  <div class="info-box">
+    <p class="info-title">Multi-tenancy</p>
+    <p>Every office connects its own independent Zoom account. One office's Zoom credentials are
+    never shared with or visible to any other office.</p>
+  </div>
+
+  <!-- How to Connect -->
+  <h2>How to Connect Your Zoom Account</h2>
+
+  <ol class="steps">
+    <li>
+      <div class="step-body">
+        <strong>Log in to your office account</strong>
+        <span>Go to the SkayOffice site and sign in with your office credentials.</span>
+      </div>
+    </li>
+    <li>
+      <div class="step-body">
+        <strong>Open the Dashboard</strong>
+        <span>After login you will land on the office dashboard automatically.</span>
+      </div>
+    </li>
+    <li>
+      <div class="step-body">
+        <strong>Click "Zoom Integration" in the sidebar</strong>
+        <span>Find the <em>Zoom Integration</em> item in the left navigation menu of the dashboard and click it.</span>
+      </div>
+    </li>
+    <li>
+      <div class="step-body">
+        <strong>Click "Connect Zoom"</strong>
+        <span>On the Zoom Integration page, click the blue <strong>Connect Zoom</strong> button.</span>
+      </div>
+    </li>
+    <li>
+      <div class="step-body">
+        <strong>Authorize on Zoom's website</strong>
+        <span>You will be redirected to Zoom's official authorization page. Log in with your Zoom account and click <strong>Allow</strong> to grant SkayOffice the required permissions.</span>
+      </div>
+    </li>
+    <li>
+      <div class="step-body">
+        <strong>Return to dashboard — connection confirmed</strong>
+        <span>Zoom redirects you back to SkayOffice. A success message appears and the status badge changes to <strong>Connected</strong>. Your Zoom email address is shown on the page.</span>
+      </div>
+    </li>
+  </ol>
+
+  <div class="success-box">
+    <p class="success-title">Done — Zoom is now active</p>
+    <p>From this point, every accepted video call booking will automatically create a Zoom meeting.
+    No further setup is required.</p>
+  </div>
+
+  <!-- Connection Status -->
+  <h2>Connection Status Indicators</h2>
+  <p>The Zoom Integration page shows the current status at all times:</p>
+
+  <div class="badge-row">
+    <span class="badge badge-slate">Not Connected</span>
+    <span class="badge badge-green">Connected</span>
+    <span class="badge badge-blue">Refreshing…</span>
+    <span class="badge badge-amber">Re-auth Required</span>
+    <span class="badge badge-slate">Disconnected</span>
+    <span class="badge badge-red">Error</span>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Status</th>
+        <th>Meaning</th>
+        <th>Action Required</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Not Connected</strong></td>
+        <td>No Zoom account has been linked yet</td>
+        <td>Click "Connect Zoom"</td>
+      </tr>
+      <tr>
+        <td><strong>Connected</strong></td>
+        <td>Zoom account is linked and working</td>
+        <td>None — meetings create automatically</td>
+      </tr>
+      <tr>
+        <td><strong>Refreshing…</strong></td>
+        <td>Access token is being renewed in the background</td>
+        <td>Wait a moment, then refresh the page</td>
+      </tr>
+      <tr>
+        <td><strong>Re-auth Required</strong></td>
+        <td>Zoom revoked access (e.g. password change, app removed)</td>
+        <td>Click "Reconnect Zoom" to re-authorize</td>
+      </tr>
+      <tr>
+        <td><strong>Disconnected</strong></td>
+        <td>Office manually disconnected Zoom</td>
+        <td>Click "Connect Zoom" to reconnect</td>
+      </tr>
+      <tr>
+        <td><strong>Error</strong></td>
+        <td>Unexpected error fetching status</td>
+        <td>Refresh the page; reconnect if issue persists</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Reconnect & Disconnect -->
+  <h2>Reconnect or Disconnect</h2>
+
+  <h3>Reconnect</h3>
+  <p>
+    If you want to switch to a different Zoom account, or if the status shows
+    <strong>Re-auth Required</strong>, click <strong>Reconnect Zoom</strong>.
+    You will go through the OAuth flow again and the new account will replace the old one.
+  </p>
+
+  <h3>Disconnect</h3>
+  <p>
+    Click <strong>Disconnect Zoom</strong> (red button) to unlink your Zoom account.
+    Existing booking records and past meeting links are preserved — only future accepted
+    bookings will no longer auto-create a meeting.
+  </p>
+
+  <!-- Permissions -->
+  <h2>Permissions Requested from Zoom</h2>
+  <p>SkayOffice requests only the minimum permissions needed:</p>
+
+  <ul class="perm-list">
+    <li><span class="dot"></span> View your Zoom profile (to show connected email)</li>
+    <li><span class="dot"></span> Create meetings (to auto-create on booking accept)</li>
+    <li><span class="dot"></span> View meetings (to verify meeting status)</li>
+    <li><span class="dot"></span> Delete meetings (to cancel if booking is declined)</li>
+  </ul>
+
+  <div class="info-box">
+    <p>Recording, webinar, chat, and participant management permissions are <strong>never requested</strong>.</p>
+  </div>
+
+  <!-- Token security -->
+  <h2>Security</h2>
+  <p>
+    Zoom access and refresh tokens are <strong>never stored in plaintext</strong>.
+    They are encrypted using AES-256-GCM before being saved to the database.
+    Tokens are automatically refreshed in the background before expiry — the office
+    does not need to reconnect periodically under normal conditions.
+  </p>
+
+  <!-- Footer -->
+  <div class="doc-footer">
+    <span>SkayOffice — Internal Documentation</span>
+    <span>Zoom Integration · Office Connection Guide · November 2025</span>
+  </div>
+
+</body>
+</html>

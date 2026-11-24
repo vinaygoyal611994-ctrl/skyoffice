@@ -58,7 +58,11 @@ const SPOKEN_LANGUAGE_OPTIONS = [
   { code: 'fr', labelEn: 'French', labelAr: 'الفرنسية' },
 ];
 
-export function ProfileSection() {
+interface ProfileSectionProps {
+  navigate?: (section: string) => void;
+}
+
+export function ProfileSection({ navigate }: ProfileSectionProps) {
   const { t, language } = useI18n();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -69,6 +73,7 @@ export function ProfileSection() {
     mutation: {
       onSuccess: (data) => {
         queryClient.setQueryData(getGetMyOfficeQueryKey(), data);
+        if (suppressSaveToastRef.current) return;
         const savedStatus = data?.status ?? office?.status;
         const wasLocked = savedStatus ? LOCKED_EDIT_STATUSES.includes(savedStatus) : false;
 
@@ -107,6 +112,7 @@ export function ProfileSection() {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: getGetMyOfficeQueryKey() });
         setNewService('');
+        setMissingFields(prev => prev.filter(f => f !== 'services'));
       },
     },
   });
@@ -119,6 +125,9 @@ export function ProfileSection() {
 
   const [formErrors, setFormErrors] = useState<{ whatsapp?: string; email?: string }>({});
   const [missingFields, setMissingFields] = useState<string[]>([]);
+  const suppressSaveToastRef = useRef(false);
+  const missingFieldsBannerRef = useRef<HTMLDivElement>(null);
+
   const submitMut = useSubmitMyOfficeApplication({
     mutation: {
       onSuccess: (data) => {
@@ -129,6 +138,15 @@ export function ProfileSection() {
       onError: (err: any) => {
         const fields: string[] = err?.data?.missingFields || [];
         setMissingFields(fields);
+        if (fields.length > 0) {
+          setTimeout(() => {
+            const el = missingFieldsBannerRef.current;
+            if (el) {
+              const top = el.getBoundingClientRect().top + window.scrollY - 100;
+              window.scrollTo({ top, behavior: 'smooth' });
+            }
+          }, 50);
+        }
         toast({
           title: t('dashboard.submit_failed_title'),
           description: safeApiError(err, language, { ar: t('dashboard.submit_failed_generic'), en: t('dashboard.submit_failed_generic') }),
@@ -183,6 +201,46 @@ export function ProfileSection() {
     if (name === 'whatsapp' || name === 'email') {
       setFormErrors(prev => ({ ...prev, [name]: undefined }));
     }
+    setMissingFields(prev => prev.filter(f => f !== name));
+  };
+
+  const handleSubmitForReview = async () => {
+    const isAr = language === 'ar';
+    const errors: { whatsapp?: string; email?: string } = {};
+    if (!formData.whatsapp.trim()) {
+      errors.whatsapp = isAr ? 'رقم واتساب مطلوب' : 'WhatsApp number is required';
+    } else if (!/^\+?[0-9]{7,15}$/.test(formData.whatsapp.trim())) {
+      errors.whatsapp = isAr ? 'أدخل رقماً صحيحاً (أرقام فقط)' : 'Enter a valid number (digits only)';
+    }
+    if (!formData.email.trim()) {
+      errors.email = isAr ? 'البريد الإلكتروني مطلوب' : 'Email is required';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
+      errors.email = isAr ? 'أدخل بريداً إلكترونياً صحيحاً' : 'Enter a valid email address';
+    }
+    setFormErrors(errors);
+    if (Object.keys(errors).length > 0) return;
+
+    const lat = formData.latitude !== '' ? parseFloat(formData.latitude) : null;
+    const lon = formData.longitude !== '' ? parseFloat(formData.longitude) : null;
+    const { category, ...profileFields } = formData;
+    try {
+      suppressSaveToastRef.current = true;
+      await updateMutation.mutateAsync({
+        data: {
+          ...profileFields,
+          ...(category !== 'other' ? { category: category as SelectableOfficeCategory } : {}),
+          spokenLanguages,
+          customLanguages,
+          latitude: isNaN(lat as number) ? null : lat,
+          longitude: isNaN(lon as number) ? null : lon,
+        },
+      });
+    } catch {
+      suppressSaveToastRef.current = false;
+      return;
+    }
+    suppressSaveToastRef.current = false;
+    submitMut.mutate();
   };
 
   const handleSave = () => {
@@ -306,16 +364,28 @@ export function ProfileSection() {
 
       {/* Missing fields */}
       {missingFields.length > 0 && (
-        <div className="rounded-2xl border border-red-200 bg-red-50 p-4" data-testid="banner-missing-fields">
+        <div ref={missingFieldsBannerRef} className="rounded-2xl border border-red-200 bg-red-50 p-4" data-testid="banner-missing-fields">
           <div className="font-semibold text-red-800 flex items-center gap-2 mb-2 text-sm">
             <AlertTriangle size={14} /> {t('dashboard.missing_fields_notice')}:
           </div>
-          <ul className="list-disc list-inside text-sm text-red-700 space-y-0.5">
-            {missingFields.map(f => (
-              <li key={f} data-testid={`missing-field-${f}`}>
-                {MISSING_FIELD_KEYS[f] ? t(MISSING_FIELD_KEYS[f]) : f}
-              </li>
-            ))}
+          <ul className="list-disc list-inside text-sm text-red-700 space-y-1">
+            {missingFields.map(f => {
+              const isDocField = f === 'identity document' || f === 'trade license document';
+              return (
+                <li key={f} data-testid={`missing-field-${f}`} className="flex items-center gap-2 flex-wrap">
+                  <span>{MISSING_FIELD_KEYS[f] ? t(MISSING_FIELD_KEYS[f]) : f}</span>
+                  {isDocField && navigate && (
+                    <button
+                      type="button"
+                      onClick={() => navigate('documents')}
+                      className="text-xs underline font-medium text-red-800 hover:text-red-900"
+                    >
+                      {language === 'ar' ? '← اذهب إلى المستندات' : '→ Go to Documents'}
+                    </button>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         </div>
       )}
@@ -537,7 +607,7 @@ export function ProfileSection() {
             options={SPOKEN_LANGUAGE_OPTIONS}
             selectedCodes={spokenLanguages}
             customLanguages={customLanguages}
-            onChangeCodes={setSpokenLanguages}
+            onChangeCodes={codes => { setSpokenLanguages(codes); if (codes.length > 0) setMissingFields(prev => prev.filter(f => f !== 'spokenLanguages')); }}
             onChangeCustom={setCustomLanguages}
             disabled={fieldsReadOnly}
           />
@@ -634,13 +704,13 @@ export function ProfileSection() {
       <div className="flex gap-3 flex-wrap pb-4">
         {canSubmit && (
           <Button
-            onClick={() => submitMut.mutate()}
-            disabled={submitMut.isPending}
+            onClick={handleSubmitForReview}
+            disabled={submitMut.isPending || updateMutation.isPending}
             variant="secondary"
             className="gap-2"
           >
             <Send size={15} />
-            {submitMut.isPending ? t('dashboard.submitting') : t('dashboard.submit_for_review')}
+            {(submitMut.isPending || updateMutation.isPending) ? t('dashboard.submitting') : t('dashboard.submit_for_review')}
           </Button>
         )}
         <Button

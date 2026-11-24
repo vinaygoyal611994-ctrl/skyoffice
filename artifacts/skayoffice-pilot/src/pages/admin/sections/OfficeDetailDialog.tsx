@@ -45,6 +45,7 @@ import { getOfficePublicUrl } from '@/lib/publicUrl';
 import {
   CheckCircle2, XCircle, AlertTriangle, PlayCircle, PauseCircle, RotateCcw,
   FileText, StickyNote, Eye, FileEdit, ExternalLink, Building2,
+  MapPin, Mail, Phone, MessageCircle, Globe, Tag, Briefcase, Languages,
 } from 'lucide-react';
 
 // ── Constants ────────────────────────────────────────────────────────────────
@@ -303,33 +304,101 @@ export function OfficeDetailDialog({
             <div className="space-y-5">
 
               {/* Company info */}
-              <section>
-                <h3 className="font-semibold text-sm mb-3 flex items-center gap-1.5">
-                  <Building2 size={14} />{language === 'ar' ? 'بيانات الشركة' : 'Company Information'}
-                </h3>
-                <div className="grid grid-cols-2 gap-2 text-sm bg-muted/20 rounded-lg p-3">
-                  <div><span className="text-muted-foreground">{language === 'ar' ? 'التصنيف: ' : 'Category: '}</span>{categoryLabel(detail.category)}</div>
-                  <div><span className="text-muted-foreground">{language === 'ar' ? 'المدينة: ' : 'City: '}</span>{localizedCity(detail.city || '', language)}</div>
-                  <div><span className="text-muted-foreground">{language === 'ar' ? 'الدولة: ' : 'Country: '}</span>{detail.country || '—'}</div>
-                  <div><span className="text-muted-foreground">{language === 'ar' ? 'التخصص: ' : 'Specialization: '}</span>{detail.specialization || '—'}</div>
-                  <div className="col-span-2"><span className="text-muted-foreground">{language === 'ar' ? 'البريد: ' : 'Email: '}</span>{detail.email}</div>
-                  <div><span className="text-muted-foreground">WhatsApp: </span><span dir="ltr">{detail.whatsapp || '—'}</span></div>
-                  <div><span className="text-muted-foreground">{language === 'ar' ? 'مكالمات: ' : 'Phone calls: '}</span>{detail.acceptsPhoneCalls ? (language === 'ar' ? 'نعم' : 'Yes') : (language === 'ar' ? 'لا' : 'No')}</div>
+              <section className="rounded-xl border border-border/60 overflow-hidden">
+                <div className="bg-muted/40 px-4 py-2.5 border-b border-border/40 flex items-center gap-2">
+                  <Building2 size={14} className="text-primary" />
+                  <h3 className="font-semibold text-sm">{language === 'ar' ? 'بيانات الشركة' : 'Company Information'}</h3>
+                </div>
+                <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {/* Category */}
+                  <div className="flex items-start gap-2.5">
+                    <div className="w-7 h-7 rounded-lg bg-violet-50 border border-violet-100 flex items-center justify-center shrink-0 mt-0.5">
+                      <Briefcase size={13} className="text-violet-500" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wide">{language === 'ar' ? 'التصنيف' : 'Category'}</p>
+                      <p className="text-sm font-medium">{categoryLabel(detail.category)}</p>
+                    </div>
+                  </div>
+                  {/* City / Country */}
+                  <div className="flex items-start gap-2.5">
+                    <div className="w-7 h-7 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0 mt-0.5">
+                      <MapPin size={13} className="text-blue-500" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wide">{language === 'ar' ? 'الموقع' : 'Location'}</p>
+                      <p className="text-sm font-medium">{localizedCity(detail.city || '', language)}{detail.country ? `, ${detail.country}` : ''}</p>
+                    </div>
+                  </div>
+                  {/* Email */}
+                  <div className="flex items-start gap-2.5">
+                    <div className="w-7 h-7 rounded-lg bg-sky-50 border border-sky-100 flex items-center justify-center shrink-0 mt-0.5">
+                      <Mail size={13} className="text-sky-500" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wide">{language === 'ar' ? 'البريد الإلكتروني' : 'Email'}</p>
+                      <p className="text-sm font-medium break-all">{detail.email}</p>
+                    </div>
+                  </div>
+                  {/* WhatsApp */}
+                  <div className="flex items-start gap-2.5">
+                    <div className="w-7 h-7 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center shrink-0 mt-0.5">
+                      <MessageCircle size={13} className="text-emerald-500" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wide">WhatsApp</p>
+                      <p className="text-sm font-medium" dir="ltr">{detail.whatsapp || '—'}</p>
+                      {detail.acceptsPhoneCalls && (
+                        <span className="text-[10px] text-emerald-600 flex items-center gap-1 mt-0.5">
+                          <Phone size={9} /> {language === 'ar' ? 'يقبل المكالمات' : 'Accepts calls'}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  {/* Languages */}
                   {(detail.spokenLanguages?.length || detail.customLanguages?.length) ? (
-                    <div className="col-span-2">
-                      <span className="text-muted-foreground">{language === 'ar' ? 'اللغات: ' : 'Languages: '}</span>
-                      {[...(detail.spokenLanguages ?? []), ...(detail.customLanguages ?? [])].join('، ')}
+                    <div className="flex items-start gap-2.5">
+                      <div className="w-7 h-7 rounded-lg bg-amber-50 border border-amber-100 flex items-center justify-center shrink-0 mt-0.5">
+                        <Languages size={13} className="text-amber-500" />
+                      </div>
+                      <div>
+                        <p className="text-[10px] text-muted-foreground uppercase tracking-wide">{language === 'ar' ? 'اللغات' : 'Languages'}</p>
+                        <div className="flex flex-wrap gap-1 mt-0.5">
+                          {[...(detail.spokenLanguages ?? []), ...(detail.customLanguages ?? [])].map(lang => (
+                            <span key={lang} className="text-[11px] bg-amber-50 border border-amber-200 text-amber-700 px-1.5 py-0.5 rounded-full">{lang}</span>
+                          ))}
+                        </div>
+                      </div>
                     </div>
                   ) : null}
-                  {detail.shortDescription && (
-                    <div className="col-span-2">
-                      <span className="text-muted-foreground">{language === 'ar' ? 'الوصف المختصر: ' : 'Short desc: '}</span>{detail.shortDescription}
+                  {/* Product Category / Specialization */}
+                  {detail.specialization && (
+                    <div className="flex items-start gap-2.5">
+                      <div className="w-7 h-7 rounded-lg bg-pink-50 border border-pink-100 flex items-center justify-center shrink-0 mt-0.5">
+                        <Tag size={13} className="text-pink-500" />
+                      </div>
+                      <div>
+                        <p className="text-[10px] text-muted-foreground uppercase tracking-wide">{language === 'ar' ? 'الفئة التخصصية' : 'Product Category'}</p>
+                        <p className="text-sm font-medium">{detail.specialization}</p>
+                      </div>
                     </div>
                   )}
+                  {/* Short description */}
+                  {detail.shortDescription && (
+                    <div className="sm:col-span-2 flex items-start gap-2.5">
+                      <div className="w-7 h-7 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0 mt-0.5">
+                        <Globe size={13} className="text-slate-500" />
+                      </div>
+                      <div>
+                        <p className="text-[10px] text-muted-foreground uppercase tracking-wide">{language === 'ar' ? 'الوصف المختصر' : 'Short Description'}</p>
+                        <p className="text-sm">{detail.shortDescription}</p>
+                      </div>
+                    </div>
+                  )}
+                  {/* Full description */}
                   {detail.description && (
-                    <div className="col-span-2">
-                      <span className="text-muted-foreground">{language === 'ar' ? 'الوصف: ' : 'Description: '}</span>
-                      <span className="text-xs">{detail.description.slice(0, 200)}{detail.description.length > 200 ? '…' : ''}</span>
+                    <div className="sm:col-span-2 bg-muted/20 rounded-lg p-3 text-xs text-muted-foreground leading-relaxed border border-border/40">
+                      {detail.description.slice(0, 200)}{detail.description.length > 200 ? '…' : ''}
                     </div>
                   )}
                 </div>

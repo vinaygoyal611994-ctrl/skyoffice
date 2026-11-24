@@ -20,6 +20,7 @@ import {
   useRemoveAdminOfficeMarketingVideo,
   getListAdminOfficesQueryKey,
 } from '@workspace/api-client-react';
+import { useMutation } from '@tanstack/react-query';
 import { useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -33,6 +34,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { getOfficePublicUrl } from '@/lib/publicUrl';
+import { Switch } from '@/components/ui/switch';
 import {
   Building2, Search, MoreHorizontal, Eye, CheckCircle2,
   PlayCircle, PauseCircle, RotateCcw, Trash2, ExternalLink, ShieldCheck,
@@ -59,6 +61,8 @@ const ACTIVATION_BLOCKER_LABELS: Record<string, { ar: string; en: string }> = {
   invalid_whatsapp:               { ar: 'رقم واتساب غير صالح', en: 'Invalid WhatsApp number' },
   identity_document_not_approved: { ar: 'مستند الهوية لم تتم الموافقة عليه', en: 'ID document not approved' },
   trade_license_not_approved:     { ar: 'السجل التجاري لم تتم الموافقة عليه', en: 'Trade license not approved' },
+  email_not_verified:             { ar: 'البريد الإلكتروني غير موثّق', en: 'Email not verified' },
+  phone_not_verified:             { ar: 'رقم الهاتف غير موثّق', en: 'Phone not verified' },
 };
 
 const PAGE_SIZE = 20;
@@ -109,11 +113,20 @@ export function OfficesTableSection({ initialStatus = 'all' }: { initialStatus?:
     const blockers: string[] = err?.data?.blockers || [];
     if (blockers.length > 0) {
       toast({
-        title: language === 'ar' ? 'تعذّر التفعيل' : 'Activation blocked',
-        description: blockers.map(c => {
-          const l = ACTIVATION_BLOCKER_LABELS[c];
-          return l ? `• ${language === 'ar' ? l.ar : l.en}` : `• ${c}`;
-        }).join('\n'),
+        title: language === 'ar' ? 'تعذّر التفعيل — يرجى إكمال المتطلبات' : 'Cannot activate — requirements missing',
+        description: (
+          <ul className="mt-1 space-y-0.5 text-xs list-none">
+            {blockers.map(c => {
+              const l = ACTIVATION_BLOCKER_LABELS[c];
+              return (
+                <li key={c} className="flex items-start gap-1.5">
+                  <span className="mt-0.5 shrink-0">•</span>
+                  <span>{l ? (language === 'ar' ? l.ar : l.en) : c}</span>
+                </li>
+              );
+            })}
+          </ul>
+        ) as any,
         variant: 'destructive',
       });
       return;
@@ -148,9 +161,36 @@ export function OfficesTableSection({ initialStatus = 'all' }: { initialStatus?:
       },
     },
   });
-  const activateMut   = useActivateAdminApplication({ mutation: { onSuccess: invalidate, onError: onActivationErr } });
-  const suspendMut    = useSuspendAdminApplication({ mutation: { onSuccess: invalidate, onError: onErr } });
-  const reactivateMut = useReactivateAdminApplication({ mutation: { onSuccess: invalidate, onError: onActivationErr } });
+  const activateMut   = useActivateAdminApplication({ mutation: {
+    onSuccess: () => { invalidate(); toast({ title: language === 'ar' ? 'تم تفعيل المكتب' : 'Office activated successfully' }); },
+    onError: onActivationErr,
+  }});
+  const suspendMut    = useSuspendAdminApplication({ mutation: {
+    onSuccess: () => { invalidate(); toast({ title: language === 'ar' ? 'تم تعليق المكتب' : 'Office deactivated', variant: 'destructive' }); },
+    onError: onErr,
+  }});
+  const reactivateMut = useReactivateAdminApplication({ mutation: {
+    onSuccess: () => { invalidate(); toast({ title: language === 'ar' ? 'تم إعادة تفعيل المكتب' : 'Office reactivated successfully' }); },
+    onError: onActivationErr,
+  }});
+  const reactivateOverrideMut = useMutation({
+    mutationFn: async (officeId: number) => {
+      const res = await fetch(`/api/admin/applications/${officeId}/reactivate-override`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        const err: any = new Error(data?.error || 'Reactivation failed');
+        err.data = data;
+        err.status = res.status;
+        throw err;
+      }
+      return res.json();
+    },
+    onSuccess: () => { invalidate(); toast({ title: language === 'ar' ? 'تم إعادة تفعيل المكتب' : 'Office reactivated successfully' }); },
+    onError: onErr,
+  });
   const removeVideoMut = useRemoveAdminOfficeMarketingVideo({ mutation: { onSuccess: () => { invalidate(); setPreviewVideo(null); toast({ title: language === 'ar' ? 'تم الحذف' : 'Video deleted' }); }, onError: onErr } });
 
   // ── Filtering ─────────────────────────────────────────────────────────────
@@ -324,6 +364,7 @@ export function OfficesTableSection({ initialStatus = 'all' }: { initialStatus?:
                 <TableHead>{language === 'ar' ? 'النوع' : 'Type'}</TableHead>
                 <TableHead>{language === 'ar' ? 'المدينة' : 'City'}</TableHead>
                 <TableHead>{language === 'ar' ? 'الحالة' : 'Status'}</TableHead>
+                <TableHead className="text-center">{language === 'ar' ? 'تفعيل' : 'Active'}</TableHead>
                 <TableHead>{language === 'ar' ? 'تاريخ التسجيل' : 'Registered'}</TableHead>
                 <TableHead className="text-end">{language === 'ar' ? 'إجراءات' : 'Actions'}</TableHead>
               </TableRow>
@@ -363,6 +404,25 @@ export function OfficesTableSection({ initialStatus = 'all' }: { initialStatus?:
                           </span>
                         )}
                       </div>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {(['active', 'approved', 'suspended'].includes(office.status)) ? (
+                        <Switch
+                          checked={office.status === 'active'}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              if (office.status === 'approved') activateMut.mutate({ officeId: office.id });
+                              else if (office.status === 'suspended') reactivateOverrideMut.mutate(office.id);
+                            } else {
+                              if (office.status === 'active') suspendMut.mutate({ officeId: office.id });
+                            }
+                          }}
+                          disabled={activateMut.isPending || suspendMut.isPending || reactivateOverrideMut.isPending}
+                          data-testid={`toggle-active-${office.id}`}
+                        />
+                      ) : (
+                        <Switch checked={false} disabled className="opacity-30" />
+                      )}
                     </TableCell>
                     <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
                       {format(new Date(office.createdAt), 'yyyy-MM-dd')}

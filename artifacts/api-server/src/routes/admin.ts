@@ -1012,6 +1012,49 @@ router.post(
 );
 
 router.post(
+  "/admin/applications/:officeId/reactivate-override",
+  requireRole("admin"),
+  async (req: Request, res: Response): Promise<void> => {
+    const params = ReactivateAdminApplicationParams.safeParse(req.params);
+    if (!params.success) {
+      res.status(400).json({ error: params.error.message });
+      return;
+    }
+
+    const [office] = await db
+      .select()
+      .from(officesTable)
+      .where(eq(officesTable.id, params.data.officeId));
+    if (!office) {
+      res.status(404).json({ error: "Application not found" });
+      return;
+    }
+
+    if (office.status !== "suspended") {
+      res.status(400).json({
+        error: `Cannot reactivate-override an application in status "${office.status}"`,
+      });
+      return;
+    }
+
+    const [updated] = await db
+      .update(officesTable)
+      .set({ status: "active" })
+      .where(eq(officesTable.id, office.id))
+      .returning();
+
+    await recordAuditLog({
+      actor: req.session.user,
+      action: "office.application.reactivate_override",
+      targetType: "office",
+      targetId: office.id,
+    });
+
+    res.json(await serializeAdminApplicationDetail(updated));
+  },
+);
+
+router.post(
   "/admin/applications/:officeId/pending-changes/approve",
   requireRole("admin"),
   async (req: Request, res: Response): Promise<void> => {

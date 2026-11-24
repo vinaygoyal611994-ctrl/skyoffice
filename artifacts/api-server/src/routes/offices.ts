@@ -1961,7 +1961,7 @@ router.post(
       (d) => d.documentType === "trade_license",
     );
     if (!hasIdentity) missing.push("identity document");
-    if (!hasTradeLicense) missing.push("trade license document");
+    if (!hasTradeLicense && office.providerType !== "freelancer") missing.push("trade license document");
 
     if (missing.length > 0) {
       res.status(400).json({

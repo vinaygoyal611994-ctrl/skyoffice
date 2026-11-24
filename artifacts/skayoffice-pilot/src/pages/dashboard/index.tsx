@@ -364,7 +364,7 @@ function SectionContent({ section, navigate }: { section: DashSection; navigate:
   switch (section) {
     case 'overview':         return <OverviewSection navigate={navigate} />;
     case 'office_tools':     return <OfficeToolsSection />;
-    case 'profile':          return <ProfileSection />;
+    case 'profile':          return <ProfileSection navigate={navigate} />;
     case 'media':            return <MediaSection />;
     case 'contact':          return <ContactFeaturesSection navigate={navigate} />;
     case 'requests':         return <VideoRequestsSection navigate={navigate} />;

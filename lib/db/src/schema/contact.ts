@@ -55,6 +55,8 @@ export const videoCallRequestStatusEnum = [
   "accepted",
   "declined",
   "completed",
+  "cancellation_pending",
+  "cancelled",
 ] as const;
 
 export const videoCallRequestsTable = pgTable(
