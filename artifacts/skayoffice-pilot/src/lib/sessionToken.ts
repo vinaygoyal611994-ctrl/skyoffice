@@ -65,6 +65,20 @@ export function captureSessionToken(data: unknown): void {
 }
 
 /**
+ * Builds a `/api/storage<path>` URL with the session token appended as `?_t=`
+ * so <img>, <video>, and <iframe> tags can load private storage objects.
+ * Browsers cannot add Authorization headers to native media requests, so the
+ * token travels in the query string instead. Falls back to the plain URL when
+ * there is no active session (unauthenticated users, public media).
+ */
+export function storageUrl(objectPath: string): string {
+  const token = getSessionToken();
+  const base = `/api/storage${objectPath}`;
+  if (!token) return base;
+  return `${base}?_t=${encodeURIComponent(token)}`;
+}
+
+/**
  * `fetch` wrapper that attaches the stored bearer token, for the handful of
  * call sites that talk to the API directly instead of going through the
  * generated `@workspace/api-client-react` hooks (which already attach it

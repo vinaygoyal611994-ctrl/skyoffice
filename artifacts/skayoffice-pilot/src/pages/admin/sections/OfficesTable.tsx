@@ -42,6 +42,7 @@ import {
 } from 'lucide-react';
 import { OfficeDetailDialog } from './OfficeDetailDialog';
 import { safeApiError } from '@/lib/apiError';
+import { storageUrl } from '@/lib/sessionToken';
 
 const STATUS_META: Record<string, { tone: string; labelAr: string; labelEn: string }> = {
   draft:             { tone: 'bg-slate-100 text-slate-700 border-slate-200',       labelAr: 'مسودة',          labelEn: 'Draft' },
@@ -510,7 +511,7 @@ export function OfficesTableSection({ initialStatus = 'all' }: { initialStatus?:
           </DialogHeader>
           {previewVideo && (
             <div className="space-y-4">
-              <video src={`/api/storage${previewVideo.url}`} controls playsInline className="w-full rounded-lg border bg-slate-900 aspect-video" />
+              <video src={storageUrl(previewVideo.url)} controls playsInline className="w-full rounded-lg border bg-slate-900 aspect-video" />
               <div className="flex justify-end">
                 <Button variant="destructive" size="sm" onClick={() => setVideoDeleteConfirm(true)} disabled={removeVideoMut.isPending} data-testid="button-admin-delete-marketing-video">
                   <Trash2 size={14} className="me-1.5" />{language === 'ar' ? 'حذف الفيديو' : 'Delete Video'}

@@ -276,18 +276,23 @@ const SESSION_COOKIE_NAME = "connect.sid";
 const SESSION_ID_REGEX = /^[A-Za-z0-9_-]{20,128}$/;
 app.use((req, _res, next) => {
   const authHeader = req.headers.authorization;
-  if (authHeader?.startsWith("Bearer ")) {
-    const token = authHeader.slice("Bearer ".length).trim();
-    // Only inject tokens that look like genuine uid-safe session IDs.
-    // Malformed or garbage tokens skip injection, leaving req.session.user
-    // undefined → downstream 401, never 500.
-    if (token && SESSION_ID_REGEX.test(token)) {
-      const signed = `s:${signature.sign(token, process.env.SESSION_SECRET!)}`;
-      const cookiePair = `${SESSION_COOKIE_NAME}=${encodeURIComponent(signed)}`;
-      req.headers.cookie = req.headers.cookie
-        ? `${req.headers.cookie}; ${cookiePair}`
-        : cookiePair;
-    }
+  // Also accept ?_t=<token> query param so <img>/<video>/<iframe> tags can
+  // load private storage objects — browsers cannot add Authorization headers
+  // to native media requests, so the frontend appends the session token as a
+  // query param for storage URLs only.
+  const queryToken = typeof req.query._t === "string" ? req.query._t : undefined;
+  const token = authHeader?.startsWith("Bearer ")
+    ? authHeader.slice("Bearer ".length).trim()
+    : queryToken;
+  // Only inject tokens that look like genuine uid-safe session IDs.
+  // Malformed or garbage tokens skip injection, leaving req.session.user
+  // undefined → downstream 401, never 500.
+  if (token && SESSION_ID_REGEX.test(token)) {
+    const signed = `s:${signature.sign(token, process.env.SESSION_SECRET!)}`;
+    const cookiePair = `${SESSION_COOKIE_NAME}=${encodeURIComponent(signed)}`;
+    req.headers.cookie = req.headers.cookie
+      ? `${req.headers.cookie}; ${cookiePair}`
+      : cookiePair;
   }
   next();
 });

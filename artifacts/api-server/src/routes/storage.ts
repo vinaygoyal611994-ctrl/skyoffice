@@ -548,9 +548,14 @@ router.get('/storage/objects/*path', async (req: Request, res: Response) => {
             FROM offices
             WHERE cover_url = ${objectPath}
               OR marketing_video_url = ${objectPath}
+              OR pending_quick_card_cover = ${objectPath}
               OR (
                 cover_variants IS NOT NULL
                 AND cover_variants::text LIKE ${'%' + objectPath + '%'}
+              )
+              OR (
+                pending_quick_card_cover_variants IS NOT NULL
+                AND pending_quick_card_cover_variants::text LIKE ${'%' + objectPath + '%'}
               )
           UNION ALL
           SELECT request.office_id, request.id AS request_id, request.customer_id

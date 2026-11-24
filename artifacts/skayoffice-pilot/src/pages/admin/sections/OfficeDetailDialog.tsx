@@ -42,6 +42,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { getOfficePublicUrl } from '@/lib/publicUrl';
+import { storageUrl } from '@/lib/sessionToken';
 import {
   CheckCircle2, XCircle, AlertTriangle, PlayCircle, PauseCircle, RotateCcw,
   FileText, StickyNote, Eye, FileEdit, ExternalLink, Building2,
@@ -580,7 +581,7 @@ export function OfficeDetailDialog({
                       <div className="space-y-2" data-testid="panel-pending-quick-card-cover">
                         <p className="text-xs font-medium text-muted-foreground">{language === 'ar' ? 'صورة البطاقة السريعة' : 'Quick Card Cover'}</p>
                         <div className="flex flex-wrap items-start gap-4">
-                          <img src={`/api/storage${pendingQC}`} alt="Pending quick card cover" className="h-24 w-40 object-cover rounded-lg border shadow-sm" />
+                          <img src={storageUrl(pendingQC)} alt="Pending quick card cover" className="h-24 w-40 object-cover rounded-lg border shadow-sm" />
                           <div className="flex flex-col gap-2">
                             {pendingQCReason && <p className="text-xs text-red-700">{language === 'ar' ? 'سبب الرفض السابق: ' : 'Previous rejection: '}{pendingQCReason}</p>}
                             <div className="flex gap-2">
@@ -615,7 +616,7 @@ export function OfficeDetailDialog({
                         <div className="flex flex-wrap gap-3">
                           {pendingDCCovers.map(item => (
                             <div key={item.id} className="space-y-1.5" data-testid={`panel-pending-dc-cover-${item.id}`}>
-                              <img src={`/api/storage${item.url}`} alt="Pending DC cover" className="h-20 w-32 object-cover rounded-lg border shadow-sm" />
+                              <img src={storageUrl(item.url)} alt="Pending DC cover" className="h-20 w-32 object-cover rounded-lg border shadow-sm" />
                               <div className="flex gap-1">
                                 <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-2 py-1 h-auto"
                                   data-testid={`button-approve-dc-cover-${item.id}`}
@@ -651,7 +652,7 @@ export function OfficeDetailDialog({
                         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                           {pendingWorks.map(item => (
                             <div key={item.id} className="space-y-2 rounded-lg border bg-background p-2" data-testid={`panel-pending-works-${item.id}`}>
-                              <img src={`/api/storage${item.url}`} alt={language === 'ar' ? 'عمل بانتظار المراجعة' : 'Pending work'} className="aspect-[4/3] w-full rounded-md border object-cover shadow-sm" />
+                              <img src={storageUrl(item.url)} alt={language === 'ar' ? 'عمل بانتظار المراجعة' : 'Pending work'} className="aspect-[4/3] w-full rounded-md border object-cover shadow-sm" />
                               <div className="flex flex-wrap gap-1.5">
                                 <Button size="sm" className="h-auto bg-emerald-600 px-2 py-1 text-xs text-white hover:bg-emerald-700"
                                   data-testid={`button-approve-works-${item.id}`}
@@ -685,7 +686,7 @@ export function OfficeDetailDialog({
                         <div className="flex flex-wrap gap-3">
                           {pendingGallery.map(item => (
                             <div key={item.id} className="space-y-1.5" data-testid={`panel-pending-gallery-${item.id}`}>
-                              <img src={`/api/storage${item.url}`} alt="Pending gallery" className="h-20 w-32 object-cover rounded-lg border shadow-sm" />
+                              <img src={storageUrl(item.url)} alt="Pending gallery" className="h-20 w-32 object-cover rounded-lg border shadow-sm" />
                               <div className="flex gap-1">
                                 <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-2 py-1 h-auto"
                                   data-testid={`button-approve-gallery-${item.id}`}
@@ -865,8 +866,8 @@ export function OfficeDetailDialog({
           <DialogHeader><DialogTitle>{previewDoc?.documentType}</DialogTitle></DialogHeader>
           {previewDoc && (
             /\.pdf$/i.test(previewDoc.objectPath)
-              ? <iframe src={`/api/storage${previewDoc.objectPath}`} className="w-full h-[70vh] rounded border" title={previewDoc.documentType} data-testid="preview-document-pdf" />
-              : <img src={`/api/storage${previewDoc.objectPath}`} alt={previewDoc.documentType} className="w-full max-h-[70vh] object-contain rounded border" data-testid="preview-document-image" />
+              ? <iframe src={storageUrl(previewDoc.objectPath)} className="w-full h-[70vh] rounded border" title={previewDoc.documentType} data-testid="preview-document-pdf" />
+              : <img src={storageUrl(previewDoc.objectPath)} alt={previewDoc.documentType} className="w-full max-h-[70vh] object-contain rounded border" data-testid="preview-document-image" />
           )}
           <div className="flex justify-end">
             <Button asChild variant="outline" size="sm">

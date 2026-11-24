@@ -23,7 +23,7 @@ import {
   AlertTriangle, Clock, CheckCircle2, XCircle, ArrowUp, ArrowDown, Info,
 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { authFetch } from '@/lib/sessionToken';
+import { authFetch, storageUrl } from '@/lib/sessionToken';
 import { safeApiError } from '@/lib/apiError';
 import { buildStoragePutParameters } from '@/lib/uploadParameters';
 
@@ -90,7 +90,7 @@ function ImageTile({
   return (
     <div className="relative group rounded-xl overflow-hidden border border-border/60 shadow-sm bg-card" style={{ aspectRatio, width: 200, maxWidth: '100%' }}>
       <img
-        src={`/api/storage${displayPath}`}
+        src={storageUrl(displayPath)}
         alt={label ?? 'preview'}
         loading="lazy"
         decoding="async"
@@ -1010,8 +1010,8 @@ export function MediaSection() {
               <div className="flex flex-col sm:flex-row items-start gap-4">
                 <div className="w-full sm:w-56 aspect-video rounded-xl overflow-hidden border bg-slate-900 shrink-0" data-testid="preview-marketing-video">
                   <video
-                    src={`/api/storage${office.marketingVideoUrl}`}
-                    poster={office.coverUrl ? `/api/storage${office.coverUrl}` : undefined}
+                    src={storageUrl(office.marketingVideoUrl)}
+                    poster={office.coverUrl ? storageUrl(office.coverUrl) : undefined}
                     preload="none"
                     controls
                     playsInline
@@ -1177,7 +1177,7 @@ export function MediaSection() {
                         </div>
                       ) : (
                         <img
-                          src={`/api/storage${item.variants?.thumbnail ?? item.url}`}
+                          src={storageUrl(item.variants?.thumbnail ?? item.url)}
                           alt="Pending gallery"
                           loading="lazy"
                           decoding="async"
@@ -1220,7 +1220,7 @@ export function MediaSection() {
                       </div>
                     ) : (
                       <img
-                        src={`/api/storage${media.variants?.thumbnail ?? media.url}`}
+                        src={storageUrl(media.variants?.thumbnail ?? media.url)}
                         alt="Gallery"
                         loading="lazy"
                         decoding="async"
