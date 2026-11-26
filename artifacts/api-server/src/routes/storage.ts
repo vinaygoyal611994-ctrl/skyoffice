@@ -603,6 +603,11 @@ router.get('/storage/objects/*path', async (req: Request, res: Response) => {
 
     res.status(response.status);
     response.headers.forEach((value, key) => res.setHeader(key, value));
+    // Force inline display so PDFs and images render inside <iframe> tags.
+    // R2 may return Content-Disposition: attachment which blocks iframe display
+    // even for same-origin requests. The download <a download="..."> attribute
+    // on the admin dialog still triggers a download regardless of this header.
+    res.setHeader('Content-Disposition', 'inline');
 
     if (response.body) {
       const nodeStream = Readable.fromWeb(
