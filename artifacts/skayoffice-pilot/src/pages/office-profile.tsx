@@ -1,4 +1,5 @@
 import React from 'react';
+import { storageUrl } from '@/lib/sessionToken';
 import { useRoute, useLocation } from 'wouter';
 import { trackVideoStart, trackVideoComplete, trackGalleryInteraction, trackCopyLink } from '@/lib/analytics';
 import { useI18n, categoriesMap, localizedCity, type TranslationKey } from '@/lib/i18n';
@@ -194,8 +195,8 @@ function MarketingScreen({
                 <>
                   <video
                     ref={idx === active ? videoRef : undefined}
-                    src={`/api/storage${item.url}`}
-                    poster={item.poster ? `/api/storage${item.poster}` : undefined}
+                    src={storageUrl(item.url)}
+                    poster={item.poster ? storageUrl(item.poster) : undefined}
                     preload="none"
                     className="h-full w-full object-cover"
                     controls={isPlaying && idx === active}
@@ -239,7 +240,7 @@ function MarketingScreen({
                   tabIndex={idx === active ? 0 : -1}
                 >
                   <img
-                    src={`/api/storage${item.url}`}
+                    src={storageUrl(item.url)}
                     alt={officeName}
                     className="h-full w-full object-cover pointer-events-none"
                     loading="lazy"
@@ -249,7 +250,7 @@ function MarketingScreen({
                 </button>
               ) : (
                 <img
-                  src={`/api/storage${item.url}`}
+                  src={storageUrl(item.url)}
                   alt={officeName}
                   className="h-full w-full object-cover"
                   loading="lazy"
@@ -1263,7 +1264,7 @@ export function OfficeProfile({
                           aria-label={displayName}
                         >
                           <img
-                            src={`/api/storage${img.url}`}
+                            src={storageUrl(img.url)}
                             alt={displayName}
                             className="block h-full w-full object-cover object-center transition-transform group-hover:scale-105"
                             loading="lazy"

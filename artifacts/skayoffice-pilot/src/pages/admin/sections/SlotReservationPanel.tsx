@@ -21,6 +21,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
+import { getSessionToken } from '@/lib/sessionToken';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -300,9 +301,10 @@ export function SlotReservationPanel({
     setAuditLog(null);
     setAuditLoading(true);
     try {
+      const _auditToken = getSessionToken();
       const res = await fetch(
         `${baseUrl}/admin/supply-slots/audit/${officeId}`,
-        { credentials: 'include' },
+        { credentials: 'include', headers: _auditToken ? { 'Authorization': `Bearer ${_auditToken}` } : {} },
       );
       if (res.ok) {
         const data = await res.json();
@@ -319,10 +321,11 @@ export function SlotReservationPanel({
     setSweepResult(null);
     setSweepError(null);
     try {
+      const _sweepToken = getSessionToken();
       const res = await fetch(`${baseUrl}/admin/supply-slots/sweep`, {
         method: 'POST',
         credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...(_sweepToken ? { 'Authorization': `Bearer ${_sweepToken}` } : {}) },
       });
       if (res.ok) {
         const data: SweepResult = await res.json();
@@ -345,10 +348,11 @@ export function SlotReservationPanel({
     setOverrideRunning(true);
     setOverrideResult(null);
     try {
+      const _allocToken = getSessionToken();
       const res = await fetch(`${baseUrl}/admin/supply-slots/allocate/${id}`, {
         method: 'POST',
         credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...(_allocToken ? { 'Authorization': `Bearer ${_allocToken}` } : {}) },
         body: JSON.stringify({ reason: overrideReason.trim() }),
       });
       if (res.ok) {

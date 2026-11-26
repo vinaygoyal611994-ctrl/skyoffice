@@ -12,6 +12,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useI18n, categoriesMap, citiesMap } from '@/lib/i18n';
 import { safeApiError } from '@/lib/apiError';
+import { getSessionToken } from '@/lib/sessionToken';
 import {
   RefreshCw,
   ChevronRight,
@@ -172,9 +173,11 @@ const CAP_STATUS_LABEL_AR: Record<CapStatus, string> = {
 const BASE = `${import.meta.env.BASE_URL}api`;
 
 async function apiFetch(path: string, opts?: RequestInit) {
+  const token = getSessionToken();
+  const authHeader: Record<string, string> = token ? { 'Authorization': `Bearer ${token}` } : {};
   const res = await fetch(`${BASE}${path}`, {
     credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...authHeader },
     ...opts,
   });
   if (!res.ok) {
@@ -782,11 +785,13 @@ function DrillDown({
     setSlotLoading(true);
     try {
       const enc = encodeURIComponent(marketKey);
+      const _slotToken = getSessionToken();
+      const _slotHeaders = _slotToken ? { 'Authorization': `Bearer ${_slotToken}` } : {};
       const [summaryRes, reservRes, waitRes, outboxRes] = await Promise.all([
-        fetch(`${BASE_API}/admin/supply-slots/market/${enc}`,                 { credentials: 'include' }),
-        fetch(`${BASE_API}/admin/supply-slots/reserved/${enc}`,               { credentials: 'include' }),
-        fetch(`${BASE_API}/admin/supply-slots/waitlist/${enc}`,               { credentials: 'include' }),
-        fetch(`${BASE_API}/admin/supply-slots/notification-outbox/${enc}`,    { credentials: 'include' }),
+        fetch(`${BASE_API}/admin/supply-slots/market/${enc}`,                 { credentials: 'include', headers: _slotHeaders }),
+        fetch(`${BASE_API}/admin/supply-slots/reserved/${enc}`,               { credentials: 'include', headers: _slotHeaders }),
+        fetch(`${BASE_API}/admin/supply-slots/waitlist/${enc}`,               { credentials: 'include', headers: _slotHeaders }),
+        fetch(`${BASE_API}/admin/supply-slots/notification-outbox/${enc}`,    { credentials: 'include', headers: _slotHeaders }),
       ]);
       if (summaryRes.ok)  setSlotSummary(await summaryRes.json());
       if (reservRes.ok)   setReservations((await reservRes.json()).reservations ?? []);

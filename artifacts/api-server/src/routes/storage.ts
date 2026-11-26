@@ -84,7 +84,7 @@ const UPLOAD_LIMITS: Record<
     maxSizeBytes: 80 * 1024 * 1024,
   },
   document: {
-    contentTypes: ["application/pdf", "image/jpeg", "image/png"],
+    contentTypes: ["application/pdf", "image/jpeg", "image/png", "image/webp"],
     maxSizeBytes: 15 * 1024 * 1024,
   },
   // Quick Card cover — the thumbnail shown in the search/listing card.

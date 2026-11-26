@@ -17,13 +17,17 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useI18n } from '@/lib/i18n';
 import { safeApiError } from '@/lib/apiError';
+import { getSessionToken } from '@/lib/sessionToken';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 const BASE = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
 
 function apiFetch<T>(path: string): Promise<T> {
-  return fetch(`${BASE}${path}`, { credentials: 'include' }).then((r) => {
+  const token = getSessionToken();
+  const headers: Record<string, string> = {};
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  return fetch(`${BASE}${path}`, { credentials: 'include', headers }).then((r) => {
     if (!r.ok) throw Object.assign(new Error('request_failed'), { status: r.status });
     return r.json() as Promise<T>;
   });

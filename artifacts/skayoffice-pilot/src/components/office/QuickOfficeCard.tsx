@@ -1,4 +1,5 @@
 import React from 'react';
+import { storageUrl } from '@/lib/sessionToken';
 import { Link } from 'wouter';
 import { useI18n, categoriesMap, localizedCity, pickLocalized } from '@/lib/i18n';
 import { trackCardClick, useImpressionTracker } from '@/lib/analytics';
@@ -178,7 +179,7 @@ export function QuickOfficeCard({
               data-testid="button-enlarge-quick-card-cover"
             >
               <img
-                src={`/api/storage${office.coverUrl}`}
+                src={storageUrl(office.coverUrl)}
                 alt={displayName}
                 loading="lazy"
                 decoding="async"

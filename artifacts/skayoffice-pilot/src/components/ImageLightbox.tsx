@@ -22,6 +22,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
+import { storageUrl } from '@/lib/sessionToken';
 
 // ── Public types ─────────────────────────────────────────────────────────────
 
@@ -354,7 +355,7 @@ export function ImageLightbox({
         <img
           ref={imageRef}
           key={image.id}
-          src={`/api/storage${image.url}`}
+          src={storageUrl(image.url)}
           alt={officeName}
           draggable={false}
           style={{
