@@ -534,10 +534,26 @@ router.patch(
         // removed; discard this field silently so legacy clients don't
         // accidentally stage it as a pending change.
         freelancerImageStyle: _discardedFis,
+        // Contact toggles take effect immediately — no admin review needed.
+        acceptsPhoneCalls: directAcceptsPhoneCalls,
+        videoCallEnabled: directVideoCallEnabled,
         ...pendingData
       } = parsed.data;
 
       let latestOffice = existing;
+
+      // Apply contact-feature toggles directly even on locked offices.
+      const contactUpdate: Record<string, unknown> = {};
+      if (directAcceptsPhoneCalls !== undefined) contactUpdate.acceptsPhoneCalls = directAcceptsPhoneCalls;
+      if (directVideoCallEnabled !== undefined) contactUpdate.videoCallEnabled = directVideoCallEnabled;
+      if (Object.keys(contactUpdate).length > 0) {
+        const [contactUpdated] = await db
+          .update(officesTable)
+          .set(contactUpdate)
+          .where(eq(officesTable.id, existing.id))
+          .returning();
+        latestOffice = contactUpdated;
+      }
 
       // If a legacy client sent coverUrl, route it to the pending_quick_card_cover
       // column instead of staging it in the pendingChanges blob. This is a

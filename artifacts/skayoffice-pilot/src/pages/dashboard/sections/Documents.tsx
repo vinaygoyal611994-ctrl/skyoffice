@@ -19,7 +19,7 @@ import { safeApiError } from '@/lib/apiError';
 import { buildStoragePutParameters } from '@/lib/uploadParameters';
 
 const UPLOAD_CATEGORY_LIMITS = {
-  document: { allowedFileTypes: ['application/pdf', 'image/jpeg', 'image/png'], maxFileSize: 15 * 1024 * 1024 },
+  document: { allowedFileTypes: ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'], maxFileSize: 15 * 1024 * 1024 },
 } as const;
 
 export function DocumentsSection() {

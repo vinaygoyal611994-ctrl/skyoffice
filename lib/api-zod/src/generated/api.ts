@@ -403,6 +403,7 @@ export const UpdateMyOfficeBody = zod.object({
   "description": zod.string().optional(),
   "whatsapp": zod.string().min(1).optional(),
   "acceptsPhoneCalls": zod.boolean().optional(),
+  "videoCallEnabled": zod.boolean().optional(),
   "spokenLanguages": zod.array(zod.string()).optional(),
   "customLanguages": zod.array(zod.string()).optional(),
   "email": zod.string().optional(),
