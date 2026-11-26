@@ -27,7 +27,7 @@ import {
   getGetAdminApplicationQueryKey,
   getListAdminApplicationNotesQueryKey,
 } from '@workspace/api-client-react';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueryClient, useMutation } from '@tanstack/react-query';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -42,7 +42,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { getOfficePublicUrl } from '@/lib/publicUrl';
-import { storageUrl } from '@/lib/sessionToken';
+import { storageUrl, authFetch } from '@/lib/sessionToken';
 import {
   CheckCircle2, XCircle, AlertTriangle, PlayCircle, PauseCircle, RotateCcw,
   FileText, StickyNote, Eye, FileEdit, ExternalLink, Building2,
@@ -157,7 +157,7 @@ export function OfficeDetailDialog({
   const [noteText, setNoteText]         = useState('');
   const [previewDoc, setPreviewDoc]     = useState<{ objectPath: string; documentType: string } | null>(null);
   const [approveUnreviewed, setApproveUnreviewed] = useState<{ officeId: number; count: number } | null>(null);
-  const [activationOverride, setActivationOverride] = useState<{ officeId: number; blockers: string[] } | null>(null);
+  const [activationOverride, setActivationOverride] = useState<{ officeId: number; blockers: string[]; type: 'activate' | 'reactivate' } | null>(null);
 
   // Reset form state whenever the selected office changes
   React.useEffect(() => {
@@ -245,6 +245,15 @@ export function OfficeDetailDialog({
   }});
   const suspendMut     = useSuspendAdminApplication({ mutation: { onSuccess: invalidate, onError: onErr } });
   const reactivateMut  = useReactivateAdminApplication({ mutation: { onSuccess: invalidate, onError: onActivationErr } });
+  const reactivateOverrideMut = useMutation({
+    mutationFn: async (officeId: number) => {
+      const res = await authFetch(`/api/admin/applications/${officeId}/reactivate-override`, { method: 'POST' });
+      if (!res.ok) { const e = await res.json().catch(() => ({})); throw e; }
+      return res.json();
+    },
+    onSuccess: () => { invalidate(); setActivationOverride(null); },
+    onError: onActivationOverrideErr,
+  });
   const reviewDocMut   = useReviewAdminApplicationDocument({ mutation: {
     onSuccess: () => { invalidate(); setRejectDocId(null); setDocRejectReason(''); },
     onError: onErr,
@@ -280,10 +289,20 @@ export function OfficeDetailDialog({
     if (!detail) return;
     const blockers = detail.activationBlockers ?? [];
     if (blockers.length > 0) {
-      setActivationOverride({ officeId: detail.id, blockers: [...blockers] });
+      setActivationOverride({ officeId: detail.id, blockers: [...blockers], type: 'activate' });
       return;
     }
     activateMut.mutate({ officeId: detail.id });
+  };
+
+  const handleReactivate = () => {
+    if (!detail) return;
+    const blockers = detail.activationBlockers ?? [];
+    if (blockers.length > 0) {
+      setActivationOverride({ officeId: detail.id, blockers: [...blockers], type: 'reactivate' });
+      return;
+    }
+    reactivateMut.mutate({ officeId: detail.id });
   };
 
   // ── Render ──
@@ -522,16 +541,51 @@ export function OfficeDetailDialog({
                   <Label className="flex items-center gap-1.5 text-amber-800 mb-2 text-sm">
                     <FileEdit size={13} />{language === 'ar' ? 'تعديل مقترح بانتظار المراجعة' : 'Proposed edit awaiting review'}
                   </Label>
-                  <div className="grid grid-cols-2 gap-2 text-xs bg-white/60 rounded p-2 mb-2">
-                    <div>{language === 'ar' ? 'الاسم المعتمد' : 'Approved name'}: <strong>{detail.name}</strong>{detail.nameAr ? ` / ${detail.nameAr}` : ''}</div>
-                    <div>{language === 'ar' ? 'الاسم المقترح' : 'Proposed name'}: <strong>{String((detail.pendingChanges as any).name ?? '—')}</strong></div>
-                    <div>{language === 'ar' ? 'الاسم العربي المقترح' : 'Proposed Arabic name'}: <strong>{String((detail.pendingChanges as any).nameAr ?? '—')}</strong></div>
-                    <div>{language === 'ar' ? 'التصنيف المعتمد' : 'Approved category'}: <strong>{categoryLabel(detail.category)}</strong></div>
-                    <div>{language === 'ar' ? 'التصنيف المقترح' : 'Proposed category'}: <strong>{(detail.pendingChanges as any).category ? categoryLabel(String((detail.pendingChanges as any).category)) : '—'}</strong></div>
-                  </div>
-                  <pre className="text-xs bg-white/60 rounded p-2 overflow-x-auto whitespace-pre-wrap" data-testid="text-pending-changes-json">
-                    {JSON.stringify(detail.pendingChanges, null, 2)}
-                  </pre>
+                  {(() => {
+                    const pc = detail.pendingChanges as Record<string, unknown>;
+                    const FIELD_LABELS: Record<string, { ar: string; en: string }> = {
+                      name: { ar: 'الاسم', en: 'Name' },
+                      nameAr: { ar: 'الاسم العربي', en: 'Arabic Name' },
+                      city: { ar: 'المدينة', en: 'City' },
+                      country: { ar: 'الدولة', en: 'Country' },
+                      category: { ar: 'التصنيف', en: 'Category' },
+                      shortDescription: { ar: 'وصف مختصر', en: 'Short Description' },
+                      description: { ar: 'الوصف', en: 'Description' },
+                      whatsapp: { ar: 'واتساب', en: 'WhatsApp' },
+                      email: { ar: 'البريد الإلكتروني', en: 'Email' },
+                      website: { ar: 'الموقع الإلكتروني', en: 'Website' },
+                      address: { ar: 'العنوان', en: 'Address' },
+                      specialization: { ar: 'التخصص', en: 'Specialization' },
+                      googleMapsUrl: { ar: 'رابط خرائط جوجل', en: 'Google Maps URL' },
+                      spokenLanguages: { ar: 'اللغات', en: 'Languages' },
+                      customLanguages: { ar: 'لغات مخصصة', en: 'Custom Languages' },
+                      certifications: { ar: 'الشهادات', en: 'Certifications' },
+                      heroMediaType: { ar: 'نوع الوسائط الرئيسية', en: 'Hero Media Type' },
+                      isOnline: { ar: 'متاح أونلاين', en: 'Online Available' },
+                    };
+                    const formatVal = (k: string, v: unknown): string => {
+                      if (v === null || v === undefined) return '—';
+                      if (k === 'category') return categoryLabel(String(v));
+                      if (Array.isArray(v)) return v.length ? v.join(', ') : '—';
+                      if (typeof v === 'boolean') return v ? (language === 'ar' ? 'نعم' : 'Yes') : (language === 'ar' ? 'لا' : 'No');
+                      const s = String(v);
+                      return s.length > 120 ? s.slice(0, 120) + '…' : s;
+                    };
+                    return (
+                      <div className="bg-white/60 rounded p-2 text-xs space-y-1" data-testid="text-pending-changes-json">
+                        {Object.entries(pc).map(([k, v]) => {
+                          const lbl = FIELD_LABELS[k];
+                          const label = lbl ? (language === 'ar' ? lbl.ar : lbl.en) : k;
+                          return (
+                            <div key={k} className="grid grid-cols-[140px_1fr] gap-2 border-b border-amber-100 pb-1">
+                              <span className="font-medium text-amber-900 shrink-0">{label}</span>
+                              <span className="text-gray-700 break-words">{formatVal(k, v)}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    );
+                  })()}
                   <div className="flex gap-2 justify-end mt-2">
                     <Button size="sm" variant="destructive" onClick={() => setReasonDialog('reject-pending-changes')} data-testid="button-reject-pending-changes">
                       {language === 'ar' ? 'رفض التعديل' : 'Reject Edit'}
@@ -847,12 +901,19 @@ export function OfficeDetailDialog({
                   </Button>
                 )}
                 {detail.status === 'suspended' && (
-                  <Button size="sm"
-                    onClick={() => reactivateMut.mutate({ officeId: detail.id })}
-                    disabled={reactivateMut.isPending || (detail.activationBlockers?.length ?? 0) > 0}
-                    className="gap-1" data-testid="button-reactivate">
-                    <RotateCcw size={13} />{language === 'ar' ? 'إعادة التفعيل' : 'Reactivate'}
-                  </Button>
+                  (detail.activationBlockers?.length ?? 0) > 0
+                    ? <Button size="sm" variant="destructive"
+                        onClick={handleReactivate}
+                        disabled={reactivateOverrideMut.isPending}
+                        className="gap-1" data-testid="button-reactivate-override">
+                        <RotateCcw size={13} />{language === 'ar' ? 'إعادة التفعيل استثنائي' : 'Reactivate with Override'}
+                      </Button>
+                    : <Button size="sm"
+                        onClick={handleReactivate}
+                        disabled={reactivateMut.isPending}
+                        className="gap-1" data-testid="button-reactivate">
+                        <RotateCcw size={13} />{language === 'ar' ? 'إعادة التفعيل' : 'Reactivate'}
+                      </Button>
                 )}
               </div>
             </div>
@@ -938,22 +999,22 @@ export function OfficeDetailDialog({
             </AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              disabled={activateOverrideMut.isPending}
+              disabled={activateOverrideMut.isPending || reactivateOverrideMut.isPending}
               onClick={() => {
-                if (activationOverride) {
+                if (!activationOverride) return;
+                if (activationOverride.type === 'reactivate') {
+                  reactivateOverrideMut.mutate(activationOverride.officeId);
+                } else {
                   activateOverrideMut.mutate({
                     officeId: activationOverride.officeId,
-                    data: {
-                      confirm: true,
-                      expectedBlockers: activationOverride.blockers,
-                    },
+                    data: { confirm: true, expectedBlockers: activationOverride.blockers },
                   });
                 }
               }}
               data-testid="button-confirm-activation-override">
-              {activateOverrideMut.isPending
+              {(activateOverrideMut.isPending || reactivateOverrideMut.isPending)
                 ? '...'
-                : (language === 'ar' ? 'تأكيد التفعيل الاستثنائي' : 'Confirm Override Activation')}
+                : (language === 'ar' ? 'تأكيد التفعيل الاستثنائي' : 'Confirm Override')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
