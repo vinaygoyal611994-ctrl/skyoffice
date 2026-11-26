@@ -467,7 +467,7 @@ export function OfficeDetailDialog({
                             <Eye size={13} />
                           </Button>
                           <Button size="icon" variant="ghost" className="h-6 w-6" asChild>
-                            <a href={`/api/storage${doc.objectPath}`} download={doc.documentType} target="_blank" rel="noreferrer">
+                            <a href={storageUrl(doc.objectPath)} download={doc.documentType} target="_blank" rel="noreferrer">
                               <ExternalLink size={13} />
                             </a>
                           </Button>
@@ -865,13 +865,11 @@ export function OfficeDetailDialog({
         <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto" data-testid="dialog-document-preview">
           <DialogHeader><DialogTitle>{previewDoc?.documentType}</DialogTitle></DialogHeader>
           {previewDoc && (
-            /\.pdf$/i.test(previewDoc.objectPath)
-              ? <iframe src={storageUrl(previewDoc.objectPath)} className="w-full h-[70vh] rounded border" title={previewDoc.documentType} data-testid="preview-document-pdf" />
-              : <img src={storageUrl(previewDoc.objectPath)} alt={previewDoc.documentType} className="w-full max-h-[70vh] object-contain rounded border" data-testid="preview-document-image" />
+            <iframe src={storageUrl(previewDoc.objectPath)} className="w-full h-[70vh] rounded border" title={previewDoc.documentType} data-testid="preview-document-iframe" />
           )}
           <div className="flex justify-end">
             <Button asChild variant="outline" size="sm">
-              <a href={`/api/storage${previewDoc?.objectPath}`} target="_blank" rel="noreferrer">
+              <a href={storageUrl(previewDoc?.objectPath ?? '')} target="_blank" rel="noreferrer">
                 {language === 'ar' ? 'فتح في تبويب جديد' : 'Open in new tab'}
               </a>
             </Button>
