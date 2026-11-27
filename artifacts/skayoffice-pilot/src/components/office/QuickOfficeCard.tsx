@@ -158,7 +158,7 @@ export function QuickOfficeCard({
       {/* ── Cover image ── */}
       <div
         className="relative w-full flex-shrink-0 overflow-hidden bg-muted"
-        style={{ aspectRatio: '25 / 9' }}
+        style={{ aspectRatio: '4 / 1' }}
         data-testid="quick-card-media"
       >
         {office.coverUrl ? (

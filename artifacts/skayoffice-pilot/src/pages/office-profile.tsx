@@ -856,7 +856,7 @@ export function OfficeProfile({
               watchIntroLabel={t('profile.watch_intro')}
               prevSlideLabel={t('profile.carousel_prev')}
               nextSlideLabel={t('profile.carousel_next')}
-              scrollerAspect="aspect-[7/3]"
+              scrollerAspect="aspect-[4/1]"
               onVideoStart={() => { try { trackVideoStart(officeId); } catch {} }}
               onVideoComplete={() => { try { trackVideoComplete(officeId); } catch {} }}
               onGalleryNavigate={() => { try { trackGalleryInteraction(officeId); } catch {} }}
