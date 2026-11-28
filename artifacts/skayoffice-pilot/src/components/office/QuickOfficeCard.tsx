@@ -157,7 +157,7 @@ export function QuickOfficeCard({
     >
       {/* ── Cover image ── */}
       <div
-        className="relative w-full flex-shrink-0 overflow-hidden bg-muted aspect-[4/1] max-h-[180px]"
+        className="relative w-full flex-shrink-0 overflow-hidden bg-white dark:bg-muted h-[130px] flex items-center justify-center"
         data-testid="quick-card-media"
       >
         {office.coverUrl ? (
@@ -183,7 +183,7 @@ export function QuickOfficeCard({
                 loading="lazy"
                 decoding="async"
                 onLoad={() => setImageLoaded(true)}
-                className={`h-full w-full object-contain transition-opacity duration-500 ${
+                className={`h-full w-full object-contain p-4 transition-opacity duration-500 ${
                   imageLoaded ? 'opacity-100' : 'opacity-0'
                 }`}
               />
