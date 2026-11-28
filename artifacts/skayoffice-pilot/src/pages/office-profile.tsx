@@ -280,7 +280,7 @@ function MarketingScreen({
                   <img
                     src={storageUrl(item.url)}
                     alt={officeName}
-                    className="h-full w-full object-contain p-4 pointer-events-none"
+                    className="h-full w-full object-contain p-2 pointer-events-none"
                     loading="lazy"
                     decoding="async"
                     onLoad={(e) => { const c = computeEdgeColor(e.currentTarget); setBgColors(prev => new Map(prev).set(item.id, c)); }}
@@ -291,7 +291,7 @@ function MarketingScreen({
                 <img
                   src={storageUrl(item.url)}
                   alt={officeName}
-                  className="h-full w-full object-contain p-4"
+                  className="h-full w-full object-contain p-2"
                   loading="lazy"
                   decoding="async"
                   onLoad={(e) => { const c = computeEdgeColor(e.currentTarget); setBgColors(prev => new Map(prev).set(item.id, c)); }}
@@ -896,7 +896,7 @@ export function OfficeProfile({
               watchIntroLabel={t('profile.watch_intro')}
               prevSlideLabel={t('profile.carousel_prev')}
               nextSlideLabel={t('profile.carousel_next')}
-              scrollerAspect="aspect-[4/1]"
+              scrollerAspect="aspect-[3/1]"
               onVideoStart={() => { try { trackVideoStart(officeId); } catch {} }}
               onVideoComplete={() => { try { trackVideoComplete(officeId); } catch {} }}
               onGalleryNavigate={() => { try { trackGalleryInteraction(officeId); } catch {} }}
