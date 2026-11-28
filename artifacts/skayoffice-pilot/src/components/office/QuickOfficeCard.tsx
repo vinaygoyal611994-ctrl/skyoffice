@@ -76,6 +76,38 @@ function formatResponseShort(minutes: number, lang: 'ar' | 'en'): string {
   return lang === 'ar' ? `${days} ي` : `${days} d`;
 }
 
+function computeEdgeColor(img: HTMLImageElement): string {
+  try {
+    const w = Math.min(img.naturalWidth, 200);
+    const h = Math.max(1, Math.round(img.naturalHeight * w / img.naturalWidth));
+    const canvas = document.createElement('canvas');
+    canvas.width = w; canvas.height = h;
+    const ctx = canvas.getContext('2d', { willReadFrequently: true } as CanvasRenderingContext2DSettings);
+    if (!ctx) return '#f7f7f7';
+    ctx.drawImage(img, 0, 0, w, h);
+    const t = 2;
+    const strips: Uint8ClampedArray[] = [];
+    for (let i = 0; i < w; i++) {
+      strips.push(ctx.getImageData(i, 0, 1, t).data);
+      strips.push(ctx.getImageData(i, h - t, 1, t).data);
+    }
+    for (let j = 0; j < h; j++) {
+      strips.push(ctx.getImageData(0, j, t, 1).data);
+      strips.push(ctx.getImageData(w - t, j, t, 1).data);
+    }
+    let r = 0, g = 0, b = 0, n = 0;
+    for (const d of strips) {
+      for (let k = 0; k < d.length; k += 4) {
+        if (d[k + 3] < 128) continue;
+        r += d[k]; g += d[k + 1]; b += d[k + 2]; n++;
+      }
+    }
+    return n ? `rgb(${Math.round(r / n)},${Math.round(g / n)},${Math.round(b / n)})` : '#f7f7f7';
+  } catch {
+    return '#f7f7f7';
+  }
+}
+
 /**
  * Full human-readable response-time sentence used as a tooltip.
  * Examples (en): "Usually responds within 8 minutes"
@@ -128,6 +160,7 @@ export function QuickOfficeCard({
   const displayCity = localizedCity(office.city, language);
   const [imageLoaded, setImageLoaded] = React.useState(false);
   const [lightboxOpen, setLightboxOpen] = React.useState(false);
+  const [bannerBg, setBannerBg] = React.useState<string>('#f7f7f7');
   const coverTriggerRef = React.useRef<HTMLButtonElement>(null);
 
   // Fetch verified service metrics for this office (when slug available).
@@ -157,7 +190,8 @@ export function QuickOfficeCard({
     >
       {/* ── Cover image ── */}
       <div
-        className="relative w-full flex-shrink-0 overflow-hidden bg-[#f7f7f7] dark:bg-muted h-[170px] flex items-center justify-center"
+        className="relative w-full flex-shrink-0 overflow-hidden dark:bg-muted h-[170px] flex items-center justify-center"
+        style={{ background: bannerBg }}
         data-testid="quick-card-media"
       >
         {office.coverUrl ? (
@@ -182,7 +216,7 @@ export function QuickOfficeCard({
                 alt={displayName}
                 loading="lazy"
                 decoding="async"
-                onLoad={() => setImageLoaded(true)}
+                onLoad={(e) => { setImageLoaded(true); setBannerBg(computeEdgeColor(e.currentTarget)); }}
                 className={`h-full w-full object-contain p-[12px] transition-opacity duration-500 ${
                   imageLoaded ? 'opacity-100' : 'opacity-0'
                 }`}
