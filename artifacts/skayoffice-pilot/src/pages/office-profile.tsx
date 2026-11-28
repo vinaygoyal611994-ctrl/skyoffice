@@ -45,6 +45,42 @@ type DecisionTab = 'about' | 'services' | 'work';
 const AUTOPLAY_INTERVAL_MS = 8000;
 const RESUME_AFTER_INTERACTION_MS = 3000;
 
+function computeEdgeColor(img: HTMLImageElement): string {
+  try {
+    const w = Math.min(img.naturalWidth, 200);
+    const h = Math.max(1, Math.round(img.naturalHeight * w / img.naturalWidth));
+    const canvas = document.createElement('canvas');
+    canvas.width = w; canvas.height = h;
+    const ctx = canvas.getContext('2d', { willReadFrequently: true } as CanvasRenderingContext2DSettings);
+    if (!ctx) return '#ffffff';
+    ctx.drawImage(img, 0, 0, w, h);
+    const t = 2;
+    const strips: Uint8ClampedArray[] = [];
+    for (let i = 0; i < w; i++) {
+      strips.push(ctx.getImageData(i, 0, 1, t).data);
+      strips.push(ctx.getImageData(i, h - t, 1, t).data);
+    }
+    for (let j = 0; j < h; j++) {
+      strips.push(ctx.getImageData(0, j, t, 1).data);
+      strips.push(ctx.getImageData(w - t, j, t, 1).data);
+    }
+    let r = 0, g = 0, b = 0, n = 0;
+    for (const d of strips) {
+      for (let k = 0; k < d.length; k += 4) {
+        if (d[k + 3] < 128) continue;
+        r += d[k]; g += d[k + 1]; b += d[k + 2]; n++;
+      }
+    }
+    if (!n) return '#ffffff';
+    const rL = Math.round(r / n * 0.25 + 255 * 0.75);
+    const gL = Math.round(g / n * 0.25 + 255 * 0.75);
+    const bL = Math.round(b / n * 0.25 + 255 * 0.75);
+    return `rgb(${rL},${gL},${bL})`;
+  } catch {
+    return '#ffffff';
+  }
+}
+
 // VIDEO_CALL PUBLIC GATE
 // Set to true ONLY when the Video Call feature is officially released.
 const VIDEO_CALL_FEATURE_RELEASED = true as const;
@@ -84,6 +120,7 @@ function MarketingScreen({
   const [active, setActive] = React.useState(0);
   const [isPlaying, setIsPlaying] = React.useState(false);
   const [isInteracting, setIsInteracting] = React.useState(false);
+  const [bgColors, setBgColors] = React.useState<Map<string | number, string>>(new Map());
   const videoRef = React.useRef<HTMLVideoElement>(null);
   const resumeTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const reducedMotionRef = React.useRef(false);
@@ -176,7 +213,8 @@ function MarketingScreen({
 
   return (
     <div
-      className="relative w-full overflow-hidden rounded-2xl bg-white dark:bg-muted shadow-sm"
+      className="relative w-full overflow-hidden rounded-2xl dark:bg-muted shadow-sm transition-colors duration-300"
+      style={{ background: bgColors.get(items[active]?.id) ?? '#ffffff' }}
       data-testid="marketing-screen"
       onMouseEnter={hasMultiple ? pauseAutoplay : undefined}
       onMouseLeave={hasMultiple ? scheduleResume : undefined}
@@ -245,6 +283,7 @@ function MarketingScreen({
                     className="h-full w-full object-contain p-4 pointer-events-none"
                     loading="lazy"
                     decoding="async"
+                    onLoad={(e) => { const c = computeEdgeColor(e.currentTarget); setBgColors(prev => new Map(prev).set(item.id, c)); }}
                     data-testid={`marketing-image-${idx}`}
                   />
                 </button>
@@ -255,6 +294,7 @@ function MarketingScreen({
                   className="h-full w-full object-contain p-4"
                   loading="lazy"
                   decoding="async"
+                  onLoad={(e) => { const c = computeEdgeColor(e.currentTarget); setBgColors(prev => new Map(prev).set(item.id, c)); }}
                   data-testid={`marketing-image-${idx}`}
                 />
               )}
