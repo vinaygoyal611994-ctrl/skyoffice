@@ -102,7 +102,12 @@ function computeEdgeColor(img: HTMLImageElement): string {
         r += d[k]; g += d[k + 1]; b += d[k + 2]; n++;
       }
     }
-    return n ? `rgb(${Math.round(r / n)},${Math.round(g / n)},${Math.round(b / n)})` : '#f7f7f7';
+    if (!n) return '#f7f7f7';
+    // Blend 75% white + 25% detected so dark/colored images stay light and consistent
+    const rL = Math.round(r / n * 0.25 + 255 * 0.75);
+    const gL = Math.round(g / n * 0.25 + 255 * 0.75);
+    const bL = Math.round(b / n * 0.25 + 255 * 0.75);
+    return `rgb(${rL},${gL},${bL})`;
   } catch {
     return '#f7f7f7';
   }
