@@ -190,7 +190,7 @@ function MarketingScreen({
       >
         <div className="flex h-full">
           {items.map((item, idx) => (
-            <div key={item.id} className="relative h-full min-w-0 flex-shrink-0 flex-grow-0 basis-full">
+            <div key={item.id} className="relative h-full min-w-0 flex-shrink-0 flex-grow-0 basis-full overflow-hidden">
               {item.type === 'video' ? (
                 <>
                   <video
@@ -232,31 +232,47 @@ function MarketingScreen({
                 </>
               ) : onImageClick ? (
                 /* Clickable image — opens fullscreen lightbox */
-                <button
-                  type="button"
-                  className="absolute inset-0 h-full w-full cursor-zoom-in appearance-none p-0 border-0"
-                  onClick={() => onImageClick(item)}
-                  aria-label={officeName}
-                  tabIndex={idx === active ? 0 : -1}
-                >
+                <>
+                  {/* Blurred backdrop fills side gaps for any image aspect ratio */}
+                  <img
+                    src={storageUrl(item.url)}
+                    aria-hidden="true"
+                    className="absolute inset-0 h-full w-full object-cover scale-110 blur-md opacity-40 pointer-events-none"
+                  />
+                  <button
+                    type="button"
+                    className="absolute inset-0 h-full w-full cursor-zoom-in appearance-none p-0 border-0 z-[1]"
+                    onClick={() => onImageClick(item)}
+                    aria-label={officeName}
+                    tabIndex={idx === active ? 0 : -1}
+                  >
+                    <img
+                      src={storageUrl(item.url)}
+                      alt={officeName}
+                      className="h-full w-full object-contain p-4 pointer-events-none"
+                      loading="lazy"
+                      decoding="async"
+                      data-testid={`marketing-image-${idx}`}
+                    />
+                  </button>
+                </>
+              ) : (
+                <>
+                  {/* Blurred backdrop fills side gaps for any image aspect ratio */}
+                  <img
+                    src={storageUrl(item.url)}
+                    aria-hidden="true"
+                    className="absolute inset-0 h-full w-full object-cover scale-110 blur-md opacity-40 pointer-events-none"
+                  />
                   <img
                     src={storageUrl(item.url)}
                     alt={officeName}
-                    className="h-full w-full object-contain p-4 pointer-events-none"
+                    className="relative h-full w-full object-contain p-4 z-[1]"
                     loading="lazy"
                     decoding="async"
                     data-testid={`marketing-image-${idx}`}
                   />
-                </button>
-              ) : (
-                <img
-                  src={storageUrl(item.url)}
-                  alt={officeName}
-                  className="h-full w-full object-contain p-4"
-                  loading="lazy"
-                  decoding="async"
-                  data-testid={`marketing-image-${idx}`}
-                />
+                </>
               )}
             </div>
           ))}
