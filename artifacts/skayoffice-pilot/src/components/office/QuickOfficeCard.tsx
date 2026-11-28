@@ -157,17 +157,11 @@ export function QuickOfficeCard({
     >
       {/* ── Cover image ── */}
       <div
-        className="relative w-full flex-shrink-0 overflow-hidden bg-muted h-[130px]"
+        className="relative w-full flex-shrink-0 overflow-hidden bg-white dark:bg-muted h-[130px]"
         data-testid="quick-card-media"
       >
         {office.coverUrl ? (
           <>
-            {/* Blurred backdrop — fills side gaps for any image aspect ratio */}
-            <img
-              src={storageUrl(office.coverUrl)}
-              aria-hidden="true"
-              className="absolute inset-0 h-full w-full object-cover scale-110 blur-md opacity-40 pointer-events-none"
-            />
             {!imageLoaded && (
               <div className="absolute inset-0 animate-pulse bg-gradient-to-tr from-muted to-muted/60" />
             )}

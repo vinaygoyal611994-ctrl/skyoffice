@@ -232,47 +232,31 @@ function MarketingScreen({
                 </>
               ) : onImageClick ? (
                 /* Clickable image — opens fullscreen lightbox */
-                <>
-                  {/* Blurred backdrop fills side gaps for any image aspect ratio */}
-                  <img
-                    src={storageUrl(item.url)}
-                    aria-hidden="true"
-                    className="absolute inset-0 h-full w-full object-cover scale-110 blur-md opacity-40 pointer-events-none"
-                  />
-                  <button
-                    type="button"
-                    className="absolute inset-0 h-full w-full cursor-zoom-in appearance-none p-0 border-0 z-[1]"
-                    onClick={() => onImageClick(item)}
-                    aria-label={officeName}
-                    tabIndex={idx === active ? 0 : -1}
-                  >
-                    <img
-                      src={storageUrl(item.url)}
-                      alt={officeName}
-                      className="h-full w-full object-contain p-4 pointer-events-none"
-                      loading="lazy"
-                      decoding="async"
-                      data-testid={`marketing-image-${idx}`}
-                    />
-                  </button>
-                </>
-              ) : (
-                <>
-                  {/* Blurred backdrop fills side gaps for any image aspect ratio */}
-                  <img
-                    src={storageUrl(item.url)}
-                    aria-hidden="true"
-                    className="absolute inset-0 h-full w-full object-cover scale-110 blur-md opacity-40 pointer-events-none"
-                  />
+                <button
+                  type="button"
+                  className="absolute inset-0 h-full w-full cursor-zoom-in appearance-none p-0 border-0"
+                  onClick={() => onImageClick(item)}
+                  aria-label={officeName}
+                  tabIndex={idx === active ? 0 : -1}
+                >
                   <img
                     src={storageUrl(item.url)}
                     alt={officeName}
-                    className="relative h-full w-full object-contain p-4 z-[1]"
+                    className="h-full w-full object-contain p-4 pointer-events-none"
                     loading="lazy"
                     decoding="async"
                     data-testid={`marketing-image-${idx}`}
                   />
-                </>
+                </button>
+              ) : (
+                <img
+                  src={storageUrl(item.url)}
+                  alt={officeName}
+                  className="h-full w-full object-contain p-4"
+                  loading="lazy"
+                  decoding="async"
+                  data-testid={`marketing-image-${idx}`}
+                />
               )}
             </div>
           ))}
