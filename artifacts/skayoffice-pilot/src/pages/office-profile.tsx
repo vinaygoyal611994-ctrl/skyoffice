@@ -176,7 +176,7 @@ function MarketingScreen({
 
   return (
     <div
-      className="relative w-full overflow-hidden rounded-2xl bg-muted shadow-sm"
+      className="relative w-full overflow-hidden rounded-2xl bg-white dark:bg-muted shadow-sm"
       data-testid="marketing-screen"
       onMouseEnter={hasMultiple ? pauseAutoplay : undefined}
       onMouseLeave={hasMultiple ? scheduleResume : undefined}
@@ -242,7 +242,7 @@ function MarketingScreen({
                   <img
                     src={storageUrl(item.url)}
                     alt={officeName}
-                    className="h-full w-full object-cover pointer-events-none"
+                    className="h-full w-full object-contain p-4 pointer-events-none"
                     loading="lazy"
                     decoding="async"
                     data-testid={`marketing-image-${idx}`}
@@ -252,7 +252,7 @@ function MarketingScreen({
                 <img
                   src={storageUrl(item.url)}
                   alt={officeName}
-                  className="h-full w-full object-cover"
+                  className="h-full w-full object-contain p-4"
                   loading="lazy"
                   decoding="async"
                   data-testid={`marketing-image-${idx}`}
